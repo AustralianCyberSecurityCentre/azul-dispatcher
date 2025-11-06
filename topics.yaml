@@ -1,0 +1,15 @@
+- topic: example_topic1
+  numpartitions: 3
+  # Only target replication_factor of 1 as we may only have 1 broker running in docker
+  replicationfactor: 1
+  config:
+    retention.ms: -1
+    segment.bytes: 1073741824
+    cleanup.policy: compact
+- topic: azul.insert
+  numpartitions: 1
+  # Only target replication_factor of 1 as we may only have 1 broker running in docker
+  replicationfactor: 1
+  config:
+    retention.ms: 43200000
+    segment.bytes: 1073741824

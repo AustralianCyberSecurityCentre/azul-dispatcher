@@ -1,0 +1,98 @@
+{
+  "model_version": 5,
+  "timestamp": "2021-03-29T14:44:53.946229644+11:00",
+  "author": {
+    "name": "vtdownload",
+    "version": "1.1",
+    "category": "plugin"
+  },
+  "source": {
+    "name": "virustotal",
+    "references": {
+      "interface": "api",
+      "submitter_country": "US",
+      "submitter_id": "ffc28588"
+    },
+    "path": [
+      {
+        "author": {
+          "name": "vtfileloader",
+          "version": "1.1",
+          "category": "loader"
+        },
+        "action": "sourced",
+        "sha256": "fa008aeed5f7252cf3c60a9c57126c037ef54b8527ca141a4d2f326cec7396fb-1564891220",
+        "timestamp": "2021-03-29T14:23:50+11:00",
+        "file_format_legacy": "PDF",
+        "size": 285625,
+        "filename": "sea-170410-c-next-day-disclosure-return-share-buyback.pdf"
+      },
+      {
+        "author": {
+          "name": "vtselect",
+          "version": "1.1",
+          "category": "plugin"
+        },
+        "action": "download_requested",
+        "sha256": "fa008aeed5f7252cf3c60a9c57126c037ef54b8527ca141a4d2f326cec7396fb",
+        "timestamp": "2021-03-29T14:26:28.629447756+11:00",
+        "file_format_legacy": "PDF",
+        "size": 285625
+      },
+      {
+        "author": {
+          "name": "vtdownload",
+          "version": "1.1",
+          "category": "plugin"
+        },
+        "action": "downloaded",
+        "sha256": "fa008aeed5f7252cf3c60a9c57126c037ef54b8527ca141a4d2f326cec7396fb",
+        "timestamp": "2021-03-29T14:44:53.946229644+11:00",
+        "file_format_legacy": "PDF",
+        "size": 285625
+      }
+    ],
+    "timestamp": "2019-08-04T04:00:20Z"
+  },
+  "entity": {
+    "sha256": "fa008aeed5f7252cf3c60a9c57126c037ef54b8527ca141a4d2f326cec7396fb",
+    "sha512": "6ae0337824f28ba2c89ec24db4026c353a7457b8690d46d28e4e08ad5e8acc0b513f342d845c509df74529d43ee36099d64c3bacac7fe9960d5c7597912cc590",
+    "sha1": "b92f105db5556226d3339fd61795a5fbc07c837e",
+    "md5": "5092d351ba34a58da0e9c7db1f75ee9a",
+    "size": 285625,
+    "file_format_legacy": "PDF",
+    "features": [
+      {
+        "name": "file_format_legacy",
+        "value": "PDF",
+        "type": "string"
+      },
+      {
+        "name": "magic",
+        "value": "PDF document, version 1.6",
+        "type": "string"
+      },
+      {
+        "name": "mime",
+        "value": "application/pdf",
+        "type": "string"
+      }
+    ],
+    "datastreams": [
+      {
+        "identify_version": 1,
+        "label": "content",
+        "size": 285625,
+        "sha512": "6ae0337824f28ba2c89ec24db4026c353a7457b8690d46d28e4e08ad5e8acc0b513f342d845c509df74529d43ee36099d64c3bacac7fe9960d5c7597912cc590",
+        "sha256": "fa008aeed5f7252cf3c60a9c57126c037ef54b8527ca141a4d2f326cec7396fb",
+        "sha1": "b92f105db5556226d3339fd61795a5fbc07c837e",
+        "md5": "5092d351ba34a58da0e9c7db1f75ee9a",
+        "mime": "application/pdf",
+        "magic": "PDF document, version 1.6",
+        "file_format_legacy": "PDF"
+      }
+    ]
+  },
+  "action": "downloaded",
+  "flags": {}
+}

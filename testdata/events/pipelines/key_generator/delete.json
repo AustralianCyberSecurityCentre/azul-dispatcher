@@ -1,0 +1,20 @@
+{
+  "model_version": 5,
+  "timestamp": "2024-10-17T04:46:44.458248Z",
+  "author": {
+    "name": "azul_writer",
+    "category": "user"
+  },
+  "entity": {
+    "reason": "deleted via cli",
+    "submission": {},
+    "author": {},
+    "link": {},
+    "ids": {
+      "ids": [
+        "8f77a56e7fd3333724ba2146d99e380a"
+      ]
+    }
+  },
+  "action": "delete_requested"
+}

@@ -1,0 +1,106 @@
+{
+  "model_version": 5,
+  "timestamp": "2021-03-29T14:23:50+11:00",
+  "author": {
+    "name": "manual",
+    "category": "user",
+    "security": "BLUEZOO"
+  },
+  "source": {
+    "name": "virustotal",
+    "references": {
+      "interface": "api",
+      "submitter_country": "US",
+      "submitter_id": "ffc28588"
+    },
+    "path": [
+      {
+        "author": {
+          "name": "vtfileloader",
+          "version": "1.1",
+          "category": "loader"
+        },
+        "action": "sourced",
+        "sha256": "fa008aeed5f7252cf3c60a9c57126c037ef54b8527ca141a4d2f326cec7396fb-1564891220",
+        "timestamp": "2021-03-29T14:23:50+11:00",
+        "file_format_legacy": "PDF",
+        "size": 285625,
+        "filename": "sea-170410-c-next-day-disclosure-return-share-buyback.pdf"
+      },
+      {
+        "author": {
+          "name": "vtselect",
+          "version": "1.1",
+          "category": "plugin"
+        },
+        "action": "download_requested",
+        "sha256": "fa008aeed5f7252cf3c60a9c57126c037ef54b8527ca141a4d2f326cec7396fb",
+        "timestamp": "2021-03-29T14:26:28.629447756+11:00",
+        "file_format_legacy": "PDF",
+        "size": 285625
+      },
+      {
+        "author": {
+          "name": "vtdownload",
+          "version": "1.1",
+          "category": "plugin"
+        },
+        "action": "downloaded",
+        "sha256": "fa008aeed5f7252cf3c60a9c57126c037ef54b8527ca141a4d2f326cec7396fb",
+        "timestamp": "2021-03-29T14:44:53.946229644+11:00",
+        "file_format_legacy": "PDF",
+        "size": 285625
+      },
+      {
+        "author": {
+          "name": "manual",
+          "category": "user",
+          "security": "BLUEZOO"
+        },
+        "action": "extracted",
+        "sha256": "b123456789",
+        "relationship": {
+          "action": "deobfuscated",
+          "scheme": "custom_base64"
+        },
+        "timestamp": "2021-03-29T14:23:50+11:00",
+        "size": 468123,
+        "filename": "winhelp.exe"
+      }
+    ],
+    "timestamp": "2019-08-04T04:00:20Z"
+  },
+  "entity": {
+    "sha256": "2435234524523452452453245",
+    "sha512": "b123456789",
+    "sha1": "345634563653456356",
+    "md5": "123434343",
+    "size": 468123,
+    "mime": "application/x-dosexec",
+    "magic": "PE32 executable for MS Windows (GUI) Intel 80386 32-bit",
+    "file_format_legacy": "Win32 EXE",
+    "features": [
+      {
+        "name": "filename",
+        "value": "C:\\Windows\\System32\\winhelp.exe",
+        "type": "filepath"
+      }
+    ],
+    "datastreams": [
+      {
+        "identify_version": 1,
+        "label": "content",
+        "size": 468123,
+        "sha512": "b123456789",
+        "sha256": "2435234524523452452453245",
+        "sha1": "345634563653456356",
+        "md5": "123434343",
+        "mime": "application/x-dosexec",
+        "magic": "PE32 executable for MS Windows (GUI) Intel 80386 32-bit",
+        "file_format_legacy": "Win32 EXE"
+      }
+    ]
+  },
+  "action": "extracted",
+  "flags": {}
+}

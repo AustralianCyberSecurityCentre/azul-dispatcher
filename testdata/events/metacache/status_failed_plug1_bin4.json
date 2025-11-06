@@ -1,0 +1,124 @@
+{
+  "model_version": 5,
+  "timestamp": "2021-03-03T13:33:33Z",
+  "author": {
+    "name": "MimeDecoder",
+    "version": "2021.02.14",
+    "category": "plugin"
+  },
+  "entity": {
+    "input": {
+      "timestamp": "2021-02-14T12:12:21.426232Z",
+      "author": {
+        "name": "vtdownload",
+        "version": "1.1",
+        "category": "plugin"
+      },
+      "source": {
+        "name": "virustotal",
+        "references": {
+          "interface": "web",
+          "submitter_city": "kharkiv",
+          "submitter_country": "UA",
+          "submitter_id": "0a9e3094",
+          "submitter_region": "63"
+        },
+        "path": [
+          {
+            "author": {
+              "name": "vtfileloader",
+              "version": "1.1",
+              "category": "loader"
+            },
+            "action": "sourced",
+            "sha256": "ccccbe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82-1612629803",
+            "timestamp": "2021-02-07T21:38:56+11:00",
+            "file_format_legacy": "Email",
+            "size": 343964,
+            "filename": "foobar.mht"
+          },
+          {
+            "author": {
+              "name": "vtselect",
+              "version": "1.1",
+              "category": "plugin"
+            },
+            "action": "download_requested",
+            "sha256": "ccccbe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
+            "timestamp": "2021-02-07T21:40:31.872294+11:00",
+            "file_format_legacy": "Email",
+            "size": 343964
+          },
+          {
+            "author": {
+              "name": "vtdownload",
+              "version": "1.1",
+              "category": "plugin"
+            },
+            "action": "downloaded",
+            "sha256": "ccccce8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
+            "timestamp": "2021-02-07T21:40:33.075142+11:00",
+            "file_format_legacy": "Email",
+            "size": 343964
+          },
+          {
+            "author": {
+              "name": "MimeDecoder",
+              "version": "2021.02.14",
+              "category": "plugin"
+            },
+            "action": "extracted",
+            "sha256": "ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69",
+            "relationship": {
+              "action": "extracted",
+              "encoding": "base64"
+            },
+            "timestamp": "2021-02-14T12:12:21.426232Z",
+            "file_format_legacy": "GIF",
+            "size": 35054,
+            "filename": "ukr_kh1.gif"
+          }
+        ],
+        "timestamp": "2021-02-06T16:43:23Z"
+      },
+      "entity": {
+        "sha256": "ccccbe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
+        "sha512": "c3",
+        "sha1": "b2",
+        "md5": "a1",
+        "size": 343964,
+        "file_format_legacy": "Email",
+        "features": [
+          {
+            "name": "filename",
+            "value": "/bad/collect/foobar.mht",
+            "type": "filepath"
+          },
+          {
+            "name": "file_format_legacy",
+            "value": "Email",
+            "type": "string"
+          }
+        ],
+        "datastreams": [
+          {
+            "label": "content",
+            "size": 343964,
+            "sha512": "b2",
+            "sha256": "ccccbe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
+            "sha1": "c3",
+            "md5": "a1",
+            "mime": "mail/rfc2822",
+            "magic": "Something Something",
+            "file_format_legacy": "Email"
+          }
+        ]
+      },
+      "action": "downloaded",
+      "dequeued": "fake",
+      "flags": {}
+    },
+    "status": "failed",
+    "runtime": 100.234
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "model_version": 5,
+  "kafka_key": "c8a5760778f2724d1560f",
+  "timestamp": "2020-07-20T10:31:40.738362Z",
+  "author": {
+    "name": "anony-moose",
+    "category": "user"
+  },
+  "source": {
+    "name": "user",
+    "references": {
+      "a": "b"
+    },
+    "path": [
+      {
+        "author": {
+          "name": "anony-moose",
+          "category": "user"
+        },
+        "action": "sourced",
+        "sha256": "dac804f3662b2228e43af80f6e0769614bf53d6c8ea16241c80d779de1308c20",
+        "timestamp": "2020-07-20T10:31:40.738362Z",
+        "size": 121,
+        "filename": "a.txt"
+      },
+      {
+        "author": {
+          "name": "anony-moose",
+          "category": "user"
+        },
+        "action": "enriched",
+        "sha256": "dac804f3662b2228e43af80f6e0769614bf53d6c8ea16241c80d779de1308c21",
+        "timestamp": "2020-07-20T10:31:41.738362Z",
+        "size": 121,
+        "filename": "a.txt"
+      }
+    ],
+    "timestamp": "2020-02-02T14:11:03.2-07:00"
+  },
+  "entity": {
+    "sha256": "dac804f3662b2228e43af80f6e0769614bf53d6c8ea16241c80d779de1308c20",
+    "sha512": "7b12298582d8d98747505982c9f6a6673bfd47e5ada8a8108fd0d8160e71a54f8222b133a97e64f0fd5b5cea186a5e4078cffaf322856373866f7badf9cd64d5",
+    "sha1": "a1e25a8c7498b39863166ee5bcd4616a8098892d",
+    "md5": "97c2e3618064b1cca21f5a8eb782a1e3",
+    "size": 121,
+    "file_format_legacy": "Text",
+    "datastreams": [
+      {
+        "label": "content",
+        "size": 121,
+        "sha512": "7b12298582d8d98747505982c9f6a6673bfd47e5ada8a8108fd0d8160e71a54f8222b133a97e64f0fd5b5cea186a5e4078cffaf322856373866f7badf9cd64d5",
+        "sha256": "dac804f3662b2228e43af80f6e0769614bf53d6c8ea16241c80d779de1308c20",
+        "sha1": "a1e25a8c7498b39863166ee5bcd4616a8098892d",
+        "md5": "97c2e3618064b1cca21f5a8eb782a1e3",
+        "mime": "text/plain",
+        "magic": "ASCII text",
+        "file_format_legacy": "Text"
+      }
+    ]
+  },
+  "action": "sourced",
+  "flags": {}
+}

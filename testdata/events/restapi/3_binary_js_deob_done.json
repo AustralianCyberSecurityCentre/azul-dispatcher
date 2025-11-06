@@ -1,0 +1,120 @@
+{
+  "kafka_key": "727f9b8c161b43b52adfa0fa0a9cf05f",
+  "author": {
+    "name": "JsDeobf",
+    "version": "2024.10.04",
+    "category": "plugin"
+  },
+  "action": "augmented",
+  "flags": {},
+  "model_version": 5,
+  "timestamp": "2025-01-18T10:09:24.283939Z",
+  "source": {
+    "name": "samples",
+    "references": {
+      "description": "File sourced by Azul Stress tester.",
+      "user": "bob@email.com"
+    },
+    "security": "OFFICIAL",
+    "path": [
+      {
+        "author": {
+          "name": "bob",
+          "category": "user",
+          "security": "OFFICIAL"
+        },
+        "action": "sourced",
+        "sha256": "9bfebfe523694f8b7d2eb570864e361554f1a9e7fa2cb418208929413854e8ae",
+
+        "filename": "9bfebfe523694f8b7d2eb570864e361554f1a9e7fa2cb418208929413854e8ae.zip",
+        "size": 4929057,
+        "file_format_legacy": "ZIP",
+        "timestamp": "2025-01-18T10:09:18Z"
+      },
+      {
+        "author": {
+          "name": "Unbox-sevenzip",
+          "version": "2024.11.13",
+          "category": "plugin"
+        },
+        "action": "extracted",
+        "sha256": "0a96175621acaa366aabb46f13c241667e85b447e5b1dbd990d18d52f6ee5191",
+
+        "filename": "140CPU65260_Copro_Exec_V5.0.bin",
+        "size": 4970693,
+        "file_format_legacy": "ZIP",
+        "relationship": { "action": "extracted" },
+        "timestamp": "2025-01-18T10:09:20.064132Z"
+      },
+      {
+        "author": {
+          "name": "Unbox-zip",
+          "version": "2024.11.13",
+          "category": "plugin"
+        },
+        "action": "extracted",
+        "sha256": "107b55635d8aa0616a97ef113ce3fb3ecae2e53e51ffc164ad16b3e945dd9677",
+
+        "filename": "FLASH0/fw/hw.ini",
+        "size": 25,
+        "file_format_legacy": "Text",
+        "relationship": { "action": "unzipped" },
+        "timestamp": "2025-01-18T10:09:23.750742Z"
+      },
+      {
+        "author": {
+          "name": "JsDeobf",
+          "version": "2024.10.04",
+          "category": "plugin"
+        },
+        "action": "augmented",
+        "sha256": "107b55635d8aa0616a97ef113ce3fb3ecae2e53e51ffc164ad16b3e945dd9677",
+
+        "timestamp": "2025-01-18T10:09:24.283939Z"
+      }
+    ],
+    "timestamp": "2025-01-18T10:09:18Z"
+  },
+  "entity": {
+    "size": 25,
+    "sha512": "60019c422834ee68612b5c7f7f8d122f06af6d1aaf9e84bb12166a38f57ada4785d66bf147852cd605cfd891aceb88e771870e3ee4b9ced489e81c92d2e57d70",
+    "sha256": "107b55635d8aa0616a97ef113ce3fb3ecae2e53e51ffc164ad16b3e945dd9677",
+    "sha1": "324c1025cda4dd9584de5aa25e01dee687314f06",
+    "md5": "29a8e3e42ee259f011d129b24b7a4017",
+    "mime": "text/plain",
+    "magic": "ASCII text, with CRLF line terminators",
+    "file_format_legacy": "Text",
+    "file_format": "text/plain",
+    "file_extension": "txt",
+    "datastreams": [
+      {
+        "identify_version": 2,
+        "label": "content",
+        "size": 25,
+        "sha512": "60019c422834ee68612b5c7f7f8d122f06af6d1aaf9e84bb12166a38f57ada4785d66bf147852cd605cfd891aceb88e771870e3ee4b9ced489e81c92d2e57d70",
+        "sha256": "107b55635d8aa0616a97ef113ce3fb3ecae2e53e51ffc164ad16b3e945dd9677",
+        "sha1": "324c1025cda4dd9584de5aa25e01dee687314f06",
+        "md5": "29a8e3e42ee259f011d129b24b7a4017",
+        "mime": "text/plain",
+        "magic": "ASCII text, with CRLF line terminators",
+        "file_format_legacy": "Text",
+        "file_format": "text/plain",
+        "file_extension": "txt"
+      },
+      {
+        "identify_version": 2,
+        "label": "deob_js",
+        "size": 28,
+        "sha512": "5a5f13a78debcc353c071c2b5d3f9db11254c419365ec82997fed53ef6ea4a8af52a32d1eee3dd726ad63ccd604983fbcf08d44752e3f7ce9983c139937c07cb",
+        "sha256": "e5b164af8c58e49d19828c5df503d9b9d4aea0a5a2c1f0611c939c962c81d13c",
+        "sha1": "69bcef73cb231a70a5574a32f4ea8fe8d6c111b3",
+        "md5": "3fee7faaa83586f4850149313c634617",
+        "mime": "text/plain",
+        "magic": "ASCII text",
+        "file_format_legacy": "Text",
+        "file_format": "text/plain",
+        "file_extension": "txt"
+      }
+    ]
+  }
+}

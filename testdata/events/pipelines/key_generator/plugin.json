@@ -1,0 +1,47 @@
+{
+  "model_version": 5,
+  "timestamp": "2023-07-06T22:20:04.968598Z",
+  "author": {
+    "name": "RatConfigs-JRat",
+    "version": "2020.06.02",
+    "category": "plugin",
+    "security": "OFFICIAL"
+  },
+  "entity": {
+    "name": "RatConfigs-JRat",
+    "version": "2020.06.02",
+    "category": "plugin",
+    "contact": "ASD's ACSC",
+    "description": "RAT config decoders adapted from the opensource malwareconfig project.",
+    "features": [
+      {
+        "name": "config_activex_key",
+        "type": "string",
+        "desc": "ActiveX Registry key configured for malware"
+      }
+    ],
+    "security": "OFFICIAL",
+    "config": {
+      "content_meta_cache_limit": "0",
+      "heartbeat_interval": "30",
+      "max_file_size": "67108864",
+      "max_timeouts_before_exit": "100",
+      "max_values_per_feature": "1000",
+      "min_config_values": "2",
+      "name_remove_prefix": "AzulPlugin",
+      "name_suffix": "",
+      "not_ready_backoff": "5",
+      "plugin_depth_authors": "[]",
+      "plugin_depth_limit": "-1",
+      "rat_blacklist": "[\"BlackNix\", \"Jbifrost\", \"Mirai\"]",
+      "request_retry_backoff": "10",
+      "request_retry_count": "5",
+      "request_retry_multiplier": "2",
+      "request_timeout": "15",
+      "run_timeout": "60",
+      "security_override": "null",
+      "server": "http://dp-plugin",
+      "version_suffix": ""
+    }
+  }
+}

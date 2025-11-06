@@ -1,0 +1,4 @@
+sources:
+  virustotal:
+    description: "test"
+    expire_events_after: "2 days"

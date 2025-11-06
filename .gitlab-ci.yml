@@ -1,0 +1,16 @@
+stages:
+- build
+
+build:
+  stage: build
+  extends: .kaniko
+  before_script:
+    - "export KANIKO_TAGS=$(date -Iminutes -u | tr -d : | tr -d - | cut -c 1-13)"
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
+
+include:
+- project: "$AUTO_DEVOPS_GROUP/autodevops"
+  ref: master
+  file:
+  - "/build/Kaniko.gitlab-ci.yml"

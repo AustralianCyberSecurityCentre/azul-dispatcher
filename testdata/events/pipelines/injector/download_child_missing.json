@@ -1,0 +1,16 @@
+{
+  "model_version": 5,
+  "timestamp": "2021-03-29T14:32:34.414265368+11:00",
+  "author": {
+    "name": "entropy",
+    "version": "1.1",
+    "category": "plugin"
+  },
+  "entity": {
+    "submission": {},
+    "author": {},
+    "link": {},
+    "ids": {}
+  },
+  "action": "manual_insert"
+}

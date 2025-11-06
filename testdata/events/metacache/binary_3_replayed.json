@@ -1,0 +1,77 @@
+{
+  "model_version": 5,
+  "timestamp": "2021-01-10T10:00:00Z",
+  "author": {
+    "name": "MimeDecoder",
+    "version": "2021.02.14",
+    "category": "plugin"
+  },
+  "entity": {
+    "input": {
+      "timestamp": "2077-02-14T12:12:21.426232Z",
+      "author": {
+        "name": "frank",
+        "category": "user"
+      },
+      "source": {
+        "name": "investigations",
+        "references": {
+          "ref": "inv0001",
+          "user": "frank"
+        },
+        "path": [
+          {
+            "author": {
+              "name": "frank",
+              "category": "user"
+            },
+            "action": "uploaded",
+            "sha256": "aaaabe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
+            "timestamp": "2021-02-07T21:40:33.075142+11:00",
+            "file_format_legacy": "Email",
+            "size": 343964
+          }
+        ],
+        "timestamp": "2018-02-06T16:43:23Z"
+      },
+      "entity": {
+        "sha256": "aaaabe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
+        "sha512": "c3",
+        "sha1": "b2",
+        "md5": "a1",
+        "size": 343964,
+        "file_format_legacy": "Email",
+        "features": [
+          {
+            "name": "filename",
+            "value": "malicious.eml",
+            "type": "filepath"
+          },
+          {
+            "name": "file_format_legacy",
+            "value": "Email",
+            "type": "string"
+          }
+        ],
+        "datastreams": [
+          {
+            "label": "content",
+            "size": 343964,
+            "sha512": "b2",
+            "sha256": "aaaabe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
+            "sha1": "c3",
+            "md5": "a1",
+            "mime": "mail/rfc2822",
+            "magic": "Something Something",
+            "file_format_legacy": "Email"
+          }
+        ]
+      },
+      "action": "uploaded",
+      "dequeued": "babe19da6cbd9ae54cabea73a04441f6-MimeDecoder-2021.02.14",
+      "flags": {}
+    },
+    "status": "completed",
+    "runtime": 100.234
+  }
+}
