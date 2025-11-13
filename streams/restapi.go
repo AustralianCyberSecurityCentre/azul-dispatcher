@@ -15,11 +15,11 @@ import (
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/client/poststreams"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/restapi/restapi_handlers"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/identify"
-	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/store"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 )
@@ -66,14 +66,14 @@ func (s *Streams) GetData(c *gin.Context) {
 	source := c.Params.ByName("source")
 	label := c.Params.ByName("label")
 	hash := c.Params.ByName("hash")
-	content, err := s.Store.Fetch(source, label, hash, ra.start, ra.length)
+	content, err := s.Store.Fetch(source, label, hash, store.WithOffsetAndSize(ra.start, ra.length))
 
 	var notFoundError *store.NotFoundError
 	if errors.As(err, &notFoundError) {
 		// Check in store without source and label prefix
 		source = ""
 		label = ""
-		content, err = s.Store.Fetch(source, label, hash, ra.start, ra.length)
+		content, err = s.Store.Fetch(source, label, hash, store.WithOffsetAndSize(ra.start, ra.length))
 	}
 
 	if err != nil {
@@ -234,7 +234,15 @@ func (s *Streams) PostStream(c *gin.Context) {
 	// put binary into s3
 	attempt := 0
 	for attempt < 3 {
-		err = s.Store.Put(c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256, file.Name(), int64(fileSize))
+		_, err = file.Seek(0, 0)
+		if err != nil {
+			attempt += 1
+			st.Logger.Warn().Err(err).Msgf("Retrying upload of file %s/%s/%s - due to error when seeking", c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256)
+			// Randomly sleep for up to 5seconds to deconflict with the colliding upload.
+			time.Sleep(time.Duration(rand.Intn(5000)) * time.Millisecond)
+			continue
+		}
+		err = s.Store.Put(c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256, file, int64(fileSize))
 		// Retry upload if an error occurred as it can be because of two concurrent uploads of the same file.
 		if err != nil {
 			attempt += 1
@@ -314,14 +322,14 @@ func (s *Streams) DeleteData(c *gin.Context) {
 	source := c.Params.ByName("source")
 	label := c.Params.ByName("label")
 	hash := c.Params.ByName("hash")
-	ok, err := s.Store.Delete(source, label, hash, int64(ifOlderThan))
+	ok, err := s.Store.Delete(source, label, hash, store.WithDeleteIfOlderThan(int64(ifOlderThan)))
 
 	var notFoundError *store.NotFoundError
 	if errors.As(err, &notFoundError) {
 		// Check in store without source and label prefix
 		source = ""
 		label = ""
-		ok, err = s.Store.Delete(source, label, hash, int64(ifOlderThan))
+		ok, err = s.Store.Delete(source, label, hash, store.WithDeleteIfOlderThan(int64(ifOlderThan)))
 	}
 
 	if err != nil {

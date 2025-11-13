@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
-	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/store"
 
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	testdata "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/testdata"
@@ -194,7 +194,9 @@ func TestChildBinaryCopy(t *testing.T) {
 	_, err = f.Write(test_data)
 	require.Nil(t, err)
 
-	err = fstore.Put(test_source, test_label.Str(), test_hash, f.Name(), int64(len(test_data)))
+	_, err = f.Seek(0, 0)
+	require.Nil(t, err, "Error when seeking back to 0 during copy.")
+	err = fstore.Put(test_source, test_label.Str(), test_hash, f, int64(len(test_data)))
 	require.Nil(t, err, "Error writing to file store")
 
 	// check that the file has been written
@@ -231,10 +233,10 @@ func TestChildBinaryCopy(t *testing.T) {
 	require.True(t, exists)
 
 	// clean up test files
-	deleted, err := fstore.Delete(test_source, test_label.Str(), test_hash, 0)
+	deleted, err := fstore.Delete(test_source, test_label.Str(), test_hash)
 	require.Nil(t, err)
 	require.True(t, deleted)
-	deleted, err = fstore.Delete(expected_source, test_label.Str(), test_hash, 0)
+	deleted, err = fstore.Delete(expected_source, test_label.Str(), test_hash)
 	require.Nil(t, err)
 	require.True(t, deleted)
 }

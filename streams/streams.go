@@ -5,9 +5,10 @@ It acts as the HTTP storage abstraction for the system.
 package streams
 
 import (
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
+	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/identify"
-	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/store"
 )
 
 type Streams struct {
@@ -29,19 +30,19 @@ func NewStreams() *Streams {
 		// external s3 api
 		if len(st.Streams.S3.AccessKey) == 0 && len(st.Streams.S3.SecretKey) == 0 {
 			// Use credentials from service accounts by default
-			fstore, err = store.NewS3StoreIAM(st.Streams.S3.Endpoint, st.Streams.S3.Secure, st.Streams.S3.Bucket, st.Streams.S3.Region)
+			fstore, err = store.NewS3StoreIAM(st.Streams.S3.Endpoint, st.Streams.S3.Secure, st.Streams.S3.Bucket, st.Streams.S3.Region, prom.StreamsOperationDuration)
 			if err != nil {
 				panic(err.Error())
 			}
 		} else {
 			// Use a hardcoded access/secret key combo
-			fstore, err = store.NewS3Store(st.Streams.S3.Endpoint, st.Streams.S3.AccessKey, st.Streams.S3.SecretKey, st.Streams.S3.Secure, st.Streams.S3.Bucket, st.Streams.S3.Region)
+			fstore, err = store.NewS3Store(st.Streams.S3.Endpoint, st.Streams.S3.AccessKey, st.Streams.S3.SecretKey, st.Streams.S3.Secure, st.Streams.S3.Bucket, st.Streams.S3.Region, prom.StreamsOperationDuration)
 			if err != nil {
 				panic(err.Error())
 			}
 		}
 	case "azure":
-		fstore, err = store.NewAzureStore(st.Streams.Azure.Endpoint, st.Streams.Azure.Container, st.Streams.Azure.StorageAccount)
+		fstore, err = store.NewAzureStore(st.Streams.Azure.Endpoint, st.Streams.Azure.Container, st.Streams.Azure.StorageAccount, st.Streams.Azure.AccessKey, prom.StreamsOperationDuration)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -57,7 +58,13 @@ func NewStreams() *Streams {
 	if st.Streams.Cache.SizeBytes > 1048576 {
 		// wrap the previous store with an in-memory cache
 		// defined in MB
-		fstore, err = store.NewDataCache(int(st.Streams.Cache.SizeBytes/1048576), int(st.Streams.Cache.TTLSeconds), int(st.Streams.Cache.Shards), fstore)
+		fstore, err = store.NewDataCache(
+			int(st.Streams.Cache.SizeBytes/1048576),
+			int(st.Streams.Cache.TTLSeconds),
+			int(st.Streams.Cache.Shards),
+			fstore,
+			store.StoreCacheMetricCollectors{CacheLookup: prom.CacheLookups, CacheHits: prom.CacheHits, PromStreamsOperationDuration: prom.StreamsOperationDuration},
+		)
 		if err != nil {
 			panic(err.Error())
 		}

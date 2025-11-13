@@ -8,10 +8,10 @@ import (
 	"github.com/goccy/go-json"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	fstore "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
-	fstore "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/store"
 )
 
 type ConsumeError struct {

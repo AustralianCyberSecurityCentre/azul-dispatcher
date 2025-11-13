@@ -10,6 +10,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/dedupe"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/manager"
@@ -23,7 +24,6 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/tracking"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
-	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/store"
 )
 
 var ctx = context.Background()
