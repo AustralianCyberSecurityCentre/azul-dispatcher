@@ -9,6 +9,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
@@ -78,7 +79,7 @@ func TestMetaCacheMerge(t *testing.T) {
 		err = json.Unmarshal(table.event, &binary)
 		require.Nil(t, err, table.test)
 		m := formCacheCompletedEvents(&binary, &status, when)
-		st.Logger.Printf("checking %v", table.test)
+		bedSet.Logger.Printf("checking %v", table.test)
 		require.Equal(t, len(m), len(table.expected), table.test)
 		for i := range table.expected {
 			result := table.expected[i]

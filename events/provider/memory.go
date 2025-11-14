@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"time"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pauser"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider/in_memory"
 	sarama_internals "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider/sarama_internals"
@@ -18,7 +19,7 @@ type MemoryProvider struct {
 }
 
 func NewMemoryProvider() (*MemoryProvider, error) {
-	st.Logger.Info().Msg("new consumer manager")
+	bedSet.Logger.Info().Msg("new consumer manager")
 	mem := in_memory.NewInMemory()
 	prov := MemoryProvider{Mem: &mem}
 	return &prov, nil
@@ -121,7 +122,7 @@ func (c *MemoryConsumer) Poll() *sarama_internals.Message {
 	select {
 	case kafkaMessage, ok := <-c.channel:
 		if !ok {
-			st.Logger.Error().Msgf("Unexpected err")
+			bedSet.Logger.Error().Msgf("Unexpected err")
 		}
 		return kafkaMessage
 	case <-ticker.C:

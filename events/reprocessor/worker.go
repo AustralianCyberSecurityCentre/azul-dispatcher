@@ -9,6 +9,7 @@ import (
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/producer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
@@ -53,13 +54,13 @@ func (worker *Worker) handle(msg *sarama_internals.Message) {
 	toProcess, resp, _, err := worker.producer.TransformEvents(msg.Value, &worker.produceParams)
 
 	if err != nil {
-		st.Logger.Error().Int("reprocessor", worker.index).Bool("isfatal", false).Int64("offset", int64(msg.Offset)).
+		bedSet.Logger.Error().Int("reprocessor", worker.index).Bool("isfatal", false).Int64("offset", int64(msg.Offset)).
 			Int32("partition", msg.Partition).Str("source", msg.Topic).Err(err).Msg("reprocessor encountered transformation error")
 		return
 	}
 	if resp.TotalFailures > 0 {
 		// should not abort
-		st.Logger.Error().Int("reprocessor", worker.index).Bool("isfatal", false).Int64("offset", int64(msg.Offset)).
+		bedSet.Logger.Error().Int("reprocessor", worker.index).Bool("isfatal", false).Int64("offset", int64(msg.Offset)).
 			Int32("partition", msg.Partition).Str("source", msg.Topic).Any("failures", resp.Failures).Msg("reprocessor encountered non-fatal transformation error")
 	}
 	// Send the processed events to the sender thread
@@ -83,7 +84,7 @@ func (worker *Worker) markCaughtUp() {
 	// If we are at this point, we have hopefully reached EOF on all partitions
 	worker.eof <- worker.index
 	if !worker.signaledEof {
-		st.Logger.Info().Int("reprocessor", worker.index).Bool("EOF", true).Msg("reached EOF on assigned partitions")
+		bedSet.Logger.Info().Int("reprocessor", worker.index).Bool("EOF", true).Msg("reached EOF on assigned partitions")
 		worker.eofMetric.Inc()
 		worker.signaledEof = true
 	}
@@ -101,7 +102,7 @@ func (worker *Worker) doRecv(context context.Context) {
 	for {
 		select {
 		case <-context.Done():
-			st.Logger.Info().Int("reprocessor", worker.index).Msg("Receiving thread shutting down")
+			bedSet.Logger.Info().Int("reprocessor", worker.index).Msg("Receiving thread shutting down")
 			err := worker.consumer.Close()
 			if err != nil {
 				panic(err)
@@ -113,7 +114,7 @@ func (worker *Worker) doRecv(context context.Context) {
 				worker.sequentialZeroDataPolls = 0
 				worker.handle(msg)
 			} else {
-				st.Logger.Info().Int("reprocessor", worker.index).Msg("reprocessor got no data before timeout")
+				bedSet.Logger.Info().Int("reprocessor", worker.index).Msg("reprocessor got no data before timeout")
 				worker.sequentialZeroDataPolls += 1
 				worker.checkCaughtUp()
 				// If there are lots (180==~3minutes) of empty results the topic must be empty and is not be marked as such.
@@ -138,7 +139,7 @@ func (worker *Worker) doSend(context context.Context) {
 		case <-context.Done():
 			// Only exit once we know all events have been processed.
 			if len(worker.transformed) == 0 {
-				st.Logger.Info().Int("reprocessor", worker.index).Msg("Submission thread shutting down")
+				bedSet.Logger.Info().Int("reprocessor", worker.index).Msg("Submission thread shutting down")
 				worker.producer.Stop()
 				return
 			}
@@ -147,7 +148,7 @@ func (worker *Worker) doSend(context context.Context) {
 		worker.processed += 1
 
 		if err != nil {
-			st.Logger.Error().Int("reprocessor", worker.index).Bool("isfatal", false).Int64("offset", int64(event.offset)).
+			bedSet.Logger.Error().Int("reprocessor", worker.index).Bool("isfatal", false).Int64("offset", int64(event.offset)).
 				Int32("partition", event.partition).Str("source", event.topic).
 				Err(err).Msg("reprocessor encountered production error")
 		} else {

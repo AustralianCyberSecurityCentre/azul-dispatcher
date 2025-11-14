@@ -23,6 +23,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/client/postevents"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/manager"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pauser"
@@ -325,7 +326,7 @@ func (ev *Events) getEvents(fetchEvents manager.FetchEvents, c *gin.Context) {
 	// write data to response
 	_, err = c.Writer.Write(respBody)
 	if err != nil {
-		st.Logger.Err(err).Msg("failed Write")
+		bedSet.Logger.Err(err).Msg("failed Write")
 	}
 }
 
@@ -386,7 +387,7 @@ func (ev *Events) PostEvent(c *gin.Context) {
 	if len(to_publish) > 0 {
 		err = ev.producer.ProduceAnyEvents(sync, to_publish)
 		if err != nil {
-			st.Logger.Err(err).Msg("failed ProduceAnyEvents")
+			bedSet.Logger.Err(err).Msg("failed ProduceAnyEvents")
 			status := 500
 			var badpart *producer.BadPartitionSelection
 			if errors.As(err, &badpart) {
@@ -445,7 +446,7 @@ func (ev *Events) PostEvent(c *gin.Context) {
 	// write data to response
 	_, err = c.Writer.Write(out)
 	if err != nil {
-		st.Logger.Err(err).Msg("failed Write")
+		bedSet.Logger.Err(err).Msg("failed Write")
 	}
 
 	promTimeAfterProduce := time.Now().UnixNano()
@@ -484,6 +485,6 @@ func (ev *Events) PostEventSimulate(c *gin.Context) {
 	// write data to response
 	_, err = c.Writer.Write(out)
 	if err != nil {
-		st.Logger.Err(err).Msg("failed Write")
+		bedSet.Logger.Err(err).Msg("failed Write")
 	}
 }

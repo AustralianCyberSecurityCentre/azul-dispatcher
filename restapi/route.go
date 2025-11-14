@@ -3,6 +3,7 @@ package restapi
 import (
 	"context"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"
@@ -24,23 +25,23 @@ func GetRoot(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "text/plain")
 	_, err := c.Writer.Write([]byte("Azul Dispatcher"))
 	if err != nil {
-		st.Logger.Err(err).Msg("get root")
+		bedSet.Logger.Err(err).Msg("get root")
 	}
 }
 
 // Basic middleware to log errors.
 func ErrorLoggerMiddleware(c *gin.Context) {
 	if c == nil {
-		st.Logger.Error().Msg("gin error, couldn't provide error info as context was nil.")
+		bedSet.Logger.Error().Msg("gin error, couldn't provide error info as context was nil.")
 		return
 	}
 	c.Next()
 
 	for _, err := range c.Errors {
 		if c.Request == nil || c.Request.URL == nil {
-			st.Logger.Error().Err(err).Msg("gin error, limited detail was Request or Request URL was nil.")
+			bedSet.Logger.Error().Err(err).Msg("gin error, limited detail was Request or Request URL was nil.")
 		} else {
-			st.Logger.Error().Err(err).Msgf("gin error on route %s %s with query params %v", c.Request.Method, c.Request.URL, c.Request.URL.Query())
+			bedSet.Logger.Error().Err(err).Msgf("gin error on route %s %s with query params %v", c.Request.Method, c.Request.URL, c.Request.URL.Query())
 		}
 	}
 }
@@ -52,7 +53,7 @@ func NewDispatcher(prov provider.ProviderInterface, kvprov *kvprovider.KVMulti, 
 	event.InitialiseKafka()
 	gin.SetMode(gin.ReleaseMode) // don't print route list on start
 
-	st.Logger.Info().Msg("Start Dispatcher RestAPI")
+	bedSet.Logger.Info().Msg("Start Dispatcher RestAPI")
 	router := gin.New()
 	router.Use(ErrorLoggerMiddleware)
 	// universally post binary/status/plugin/etc events to dispatcher
@@ -99,9 +100,9 @@ func NewDispatcher(prov provider.ProviderInterface, kvprov *kvprovider.KVMulti, 
 }
 
 func (dp *Dispatcher) Stop() {
-	st.Logger.Info().Msg("stopping dispatcher restapi and cleaning up data structures")
+	bedSet.Logger.Info().Msg("stopping dispatcher restapi and cleaning up data structures")
 	dp.event.Stop()
-	st.Logger.Info().Msg("stopped dispatcher restapi")
+	bedSet.Logger.Info().Msg("stopped dispatcher restapi")
 	dp.stream.Close()
 	// dp.stream.Stop()
 }

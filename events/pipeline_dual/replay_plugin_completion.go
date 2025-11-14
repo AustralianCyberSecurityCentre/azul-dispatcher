@@ -9,6 +9,7 @@ import (
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	fstore "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
@@ -212,7 +213,7 @@ func key(hash, plugin, version string) string {
 func (c *ReplayPluginCompletion) dupeDataSources(message *events.BinaryEvent, cached *events.StatusEvent) error {
 	// skip copy if the sources are the same
 	if message.Source.Name == cached.Entity.Input.Source.Name {
-		st.Logger.Debug().Msg("Skipping artifact copy as sources are the same")
+		bedSet.Logger.Debug().Msg("Skipping artifact copy as sources are the same")
 		return nil
 	}
 	for _, r := range cached.Entity.Results {

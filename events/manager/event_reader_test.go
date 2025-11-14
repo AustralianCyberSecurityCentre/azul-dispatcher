@@ -13,6 +13,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline_consume"
@@ -115,7 +116,7 @@ sources:
 
 	prov, err := provider.NewMemoryProvider()
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msg("could not initialise kafka admin client")
+		bedSet.Logger.Fatal().Err(err).Msg("could not initialise kafka admin client")
 	}
 
 	// ac, err := prov.CreateAdmin()

@@ -30,13 +30,15 @@ func NewStreams() *Streams {
 		// external s3 api
 		if len(st.Streams.S3.AccessKey) == 0 && len(st.Streams.S3.SecretKey) == 0 {
 			// Use credentials from service accounts by default
-			fstore, err = store.NewS3StoreIAM(st.Streams.S3.Endpoint, st.Streams.S3.Secure, st.Streams.S3.Bucket, st.Streams.S3.Region, prom.StreamsOperationDuration)
+			// TODO , store.AutomaticAgeOffSettings{}
+			fstore, err = store.NewS3StoreIAM(st.Streams.S3.Endpoint, st.Streams.S3.Secure, st.Streams.S3.Bucket, st.Streams.S3.Region, prom.StreamsOperationDuration, store.AutomaticAgeOffSettings{})
 			if err != nil {
 				panic(err.Error())
 			}
 		} else {
 			// Use a hardcoded access/secret key combo
-			fstore, err = store.NewS3Store(st.Streams.S3.Endpoint, st.Streams.S3.AccessKey, st.Streams.S3.SecretKey, st.Streams.S3.Secure, st.Streams.S3.Bucket, st.Streams.S3.Region, prom.StreamsOperationDuration)
+			// TODO , store.AutomaticAgeOffSettings{}
+			fstore, err = store.NewS3Store(st.Streams.S3.Endpoint, st.Streams.S3.AccessKey, st.Streams.S3.SecretKey, st.Streams.S3.Secure, st.Streams.S3.Bucket, st.Streams.S3.Region, prom.StreamsOperationDuration, store.AutomaticAgeOffSettings{})
 			if err != nil {
 				panic(err.Error())
 			}

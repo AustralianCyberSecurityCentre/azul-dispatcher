@@ -10,7 +10,7 @@ import (
 	"github.com/goccy/go-json"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
-	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 )
 
 // Error replies to the request with the specified error message and HTTP code.
@@ -25,14 +25,14 @@ func JSONError(c *gin.Context, code int, title string, baseErr error) {
 		// print traceback so we might be able to determine more about where specifically the error occurred
 		debug.PrintStack()
 		// even though we use Stack(), doesn't print a stacktrace
-		st.Logger.Err(baseErr).Stack().Int("code", code).Str("title", title).Msg("internal restapi error")
+		bedSet.Logger.Err(baseErr).Stack().Int("code", code).Str("title", title).Msg("internal restapi error")
 	}
 
 	// generate standard error response
 	response := models.Error{Status: fmt.Sprint(code), Title: title, Detail: baseErr.Error()}
 	out, err := json.Marshal(response)
 	if err != nil {
-		st.Logger.Err(err).Int("code", code).Str("title", title).Str("detail", baseErr.Error()).
+		bedSet.Logger.Err(err).Int("code", code).Str("title", title).Str("detail", baseErr.Error()).
 			Msg("restapi failed to return json error response")
 	}
 

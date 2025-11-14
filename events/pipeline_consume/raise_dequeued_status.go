@@ -5,10 +5,10 @@ import (
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/tracking"
-	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 )
 
 type RaiseDequeuedStatus struct {
@@ -27,7 +27,7 @@ func (p *RaiseDequeuedStatus) publishDequeuedStatus(msg *events.BinaryEvent, met
 	// start tracking the processing of the event
 	err := p.Tracker.DoProcessingStarted(msg, meta.Name, meta.Version)
 	if err != nil {
-		st.Logger.Err(err).Msg("update redis")
+		bedSet.Logger.Err(err).Msg("update redis")
 		return err
 	}
 	return nil

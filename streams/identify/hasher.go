@@ -13,7 +13,7 @@ import (
 	"os"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
-	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	ssdeep "github.com/dutchcoders/gossdeep"
 	"github.com/glaslos/tlsh"
 )
@@ -127,7 +127,7 @@ func (h *Hasher) Cook() (*events.BinaryEntityDatastream, error) {
 		if h.size >= 4096 {
 			hash_ssdeep, err = h.ssdeep.Digest()
 			if err != nil {
-				st.Logger.Warn().Msgf("Failed to calculate ssdeep with error: %v", err)
+				bedSet.Logger.Warn().Msgf("Failed to calculate ssdeep with error: %v", err)
 				return nil, fmt.Errorf("failed to calculate ssdeep with internal error: %v", err)
 			}
 		}
@@ -142,7 +142,7 @@ func (h *Hasher) Cook() (*events.BinaryEntityDatastream, error) {
 			// If the TLSH isn't 72 characters it's invalid and it should be set as such.
 			if len(hash_tlsh) < 72 {
 				log.Printf("")
-				st.Logger.Warn().Msgf("Unable to calculate the TLSH value for binary '%s'", md.Sha256)
+				bedSet.Logger.Warn().Msgf("Unable to calculate the TLSH value for binary '%s'", md.Sha256)
 				hash_tlsh = ""
 			}
 		}

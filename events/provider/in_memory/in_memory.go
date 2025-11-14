@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"sync"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	sarama_internals "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider/sarama_internals"
-	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/IBM/sarama"
 )
 
@@ -138,7 +138,7 @@ func (mem *InMemory) Push(msg *sarama.ProducerMessage) error {
 			partitioner := sarama.NewHashPartitioner(msg.Topic)
 			selectedPartition, err := partitioner.Partition(msg, int32(len(topicData)))
 			if err != nil {
-				st.Logger.Warn().Err(err).Msg("failed to find a valid partition using partitioner!")
+				bedSet.Logger.Warn().Err(err).Msg("failed to find a valid partition using partitioner!")
 				return err
 			}
 			msg.Partition = selectedPartition
@@ -153,7 +153,7 @@ func (mem *InMemory) Push(msg *sarama.ProducerMessage) error {
 	if msg.Value != nil {
 		msgVal, err = msg.Value.Encode()
 		if err != nil {
-			st.Logger.Error().Err(err).Msg("unexpected failed to encode message value during push.")
+			bedSet.Logger.Error().Err(err).Msg("unexpected failed to encode message value during push.")
 			return err
 		}
 	} else {
@@ -181,7 +181,7 @@ func (mem *InMemory) Pop(consumer string, topic string, partition int32, offset 
 	}
 	event := mem.Topics[topic][partition][pos]
 	mem.Consumers[consumer][topic][partition] += 1
-	st.Logger.Debug().Msgf("kafka mem pop topic:%v partition:%v consumer:%v bytes:%v", topic, partition, consumer, len(event))
+	bedSet.Logger.Debug().Msgf("kafka mem pop topic:%v partition:%v consumer:%v bytes:%v", topic, partition, consumer, len(event))
 	return &sarama_internals.Message{Value: event, Topic: topic}, nil
 }
 

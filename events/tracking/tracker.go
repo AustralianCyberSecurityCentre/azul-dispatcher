@@ -11,6 +11,7 @@ import (
 	"github.com/goccy/go-json"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
@@ -109,7 +110,7 @@ func deleteDequeuedWithRetry(kvProv kvprovider.KVInterface, dequeuedIdList []str
 	for i := 0; i < 3; i++ {
 		goNumDeletions, goErr = kvProv.Del(ctx, dequeuedIdList...)
 		if goErr != nil {
-			st.Logger.Err(goErr).Msg("Couldn't delete a key out of redis in goroutine during delayed retry.")
+			bedSet.Logger.Err(goErr).Msg("Couldn't delete a key out of redis in goroutine during delayed retry.")
 		}
 		completions += float64(goNumDeletions)
 		// Finished with the number of retries appended.

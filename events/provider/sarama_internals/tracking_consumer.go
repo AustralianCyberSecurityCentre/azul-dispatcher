@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pauser"
-	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/IBM/sarama"
 )
 
@@ -52,7 +52,7 @@ offset: 'earliest' or 'latest'
 func NewTrackingSaramaConsumer(ctx context.Context, brokers []string, kafkaVersion sarama.KafkaVersion, name, group, topicRegex, offset string, lastPauseTime time.Time) (*TrackingConsumer, error) {
 	topicRegexCompiled, err := regexp.Compile(topicRegex)
 	if err != nil {
-		st.Logger.Error().Str("topicRegex", topicRegex).Msgf("Failed to compile topic regex")
+		bedSet.Logger.Error().Str("topicRegex", topicRegex).Msgf("Failed to compile topic regex")
 		return nil, fmt.Errorf("the provided regex '%s' could not be compiled: %w", topicRegex, err)
 	}
 	consumer := &TrackingConsumer{
@@ -95,7 +95,7 @@ func (tc *TrackingConsumer) GetBrokers() []string {
 func (tc *TrackingConsumer) GetTopics() []string {
 	topics := GetTopics(tc.Brokers, tc.TopicRegex)
 	if len(topics) == 0 {
-		st.Logger.Info().Msgf("No topics can be found for topic regex %s and group %s.", tc.TopicRegex, tc.Group)
+		bedSet.Logger.Info().Msgf("No topics can be found for topic regex %s and group %s.", tc.TopicRegex, tc.Group)
 	}
 	return topics
 }
@@ -172,7 +172,7 @@ func (consumer *TrackingConsumer) SkipClaimToLiveIfRequired(session sarama.Consu
 		shouldSkipPartition = !slices.Contains(alreadySkippedPartitions, partitionToSkip)
 	}
 	if shouldSkipPartition {
-		st.Logger.Info().Msgf("Skipping to latest for the consumer group %s, topic: %s, and partition %d", consumer.Group, topicName, partitionToSkip)
+		bedSet.Logger.Info().Msgf("Skipping to latest for the consumer group %s, topic: %s, and partition %d", consumer.Group, topicName, partitionToSkip)
 		session.MarkOffset(topicName, partitionToSkip, claim.HighWaterMarkOffset(), "")
 		session.Commit()
 		consumer.skippedClaims[topicName] = append(consumer.skippedClaims[topicName], partitionToSkip)

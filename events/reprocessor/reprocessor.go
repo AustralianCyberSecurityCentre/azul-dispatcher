@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pauser"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline_produce"
@@ -83,7 +84,7 @@ TOPIC_FILTER:
 
 	// Preamble with the range of topics permitted
 	for _, desiredTopic := range topics {
-		st.Logger.Info().Str("source", desiredTopic).Msg("configuring reprocessing topic")
+		bedSet.Logger.Info().Str("source", desiredTopic).Msg("configuring reprocessing topic")
 	}
 
 	return topics, nil
@@ -107,7 +108,7 @@ RESULT_LOOP:
 			}
 		}
 
-		st.Logger.Info().Int("reprocessor", -1).Bool("EOF", true).Msg("it appears that all reprocessors have reached the ends of their queues")
+		bedSet.Logger.Info().Int("reprocessor", -1).Bool("EOF", true).Msg("it appears that all reprocessors have reached the ends of their queues")
 		return
 	}
 }
@@ -124,7 +125,7 @@ func spawnReprocessors(prov provider.ProviderInterface, topics []string, context
 	workers := make([]Worker, len(topics))
 
 	for i, topic := range topics {
-		st.Logger.Info().Int("reprocessor", i).Str("source", topic).Msg("launching reprocessor")
+		bedSet.Logger.Info().Int("reprocessor", i).Str("source", topic).Msg("launching reprocessor")
 
 		pollWait, err := time.ParseDuration(st.Events.Kafka.PollWaitReprocessor)
 		if err != nil {
@@ -183,9 +184,9 @@ func Start(prov provider.ProviderInterface, kvprov *kvprovider.KVMulti, skipSlee
 	// Sleep to allow the user to follow along. Reprocessing shouldn't be done without
 	// a user watching the system given the risk of data loss/etc.
 	if skipSleep {
-		st.Logger.Warn().Int("count", topicCount).Msg("starting reprocessing immediately")
+		bedSet.Logger.Warn().Int("count", topicCount).Msg("starting reprocessing immediately")
 	} else {
-		st.Logger.Info().Int("count", topicCount).Msg("starting reprocessing in 30 seconds")
+		bedSet.Logger.Info().Int("count", topicCount).Msg("starting reprocessing in 30 seconds")
 		time.Sleep(30 * time.Second)
 	}
 
@@ -221,7 +222,7 @@ func Start(prov provider.ProviderInterface, kvprov *kvprovider.KVMulti, skipSlee
 	for _, worker := range workers {
 		totalProcessed += worker.processed
 	}
-	st.Logger.Info().Int("processed", totalProcessed).Msg("finished reprocess")
+	bedSet.Logger.Info().Int("processed", totalProcessed).Msg("finished reprocess")
 
 	return nil
 }

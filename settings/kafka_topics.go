@@ -7,6 +7,7 @@ import (
 	"dario.cat/mergo"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"gopkg.in/yaml.v3"
 )
 
@@ -49,7 +50,7 @@ func (tc *Topics) mergeTopicLists(base *[]GenericKafkaTopicSpecification, newLis
 func (tc *Topics) readSourcesYaml(yamlContent string) []GenericKafkaTopicSpecification {
 	sourcesConf, err := models.ParseSourcesYaml(yamlContent)
 	if err != nil {
-		Logger.Fatal().Err(err).Str("yaml", yamlContent).Msg("Failed to unmarshal sourcesConf YAML")
+		bedSet.Logger.Fatal().Err(err).Str("yaml", yamlContent).Msg("Failed to unmarshal sourcesConf YAML")
 	}
 	var readTopics []GenericKafkaTopicSpecification
 	for name, s := range sourcesConf.Sources {
@@ -103,28 +104,28 @@ func (tc *Topics) GetTopicsFromConf() []GenericKafkaTopicSpecification {
 	// Read from settings, this list of sources is also used to configure Metastore
 	sourcesConf := Events.Sources
 	if sourcesConf == "" {
-		Logger.Warn().Msg("Azul sources have not been provided")
+		bedSet.Logger.Warn().Msg("Azul sources have not been provided")
 	} else {
 		topicsFromSources := tc.readSourcesYaml(sourcesConf)
 		err := tc.mergeTopicLists(&topics, topicsFromSources)
 		if err != nil {
-			Logger.Fatal().Err(err).Msg("Failed to merge topics from Sources into Default topics")
+			bedSet.Logger.Fatal().Err(err).Msg("Failed to merge topics from Sources into Default topics")
 		}
 	}
 
 	// Read the settings and merge with default topics
 	topicsYAML := Events.Topics
 	if topicsYAML == "" {
-		Logger.Debug().Msg("Azul topic overrides have not been provided")
+		bedSet.Logger.Debug().Msg("Azul topic overrides have not been provided")
 	} else {
 		configuredTopics, err := tc.readTopicsFromYAML(topicsYAML)
 		if err != nil {
-			Logger.Fatal().Err(err).Msg("Error reading topics from YAML")
+			bedSet.Logger.Fatal().Err(err).Msg("Error reading topics from YAML")
 		}
 		// Overwrite default topics with topics.yaml config
 		err = tc.mergeTopicLists(&topics, configuredTopics)
 		if err != nil {
-			Logger.Fatal().Err(err).Msg("Failed to merge topics from YAML into Default topics")
+			bedSet.Logger.Fatal().Err(err).Msg("Failed to merge topics from YAML into Default topics")
 		}
 	}
 	tc.prefixTopics(topics)

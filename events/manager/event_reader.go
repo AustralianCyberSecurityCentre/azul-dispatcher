@@ -8,6 +8,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
@@ -67,7 +68,7 @@ func newEventReader(prov provider.ProviderInterface, pluginKey string, p *consum
 	}
 
 	c.last = time.Now()
-	st.Logger.Info().Str("plugin", pluginKey).Str("subscriptions", strings.Join(subNames, ",")).Msg("plugin event reader created")
+	bedSet.Logger.Info().Str("plugin", pluginKey).Str("subscriptions", strings.Join(subNames, ",")).Msg("plugin event reader created")
 	return &c, nil
 }
 
@@ -159,10 +160,10 @@ func (c *eventReader) pull(pipe *pipeline.ConsumePipeline, p *consumer.ConsumePa
 				// no messages ready, try again
 				continue
 			}
-			st.Logger.Trace().Str("pluginKey", c.pluginKey).Str("entityType", c.model.Str()).Msg("kafka - received msg")
+			bedSet.Logger.Trace().Str("pluginKey", c.pluginKey).Str("entityType", c.model.Str()).Msg("kafka - received msg")
 			if len(msg.Value) == 0 {
 				// msg was a deletion tombstone or had no data, skip
-				st.Logger.Trace().Str("pluginKey", c.pluginKey).Str("entityType", c.model.Str()).Msg("kafka - received tombstoned message")
+				bedSet.Logger.Trace().Str("pluginKey", c.pluginKey).Str("entityType", c.model.Str()).Msg("kafka - received tombstoned message")
 				continue
 			}
 			candidates = append(candidates, msg.Value)
@@ -179,7 +180,7 @@ func (c *eventReader) pull(pipe *pipeline.ConsumePipeline, p *consumer.ConsumePa
 		for _, parsed := range candidates {
 			inFlight, err = msginflight.NewMsgInFlightFromAvro(parsed, p.Model)
 			if err != nil {
-				st.Logger.Warn().Err(err).Str("event", string(parsed)).Str("pluginKey", c.pluginKey).Str("entityType", c.model.Str()).Msg("could not decode event to inflight")
+				bedSet.Logger.Warn().Err(err).Str("event", string(parsed)).Str("pluginKey", c.pluginKey).Str("entityType", c.model.Str()).Msg("could not decode event to inflight")
 				continue
 			}
 			msgInFlights = append(msgInFlights, inFlight)
@@ -219,9 +220,9 @@ func (c *eventReader) pull(pipe *pipeline.ConsumePipeline, p *consumer.ConsumePa
 		for i := range originTopics {
 			topics = append(topics, i)
 		}
-		st.Logger.Debug().Strs("topics", topics).Str("pluginKey", c.pluginKey).Str("entityType", c.model.Str()).Int("count", numEvents).Msg("events consumed")
+		bedSet.Logger.Debug().Strs("topics", topics).Str("pluginKey", c.pluginKey).Str("entityType", c.model.Str()).Int("count", numEvents).Msg("events consumed")
 	} else {
-		st.Logger.Trace().Str("pluginKey", c.pluginKey).Str("entityType", c.model.Str()).Int("count", numEvents).Msg("no events consumed")
+		bedSet.Logger.Trace().Str("pluginKey", c.pluginKey).Str("entityType", c.model.Str()).Int("count", numEvents).Msg("no events consumed")
 	}
 
 	// if some consumers are consistently not ready, something is wrong
@@ -229,7 +230,7 @@ func (c *eventReader) pull(pipe *pipeline.ConsumePipeline, p *consumer.ConsumePa
 	ready := len(consumers_not_ready) <= 0
 	if !ready {
 		info.ConsumersNotReady = strings.Join(consumers_not_ready, ",")
-		st.Logger.Info().Strs("consumers", consumers_not_ready).Str("pluginKey", c.pluginKey).Str("entityType", c.model.Str()).Msg("consumers not ready")
+		bedSet.Logger.Info().Strs("consumers", consumers_not_ready).Str("pluginKey", c.pluginKey).Str("entityType", c.model.Str()).Msg("consumers not ready")
 	}
 	info.Ready = ready
 	prom.EventsConsumeNotReady.WithLabelValues(p.Name, p.Version).Set(float64(len(consumers_not_ready)))
@@ -249,7 +250,7 @@ func (c *eventReader) pull(pipe *pipeline.ConsumePipeline, p *consumer.ConsumePa
 func (ev *eventReader) Stop() {
 	for i := range ev.subscriptions {
 		ref := &ev.subscriptions[i]
-		st.Logger.Debug().Str("name", ref.name).Str("group", ref.group).Msg("closing consumer")
+		bedSet.Logger.Debug().Str("name", ref.name).Str("group", ref.group).Msg("closing consumer")
 		ref.consumer.Close()
 	}
 }

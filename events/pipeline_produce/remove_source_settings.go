@@ -4,8 +4,9 @@ import (
 	"strconv"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
+
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
-	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 )
 
 // Must match the key provided in metastore
@@ -33,7 +34,7 @@ func (p *SourceSettingRemoval) ProduceMod(inFlight *msginflight.MsgInFlight, met
 	removalDepth, err := strconv.Atoi(removalDepthValue)
 	// If depth can't be found just skip removing depth as it is less bad than dropping the event completely.
 	if err != nil {
-		st.Logger.Error().Err(err).Msg("failed to convert removal depth value into an integer, it should always be set!")
+		bedSet.Logger.Error().Err(err).Msg("failed to convert removal depth value into an integer, it should always be set!")
 		return inFlight, nil
 	}
 

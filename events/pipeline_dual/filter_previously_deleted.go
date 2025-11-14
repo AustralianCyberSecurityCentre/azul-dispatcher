@@ -7,6 +7,7 @@ import (
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/producer"
@@ -54,13 +55,13 @@ func (g *FilterPreviouslyDeleted) StartRoutine(wg *sync.WaitGroup) {
 	go func() {
 		startupComplete := false
 		loaded := 0
-		st.Logger.Info().Msg("FilterPreviouslyDeleted starting up")
+		bedSet.Logger.Info().Msg("FilterPreviouslyDeleted starting up")
 		g.run = true
 		for g.run {
 			ev := g.consumer.Poll()
 			if ev == (*sarama_internals.Message)(nil) {
 				if !startupComplete && g.consumer.AreAllPartitionsCaughtUp() {
-					st.Logger.Info().Int("events", loaded).Msg("FilterPreviouslyDeleted startup complete")
+					bedSet.Logger.Info().Int("events", loaded).Msg("FilterPreviouslyDeleted startup complete")
 					startupComplete = true
 					wg.Done()
 				}
@@ -69,19 +70,19 @@ func (g *FilterPreviouslyDeleted) StartRoutine(wg *sync.WaitGroup) {
 			}
 			msginflight, err := msginflight.NewMsgInFlightFromAvro(ev.Value, events.ModelDelete)
 			if err != nil {
-				st.Logger.Err(err).Msg("FilterPreviouslyDeleted bad message")
+				bedSet.Logger.Err(err).Msg("FilterPreviouslyDeleted bad message")
 				continue
 			}
 			delete, ok := msginflight.GetDelete()
 			if !ok {
-				st.Logger.Err(err).Msg("FilterPreviouslyDeleted not a delete")
+				bedSet.Logger.Err(err).Msg("FilterPreviouslyDeleted not a delete")
 				continue
 			}
 			g.registerDelete(delete)
 			loaded += 1
 		}
 		g.consumer.Close()
-		st.Logger.Debug().Msg("FilterPreviouslyDeleted closed")
+		bedSet.Logger.Debug().Msg("FilterPreviouslyDeleted closed")
 
 	}()
 }
@@ -205,6 +206,6 @@ func (g *FilterPreviouslyDeleted) registerDelete(m *events.DeleteEvent) {
 			g.purgedIDs[id] = true
 		}
 	default:
-		st.Logger.Error().Msgf("error - unknown delete action '%s'", m.Action)
+		bedSet.Logger.Error().Msgf("error - unknown delete action '%s'", m.Action)
 	}
 }

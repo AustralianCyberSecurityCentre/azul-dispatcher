@@ -15,6 +15,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/client"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pauser"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
@@ -31,7 +32,7 @@ func GetConnection(url string, nameExtra string) *client.Client {
 	c := client.NewClient(url, url, author, "test-key")
 	err := c.PublishPlugin()
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msg("Could not obtain client connection to dispatcher")
+		bedSet.Logger.Fatal().Err(err).Msg("Could not obtain client connection to dispatcher")
 	}
 	return c
 }

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/IBM/sarama"
@@ -54,7 +55,7 @@ func (tc *TopicControl) createTopics(requiredTopics []st.GenericKafkaTopicSpecif
 				}
 			} else {
 				if ignoreTopicMismatch {
-					st.Logger.Warn().Msgf("%s exists with Partitions:%d Replicas:%d. New topic specifies:%+v but will be ignored.",
+					bedSet.Logger.Warn().Msgf("%s exists with Partitions:%d Replicas:%d. New topic specifies:%+v but will be ignored.",
 						t.Topic, existingTopicPartitions, existingTopicReplicas, t)
 					continue
 				}
@@ -72,10 +73,10 @@ func (tc *TopicControl) createTopics(requiredTopics []st.GenericKafkaTopicSpecif
 		for _, v := range missingTopics {
 			names = append(names, v.Topic)
 		}
-		st.Logger.Debug().Msgf("Creating topics: %+v", names)
+		bedSet.Logger.Debug().Msgf("Creating topics: %+v", names)
 		err = tc.Admin.CreateTopics(missingTopics)
 		if err != nil {
-			st.Logger.Err(err).Msg("Failed to create Topics")
+			bedSet.Logger.Err(err).Msg("Failed to create Topics")
 			return err
 		}
 	}
@@ -86,7 +87,7 @@ func (tc *TopicControl) createTopics(requiredTopics []st.GenericKafkaTopicSpecif
 			names = append(names, k)
 		}
 		// Increasing the partitions of these topics
-		st.Logger.Info().Msgf("Updating partitions for topics: %+v", names)
+		bedSet.Logger.Info().Msgf("Updating partitions for topics: %+v", names)
 		tc.Admin.UpdateTopicPartitions(partitionsToUpdate)
 	}
 
@@ -96,7 +97,7 @@ func (tc *TopicControl) createTopics(requiredTopics []st.GenericKafkaTopicSpecif
 		for _, v := range configsToUpdate {
 			names = append(names, v.Topic)
 		}
-		st.Logger.Debug().Msgf("Updating config for topics: %+v", names)
+		bedSet.Logger.Debug().Msgf("Updating config for topics: %+v", names)
 		tc.Admin.UpdateTopicsConfig(configsToUpdate)
 	}
 	return nil
@@ -108,7 +109,7 @@ func (tc *TopicControl) makeHealthy() error {
 	if err != nil {
 		return err
 	}
-	st.Logger.Info().Int("topics", len(allTopics)).Msg("connected to kafka cluster")
+	bedSet.Logger.Info().Int("topics", len(allTopics)).Msg("connected to kafka cluster")
 	err = tc.CreateAllTopics()
 	if err != nil {
 		return err
@@ -157,7 +158,7 @@ func (tc *TopicControl) DeleteAllTopics() error {
 func (tc *TopicControl) EnsureAllTopics() error {
 	var err error
 	for i := 0; i < int(st.Events.Kafka.ConnectRetries); i++ {
-		st.Logger.Info().Msg("attempting kafka connection")
+		bedSet.Logger.Info().Msg("attempting kafka connection")
 		err = tc.makeHealthy()
 		if err != nil {
 			time.Sleep(time.Second * 1)

@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
@@ -37,7 +38,7 @@ sources:
 	st.Streams.Backend = "local"
 	st.Events.GlobalPartitionCount = 2
 	// logging can be expensive so turn off debug and such
-	st.RecreateLogger("WARN")
+	bedSet.RecreateLogger("WARN")
 	s.cancel = testdata.InitGlobalContext()
 	prov, err := provider.NewSaramaProvider(st.Events.Kafka.Endpoint, testdata.GetGlobalTestContext())
 	require.Nil(t, err)

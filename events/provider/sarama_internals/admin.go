@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"time"
 
-	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/IBM/sarama"
 	"github.com/rcrowley/go-metrics"
 )
@@ -19,13 +19,13 @@ func ListTopics(brokers []string) ([]string, error) {
 	config.MetricRegistry = metrics.DefaultRegistry
 	adminClient, err := sarama.NewClusterAdmin(brokers, config)
 	if err != nil {
-		st.Logger.Error().Err(err).Msg("Error occurred when attempting to set up the Sarama Admin Client.")
+		bedSet.Logger.Error().Err(err).Msg("Error occurred when attempting to set up the Sarama Admin Client.")
 		return []string{}, err
 	}
 	defer adminClient.Close()
 	topicMap, err := adminClient.ListTopics()
 	if err != nil {
-		st.Logger.Warn().Err(err).Msg("Couldn't list kafka topics due to an error.")
+		bedSet.Logger.Warn().Err(err).Msg("Couldn't list kafka topics due to an error.")
 		return []string{}, err
 	}
 	topicNames := make([]string, len(topicMap))

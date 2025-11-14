@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	stats "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/IBM/sarama"
@@ -48,11 +49,11 @@ func startSaramaConsumer(ctx context.Context, kafkaVersion sarama.KafkaVersion, 
 	case "latest":
 		config.Consumer.Offsets.Initial = sarama.OffsetNewest
 	default:
-		st.Logger.Error().Str("offset", offset).Msg("Unexpected offset valid values are earliest and latest.")
+		bedSet.Logger.Error().Str("offset", offset).Msg("Unexpected offset valid values are earliest and latest.")
 	}
 	client, err := sarama.NewConsumerGroup(consumer.GetBrokers(), consumer.GetGroup(), config)
 	if err != nil {
-		st.Logger.Error().Err(err).Msg("Error creating consumer group client.")
+		bedSet.Logger.Error().Err(err).Msg("Error creating consumer group client.")
 		return fmt.Errorf("error creating consumer group client: %v", err)
 	}
 
@@ -75,7 +76,7 @@ func startSaramaConsumer(ctx context.Context, kafkaVersion sarama.KafkaVersion, 
 			// `Consume` is called inside an infinite loop to allow for server-side rebalance.
 			// This is what is required according to the Sarama documentation.
 			// Disabled as too noisy.
-			// st.Logger.Info().Msgf("Starting consume for %v and group %v", topicList, consumer.GetGroup())
+			// bedSet.Logger.Info().Msgf("Starting consume for %v and group %v", topicList, consumer.GetGroup())
 			if err := client.Consume(ctx, topicList, consumer); err != nil {
 				if errors.Is(err, sarama.ErrClosedConsumerGroup) {
 					return
@@ -83,7 +84,7 @@ func startSaramaConsumer(ctx context.Context, kafkaVersion sarama.KafkaVersion, 
 				if errors.Is(err, sarama.ErrRebalanceInProgress) {
 					stats.KafkaRebalanceCount.WithLabelValues(consumer.GetName(), consumer.GetGroup()).Inc()
 				}
-				st.Logger.Info().Err(err).Msgf("Consumer %s has errored and will retry.", consumer.GetGroup())
+				bedSet.Logger.Info().Err(err).Msgf("Consumer %s has errored and will retry.", consumer.GetGroup())
 
 				// Capture kafka error codes in stats, to allow for the errors to be identified.
 				err2, ok := err.(sarama.KError)

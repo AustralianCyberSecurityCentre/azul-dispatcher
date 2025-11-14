@@ -7,6 +7,7 @@ import (
 	"github.com/goccy/go-json"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/client"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
@@ -16,11 +17,11 @@ import (
 func GetAdminClient(ctx context.Context) *topics.TopicControl {
 	prov, err := provider.NewSaramaProvider(st.Events.Kafka.Endpoint, ctx)
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msg("could not initialise kafka admin client")
+		bedSet.Logger.Fatal().Err(err).Msg("could not initialise kafka admin client")
 	}
 	kc, err := topics.NewTopicControl(prov)
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msg("could not initialise kafka admin client")
+		bedSet.Logger.Fatal().Err(err).Msg("could not initialise kafka admin client")
 	}
 	return kc
 }
@@ -35,7 +36,7 @@ func CreateTopic(ctx context.Context, topicName string) {
 
 	err := client.Admin.CreateTopics(topics)
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msgf("Failed to create topic %v", topicName)
+		bedSet.Logger.Fatal().Err(err).Msgf("Failed to create topic %v", topicName)
 	}
 }
 
@@ -43,7 +44,7 @@ func DeleteTopic(ctx context.Context, topicName string) {
 	client := GetAdminClient(ctx)
 	err := client.Admin.DeleteTopics([]string{topicName})
 	if err != nil {
-		st.Logger.Error().Msgf("Failed to delete topic %v", topicName)
+		bedSet.Logger.Error().Msgf("Failed to delete topic %v", topicName)
 	}
 }
 
@@ -61,7 +62,7 @@ func MarshalEqual(t *testing.T, in1, in2 any) {
 // unfortunately can be quite slow depending on how much data is in the topics
 func SkipAllEvents(t *testing.T, c *client.Client, processing bool, expedite, live, historic bool) {
 	maxSecondsToWait := 5
-	st.Logger.Debug().Msg("Skipping binary events")
+	bedSet.Logger.Debug().Msg("Skipping binary events")
 	ok := false
 	nothingFoundInARow := 0
 	for retryCount := 0; retryCount < 10; retryCount++ { // retry until ok.
@@ -74,9 +75,9 @@ func SkipAllEvents(t *testing.T, c *client.Client, processing bool, expedite, li
 			if int(info.Fetched) > 0 {
 				nothingFoundInARow = 0
 			}
-			st.Logger.Printf("topics ready? %v - info %v", info.Ready, info)
+			bedSet.Logger.Printf("topics ready? %v - info %v", info.Ready, info)
 			if info.Ready && int(info.Fetched) == 0 {
-				st.Logger.Printf("consumed all")
+				bedSet.Logger.Printf("consumed all")
 				ok = true
 				break
 			}
@@ -86,7 +87,7 @@ func SkipAllEvents(t *testing.T, c *client.Client, processing bool, expedite, li
 		}
 
 		ok = false
-		st.Logger.Printf("Skipping status events")
+		bedSet.Logger.Printf("Skipping status events")
 		for i := 1; i <= maxSecondsToWait; i++ {
 			_, info, err := c.GetStatusEvents(&client.FetchEventsStruct{
 				Count: 1000, Deadline: 1, IsTask: processing,
@@ -96,9 +97,9 @@ func SkipAllEvents(t *testing.T, c *client.Client, processing bool, expedite, li
 			if int(info.Fetched) > 0 {
 				nothingFoundInARow = 0
 			}
-			st.Logger.Printf("topics ready? %v - info %v", info.Ready, info)
+			bedSet.Logger.Printf("topics ready? %v - info %v", info.Ready, info)
 			if info.Ready && int(info.Fetched) == 0 {
-				st.Logger.Printf("consumed all")
+				bedSet.Logger.Printf("consumed all")
 				ok = true
 				break
 			}

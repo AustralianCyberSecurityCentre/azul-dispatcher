@@ -8,6 +8,7 @@ import (
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
@@ -34,7 +35,7 @@ type Producer struct {
 
 // NewProducer returns a new producer with specified options.
 func NewProducer(prov provider.ProviderInterface) (*Producer, error) {
-	st.Logger.Info().Msg("create a new Producer")
+	bedSet.Logger.Info().Msg("create a new Producer")
 	p, err := prov.CreateProducer()
 	if err != nil {
 		return nil, err
@@ -188,7 +189,7 @@ func (p *Producer) publish(confirm bool, evs ...*msginflight.MsgInFlight) error 
 	for k := range createdEventAuthors {
 		usedAuthors = append(usedAuthors, k)
 	}
-	st.Logger.Debug().Int("count", successfulEventCount).Int("failed", len(errorList)).Strs("topics", usedTopics).Strs("authors", usedAuthors).Msg("events produced")
+	bedSet.Logger.Debug().Int("count", successfulEventCount).Int("failed", len(errorList)).Strs("topics", usedTopics).Strs("authors", usedAuthors).Msg("events produced")
 	if len(errorList) > 0 {
 		var errorSb strings.Builder
 		errorSb.WriteString(fmt.Sprintf("successfully submitted %d/%d events with the failed events providing the following errors: ", successfulEventCount, len(evs)))
@@ -222,7 +223,7 @@ func (p *Producer) Tombstone(confirm bool, ev *msginflight.MsgInFlight) error {
 func (p *Producer) Stop() {
 	err := p.producer.Close()
 	if err != nil {
-		st.Logger.Warn().Err(err).Msg("error when attempting to close producer provider in producer.")
+		bedSet.Logger.Warn().Err(err).Msg("error when attempting to close producer provider in producer.")
 	}
 	p.adminClient.Close()
 }
@@ -252,7 +253,7 @@ func chooseTopic(msg *msginflight.MsgInFlight) (string, error) {
 				return "", err
 			}
 		}
-		st.Logger.Trace().Str("topic", topic).Str("entityType", msg.Base.Model.Str()).Msg("selected topic for binary event")
+		bedSet.Logger.Trace().Str("topic", topic).Str("entityType", msg.Base.Model.Str()).Msg("selected topic for binary event")
 	}
 	return topic, nil
 }
