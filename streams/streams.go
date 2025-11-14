@@ -5,6 +5,7 @@ It acts as the HTTP storage abstraction for the system.
 package streams
 
 import (
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
@@ -25,20 +26,46 @@ func NewStreams() *Streams {
 	// create stream storage
 	var fstore store.FileStorage
 	var err error
+	sourcesConf, err := models.ParseSourcesYaml(st.Events.Sources)
+	if err != nil {
+		panic(err.Error())
+	}
 	switch st.Streams.Backend {
 	case "s3":
 		// external s3 api
 		if len(st.Streams.S3.AccessKey) == 0 && len(st.Streams.S3.SecretKey) == 0 {
 			// Use credentials from service accounts by default
-			// TODO , store.AutomaticAgeOffSettings{}
-			fstore, err = store.NewS3StoreIAM(st.Streams.S3.Endpoint, st.Streams.S3.Secure, st.Streams.S3.Bucket, st.Streams.S3.Region, prom.StreamsOperationDuration, store.AutomaticAgeOffSettings{})
+			fstore, err = store.NewS3StoreIAM(
+				st.Streams.S3.Endpoint,
+				st.Streams.S3.Secure,
+				st.Streams.S3.Bucket,
+				st.Streams.S3.Region,
+				prom.StreamsOperationDuration,
+				store.AutomaticAgeOffSettings{
+					EnableAutomaticAgeOff:   st.Streams.S3.EnableAutomaticAgeOff,
+					EnableCleanupAutoAgeOff: st.Streams.S3.EnableCleanupAutoAgeOff,
+					SourceConf:              &sourcesConf,
+				},
+			)
 			if err != nil {
 				panic(err.Error())
 			}
 		} else {
 			// Use a hardcoded access/secret key combo
-			// TODO , store.AutomaticAgeOffSettings{}
-			fstore, err = store.NewS3Store(st.Streams.S3.Endpoint, st.Streams.S3.AccessKey, st.Streams.S3.SecretKey, st.Streams.S3.Secure, st.Streams.S3.Bucket, st.Streams.S3.Region, prom.StreamsOperationDuration, store.AutomaticAgeOffSettings{})
+			fstore, err = store.NewS3Store(
+				st.Streams.S3.Endpoint,
+				st.Streams.S3.AccessKey,
+				st.Streams.S3.SecretKey,
+				st.Streams.S3.Secure,
+				st.Streams.S3.Bucket,
+				st.Streams.S3.Region,
+				prom.StreamsOperationDuration,
+				store.AutomaticAgeOffSettings{
+					EnableAutomaticAgeOff:   st.Streams.S3.EnableAutomaticAgeOff,
+					EnableCleanupAutoAgeOff: st.Streams.S3.EnableCleanupAutoAgeOff,
+					SourceConf:              &sourcesConf,
+				},
+			)
 			if err != nil {
 				panic(err.Error())
 			}

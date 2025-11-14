@@ -148,8 +148,6 @@ func (c *eventReader) pull(pipe *pipeline.ConsumePipeline, p *consumer.ConsumePa
 		// Keep pulling candidate messages until hit requested limit.
 		// Must track events + candidates as otherwise we have too many events to return.
 		for (len(evs) + len(candidates)) < p.Count {
-			// TODO - need a metric about nature of events being filtered and why.
-
 			// If deadline is set and we've exceeded our deadline, bail.
 			if p.Deadline > 0 && time.Now().After(deadline) {
 				break

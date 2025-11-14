@@ -40,6 +40,10 @@ type DPStreamsS3 struct {
 	Region string `koanf:"region"`
 	// S3 bucket name to store to (will attempt to create if not exists)
 	Bucket string `koanf:"bucket"`
+	// Enable automatic deletion of data that is older than what the source would keep.
+	EnableAutomaticAgeOff bool `koanf:"enable_automatic_ageoff"`
+	// If automatic ageoff is disabled, should the old rules be cleaned up?
+	EnableCleanupAutoAgeOff bool `koanf:"enable_automatic_ageoff_cleanup"`
 }
 
 type DPStreamCache struct {
