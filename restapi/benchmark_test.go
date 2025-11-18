@@ -4,12 +4,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/testutils"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
-	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/testdata"
 )
 
@@ -37,7 +38,7 @@ sources:
 	}
 	topics.RegenTopics()
 	// logging can be expensive so turn off debug and such
-	st.RecreateLogger("WARN")
+	bedSet.RecreateLogger("WARN")
 	s.cancel = testdata.InitGlobalContext()
 	prov, err := provider.NewMemoryProvider()
 	if err != nil {

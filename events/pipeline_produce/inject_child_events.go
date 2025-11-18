@@ -9,9 +9,10 @@ import (
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
-	fstore "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/store"
+	fstore "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	"github.com/goccy/go-json"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	sarama_internals "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider/sarama_internals"
@@ -51,13 +52,13 @@ func (p *InjectChildEvents) StartRoutine(wg *sync.WaitGroup) {
 	go func() {
 		startupComplete := false
 		loaded := 0
-		st.Logger.Info().Msg("InjectChildEvents starting up")
+		bedSet.Logger.Info().Msg("InjectChildEvents starting up")
 		p.run = true
 		for p.run {
 			raw := p.consumer.Poll()
 			if raw == (*sarama_internals.Message)(nil) {
 				if !startupComplete && p.consumer.AreAllPartitionsCaughtUp() {
-					st.Logger.Info().Int("events", loaded).Msg("InjectChildEvents startup complete")
+					bedSet.Logger.Info().Int("events", loaded).Msg("InjectChildEvents startup complete")
 					startupComplete = true
 					wg.Done()
 				}
@@ -68,22 +69,22 @@ func (p *InjectChildEvents) StartRoutine(wg *sync.WaitGroup) {
 			// unmarshal the insert event using upgrade pipeline
 			inFlight, err := msginflight.NewMsgInFlightFromAvro(raw.Value, events.ModelInsert)
 			if err != nil {
-				st.Logger.Err(err).Str("consumer", "InjectChildEvents").Msg("failed to load manual insert")
+				bedSet.Logger.Err(err).Str("consumer", "InjectChildEvents").Msg("failed to load manual insert")
 				continue
 			}
 			insert, ok := inFlight.GetInsert()
 			if !ok {
-				st.Logger.Err(err).Str("consumer", "InjectChildEvents").Msg("failed to load manual insert (not insert)")
+				bedSet.Logger.Err(err).Str("consumer", "InjectChildEvents").Msg("failed to load manual insert (not insert)")
 				continue
 			}
 			err = p.registerInsert(insert.KafkaKey, insert)
 			if err != nil {
-				st.Logger.Err(err).Str("consumer", "InjectChildEvents").Msg("failed to handle manual insert")
+				bedSet.Logger.Err(err).Str("consumer", "InjectChildEvents").Msg("failed to handle manual insert")
 			}
 			loaded += 1
 		}
 		p.consumer.Close()
-		st.Logger.Debug().Msg("InjectChildEvents closed")
+		bedSet.Logger.Debug().Msg("InjectChildEvents closed")
 	}()
 }
 
@@ -128,7 +129,7 @@ func (p *InjectChildEvents) ProduceMod(inFlight *msginflight.MsgInFlight, meta *
 				return nil, nil
 			}
 		}
-		st.Logger.Debug().Str("parent", parent.Entity.Sha256).Str("child", child).Msg("Attaching manual-insert child to parent")
+		bedSet.Logger.Debug().Str("parent", parent.Entity.Sha256).Str("child", child).Msg("Attaching manual-insert child to parent")
 		msg, err := merge(parent, ins)
 		if err != nil {
 			pipeline.HandleProducerError(meta.UserAgent, p.GetName(), inFlight, err, "error merging insert with parent")

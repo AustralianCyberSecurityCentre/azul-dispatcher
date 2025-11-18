@@ -3,6 +3,7 @@ package settings
 import (
 	"testing"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/stretchr/testify/require"
 )
 
@@ -125,7 +126,7 @@ sources:
         required: false
 `
 	sourcesTopics := ac.readSourcesYaml(yamlContent)
-	Logger.Debug().Msgf("%+v", sourcesTopics)
+	bedSet.Logger.Debug().Msgf("%+v", sourcesTopics)
 	// Check if the correct number of topics is read
 	require.Equal(t, len(sourcesTopics), 10)
 

@@ -15,11 +15,12 @@ import (
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/client/poststreams"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/restapi/restapi_handlers"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/identify"
-	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/store"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 )
@@ -57,7 +58,7 @@ func (s *Streams) GetData(c *gin.Context) {
 		ra, err = parseRange(c.GetHeader("Range"))
 		if err != nil {
 			restapi_handlers.JSONError(c, 400, "invalid range provided", err)
-			st.Logger.Error().Err(err).Msgf("invalid range provided")
+			bedSet.Logger.Error().Err(err).Msgf("invalid range provided")
 			return
 		}
 	}
@@ -66,14 +67,14 @@ func (s *Streams) GetData(c *gin.Context) {
 	source := c.Params.ByName("source")
 	label := c.Params.ByName("label")
 	hash := c.Params.ByName("hash")
-	content, err := s.Store.Fetch(source, label, hash, ra.start, ra.length)
+	content, err := s.Store.Fetch(source, label, hash, store.WithOffsetAndSize(ra.start, ra.length))
 
 	var notFoundError *store.NotFoundError
 	if errors.As(err, &notFoundError) {
 		// Check in store without source and label prefix
 		source = ""
 		label = ""
-		content, err = s.Store.Fetch(source, label, hash, ra.start, ra.length)
+		content, err = s.Store.Fetch(source, label, hash, store.WithOffsetAndSize(ra.start, ra.length))
 	}
 
 	if err != nil {
@@ -86,11 +87,11 @@ func (s *Streams) GetData(c *gin.Context) {
 		if errors.As(err, &offsetAfterEnd) {
 			// If the error is a range input error return 400
 			restapi_handlers.JSONError(c, 400, "invalid range end", err)
-			st.Logger.Error().Err(err).Msgf("invalid range end")
+			bedSet.Logger.Error().Err(err).Msgf("invalid range end")
 			return
 		} else { // catch errors from original fetch and fallback fetch
 			restapi_handlers.JSONError(c, 500, "store error in GetData", err)
-			st.Logger.Error().Err(err).Msgf("store error in GetData %s/%s/%s", c.Params.ByName("source"), c.Params.ByName("label"), c.Params.ByName("hash"))
+			bedSet.Logger.Error().Err(err).Msgf("store error in GetData %s/%s/%s", c.Params.ByName("source"), c.Params.ByName("label"), c.Params.ByName("hash"))
 			return
 		}
 	}
@@ -121,7 +122,7 @@ func (s *Streams) HasData(c *gin.Context) {
 	// Check in store with source and label prefix
 	exist, err := s.Store.Exists(c.Params.ByName("source"), c.Params.ByName("label"), c.Params.ByName("hash"))
 	if err != nil {
-		st.Logger.Error().Err(err).Msgf("checking if hasData 500 error for file %s/%s/%s", c.Params.ByName("source"), c.Params.ByName("label"), c.Params.ByName("hash"))
+		bedSet.Logger.Error().Err(err).Msgf("checking if hasData 500 error for file %s/%s/%s", c.Params.ByName("source"), c.Params.ByName("label"), c.Params.ByName("hash"))
 		c.Writer.WriteHeader(500)
 		c.Writer.Flush()
 		return
@@ -130,7 +131,7 @@ func (s *Streams) HasData(c *gin.Context) {
 		// Check in store without source and label prefix
 		exist, err = s.Store.Exists("", "", c.Params.ByName("hash"))
 		if err != nil {
-			st.Logger.Error().Err(err).Msgf("checking if hasData 500 error for file %s/%s/%s", c.Params.ByName("source"), c.Params.ByName("label"), c.Params.ByName("hash"))
+			bedSet.Logger.Error().Err(err).Msgf("checking if hasData 500 error for file %s/%s/%s", c.Params.ByName("source"), c.Params.ByName("label"), c.Params.ByName("hash"))
 			c.Writer.WriteHeader(500)
 			c.Writer.Flush()
 			return
@@ -234,11 +235,19 @@ func (s *Streams) PostStream(c *gin.Context) {
 	// put binary into s3
 	attempt := 0
 	for attempt < 3 {
-		err = s.Store.Put(c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256, file.Name(), int64(fileSize))
+		_, err = file.Seek(0, 0)
+		if err != nil {
+			attempt += 1
+			bedSet.Logger.Warn().Err(err).Msgf("Retrying upload of file %s/%s/%s - due to error when seeking", c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256)
+			// Randomly sleep for up to 5seconds to deconflict with the colliding upload.
+			time.Sleep(time.Duration(rand.Intn(5000)) * time.Millisecond)
+			continue
+		}
+		err = s.Store.Put(c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256, file, int64(fileSize))
 		// Retry upload if an error occurred as it can be because of two concurrent uploads of the same file.
 		if err != nil {
 			attempt += 1
-			st.Logger.Warn().Err(err).Msgf("Retrying upload of file %s/%s/%s", c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256)
+			bedSet.Logger.Warn().Err(err).Msgf("Retrying upload of file %s/%s/%s", c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256)
 			// Randomly sleep for up to 5seconds to deconflict with the colliding upload.
 			time.Sleep(time.Duration(rand.Intn(5000)) * time.Millisecond)
 			continue
@@ -247,7 +256,7 @@ func (s *Streams) PostStream(c *gin.Context) {
 	}
 
 	if err != nil {
-		st.Logger.Err(err).Msgf("Unsuccessful after upload retry of file  %s/%s/%s", c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256)
+		bedSet.Logger.Err(err).Msgf("Unsuccessful after upload retry of file  %s/%s/%s", c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256)
 		restapi_handlers.JSONError(c, 500, "store error in PutData", err)
 		return
 	}
@@ -269,7 +278,7 @@ func (s *Streams) CopyData(c *gin.Context) {
 
 	exist, err := s.Store.Exists(sourceOld, labelOld, id)
 	if err != nil {
-		st.Logger.Err(err).Msg("store error in CopyData")
+		bedSet.Logger.Err(err).Msg("store error in CopyData")
 		return
 	}
 	if !exist {
@@ -279,11 +288,11 @@ func (s *Streams) CopyData(c *gin.Context) {
 		// additional exists check as copy function does not error when the source file does not exist
 		exist, err = s.Store.Exists(sourceOld, labelOld, id)
 		if err != nil {
-			st.Logger.Err(err).Msg("store error in CopyData")
+			bedSet.Logger.Err(err).Msg("store error in CopyData")
 			return
 		}
 		if !exist {
-			st.Logger.Err(err).Msg("source file not found for copy operation")
+			bedSet.Logger.Err(err).Msg("source file not found for copy operation")
 			return
 		}
 	}
@@ -314,14 +323,14 @@ func (s *Streams) DeleteData(c *gin.Context) {
 	source := c.Params.ByName("source")
 	label := c.Params.ByName("label")
 	hash := c.Params.ByName("hash")
-	ok, err := s.Store.Delete(source, label, hash, int64(ifOlderThan))
+	ok, err := s.Store.Delete(source, label, hash, store.WithDeleteIfOlderThan(int64(ifOlderThan)))
 
 	var notFoundError *store.NotFoundError
 	if errors.As(err, &notFoundError) {
 		// Check in store without source and label prefix
 		source = ""
 		label = ""
-		ok, err = s.Store.Delete(source, label, hash, int64(ifOlderThan))
+		ok, err = s.Store.Delete(source, label, hash, store.WithDeleteIfOlderThan(int64(ifOlderThan)))
 	}
 
 	if err != nil {
@@ -334,6 +343,6 @@ func (s *Streams) DeleteData(c *gin.Context) {
 			return
 		}
 	}
-	st.Logger.Info().Str("hash", hash).Msg("deleted")
+	bedSet.Logger.Info().Str("hash", hash).Msg("deleted")
 	jsonResponse(c, map[string]bool{"deleted": ok})
 }

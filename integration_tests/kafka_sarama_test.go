@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	prov "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	sarama_internals "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider/sarama_internals"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
@@ -31,9 +32,9 @@ func createMessage(ctx context.Context, t *testing.T, expected string) {
 	}
 	defer producer.Close()
 
-	st.Logger.Printf("create message")
+	bedSet.Logger.Printf("create message")
 	topic := "testing-sarama"
-	st.Logger.Printf("expecting content: %v", expected)
+	bedSet.Logger.Printf("expecting content: %v", expected)
 	err = producer.Produce(&sarama.ProducerMessage{
 		Topic: topic,
 		Value: sarama.StringEncoder(expected),
@@ -43,7 +44,7 @@ func createMessage(ctx context.Context, t *testing.T, expected string) {
 		t.Errorf("bad %v", err)
 		return
 	}
-	st.Logger.Printf("finished create message")
+	bedSet.Logger.Printf("finished create message")
 }
 
 func TestSimpleConsumer(t *testing.T) {

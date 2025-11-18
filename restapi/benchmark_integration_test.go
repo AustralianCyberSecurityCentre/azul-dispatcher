@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/testutils"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
@@ -32,7 +33,7 @@ sources:
 	st.Events.Kafka.TopicPrefix = "test02"
 	topics.RegenTopics()
 	// logging can be expensive so turn off debug and such
-	st.RecreateLogger("WARN")
+	bedSet.RecreateLogger("WARN")
 	s.cancel = testdata.InitGlobalContext()
 	prov, err := provider.NewSaramaProvider(st.Events.Kafka.Endpoint, testdata.GetGlobalTestContext())
 	if err != nil {

@@ -7,13 +7,13 @@ import (
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pauser"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
-	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 )
 
 var lastDeleteRequestTime time.Time
@@ -63,7 +63,7 @@ func (m *ConsumerManager) getLastPauseTimeAndDeletePluginConsumers(p *consumer.C
 	}
 	isPluginProcessingPaused, err := pauser.IsPluginProcessingPaused(context.Background(), m.kvstore)
 	if err != nil {
-		st.Logger.Err(err).Msg("Failed to check if plugin processing was paused when fetching events.")
+		bedSet.Logger.Err(err).Msg("Failed to check if plugin processing was paused when fetching events.")
 		return false, time.Time{}, err
 	}
 
@@ -87,7 +87,7 @@ func (m *ConsumerManager) getLastPauseTimeAndDeletePluginConsumers(p *consumer.C
 
 // FetchEvents will return a set of events for the specified plugin, applying any supplied filters.
 func (m *ConsumerManager) fetchEvents(messagePipeline *pipeline.ConsumePipeline, p *consumer.ConsumeParams) ([]*msginflight.MsgInFlight, *models.EventResponseInfo, error) {
-	st.Logger.Trace().Str("name", p.Name).Str("version", p.Version).Bool("isTask", p.IsTask).Str("entityType", p.Model.Str()).
+	bedSet.Logger.Trace().Str("name", p.Name).Str("version", p.Version).Bool("isTask", p.IsTask).Str("entityType", p.Model.Str()).
 		Msg("fetch events")
 
 	// Prevent plugin messages being read if a pause is in place.
@@ -123,7 +123,7 @@ func (m *ConsumerManager) getEventReader(p *consumer.ConsumeParams, lastPauseTim
 	c := m.eventReaders[pluginKey]
 	m.consumersKeyCreateLock.RUnlock()
 	if c != nil {
-		st.Logger.Trace().Str("name", p.Name).Str("version", p.Version).Str("entityType", p.Model.Str()).
+		bedSet.Logger.Trace().Str("name", p.Name).Str("version", p.Version).Str("entityType", p.Model.Str()).
 			Msg("loaded existing event reader, first try")
 		return c, nil
 	}
@@ -135,7 +135,7 @@ func (m *ConsumerManager) getEventReader(p *consumer.ConsumeParams, lastPauseTim
 	// check if the consumer was created before we got the lock
 	c = m.eventReaders[pluginKey]
 	if c != nil {
-		st.Logger.Trace().Str("name", p.Name).Str("version", p.Version).Str("entityType", p.Model.Str()).
+		bedSet.Logger.Trace().Str("name", p.Name).Str("version", p.Version).Str("entityType", p.Model.Str()).
 			Msg("loaded existing event reader, second try")
 		return c, nil
 	}
@@ -147,7 +147,7 @@ func (m *ConsumerManager) getEventReader(p *consumer.ConsumeParams, lastPauseTim
 		return nil, err
 	}
 	m.eventReaders[pluginKey] = c
-	st.Logger.Trace().Str("name", p.Name).Str("version", p.Version).Str("entityType", p.Model.Str()).
+	bedSet.Logger.Trace().Str("name", p.Name).Str("version", p.Version).Str("entityType", p.Model.Str()).
 		Msg("created new event reader")
 	return c, nil
 }
@@ -169,7 +169,7 @@ func (m *ConsumerManager) DeleteAllPluginEventReaders() {
 
 func (m *ConsumerManager) Stop() {
 	for i := range m.eventReaders {
-		st.Logger.Info().Str("consumer", i).Msg("closing consumer")
+		bedSet.Logger.Info().Str("consumer", i).Msg("closing consumer")
 		m.eventReaders[i].Stop()
 	}
 }

@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
-	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 )
 
 // subscription contains all the data needed to manage a subscription to a pattern of kafka topics
@@ -64,6 +64,6 @@ func getSubscriptions(pluginKey string, p *consumer.ConsumeParams) ([]subscripti
 		// historic - return events from start of queue if this is a truly new pluginKey
 		ret = append(ret, newSub("historic", pluginKey, "earliest", pattern))
 	}
-	st.Logger.Debug().Str("pattern", pattern).Str("pluginKey", pluginKey).Msg("new kafka subscriptions")
+	bedSet.Logger.Debug().Str("pattern", pattern).Str("pluginKey", pluginKey).Msg("new kafka subscriptions")
 	return ret, nil
 }

@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"
-	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -26,7 +26,7 @@ const MAX_TIME_TO_SKIP_PLUGIN_TO_LATEST = time.Duration(30) * time.Minute
 
 func PausePluginProcessing(ctx context.Context, kvmulti *kvprovider.KVMulti) error {
 	nowTime := nowFunc()
-	st.Logger.Info().Msgf("Pausing plugin processing at time %s", nowTime.Format(time.RFC3339))
+	bedSet.Logger.Info().Msgf("Pausing plugin processing at time %s", nowTime.Format(time.RFC3339))
 	return kvmulti.PausePluginProcessingStartTime.Set(ctx, PAUSE_PLUGIN_FLAG_KEY, nowTime, MAX_TIME_TO_SKIP_PLUGIN_TO_LATEST)
 }
 
@@ -47,7 +47,7 @@ func BackgroundPauseProcessing(ctx context.Context, kvmulti *kvprovider.KVMulti)
 			if timeSince(lastPauseTime) > TIME_BETWEEN_REDIS_UPDATES {
 				err := PausePluginProcessing(ctx, kvmulti)
 				if err != nil {
-					st.Logger.Err(err).Msg("Failed to pause plugin event handling.")
+					bedSet.Logger.Err(err).Msg("Failed to pause plugin event handling.")
 				}
 			}
 		}
@@ -63,7 +63,7 @@ func PauseUntilContextDone(ctx context.Context, kvmulti *kvprovider.KVMulti) *sy
 		minutelyTicker := time.NewTicker(TIME_BETWEEN_REDIS_UPDATES)
 		err := PausePluginProcessing(ctx, kvmulti)
 		if err != nil {
-			st.Logger.Err(err).Msg("Couldn't pause plugin processing during minutely routine.")
+			bedSet.Logger.Err(err).Msg("Couldn't pause plugin processing during minutely routine.")
 		}
 		for {
 			select {
@@ -72,7 +72,7 @@ func PauseUntilContextDone(ctx context.Context, kvmulti *kvprovider.KVMulti) *sy
 			case <-minutelyTicker.C:
 				err = PausePluginProcessing(ctx, kvmulti)
 				if err != nil {
-					st.Logger.Err(err).Msg("Couldn't pause plugin processing during minutely routine.")
+					bedSet.Logger.Err(err).Msg("Couldn't pause plugin processing during minutely routine.")
 				}
 			}
 

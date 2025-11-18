@@ -13,9 +13,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/identify"
-	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/store"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -194,7 +194,9 @@ func TestGetMethods(t *testing.T) {
 	test_source := "source"
 	test_label := "stream"
 
-	err = apiStreams.Store.Put(test_source, test_label, m.Sha256, f.Name(), int64(len(test_data)))
+	_, err = f.Seek(0, 0)
+	require.Nil(t, err, "failed when attempting to seek file to put into store back to 0.")
+	err = apiStreams.Store.Put(test_source, test_label, m.Sha256, f, int64(len(test_data)))
 	if err != nil {
 		panic("Error putting data to store: " + err.Error())
 	}

@@ -9,10 +9,11 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
-	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/store"
 	testdata "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/testdata"
 	"github.com/goccy/go-json"
 	"github.com/golang/mock/gomock"
@@ -78,7 +79,7 @@ func TestMetaCacheMerge(t *testing.T) {
 		err = json.Unmarshal(table.event, &binary)
 		require.Nil(t, err, table.test)
 		m := formCacheCompletedEvents(&binary, &status, when)
-		st.Logger.Printf("checking %v", table.test)
+		bedSet.Logger.Printf("checking %v", table.test)
 		require.Equal(t, len(m), len(table.expected), table.test)
 		for i := range table.expected {
 			result := table.expected[i]
@@ -277,7 +278,9 @@ func TestCopyCachedResults(t *testing.T) {
 	_, err = f.Write(test_data)
 	require.Nil(t, err)
 
-	err = fstore.Put(test_source, test_label.Str(), test_hash, f.Name(), int64(len(test_data)))
+	_, err = f.Seek(0, 0)
+	require.Nil(t, err, "Error when seeking back to 0 during copy.")
+	err = fstore.Put(test_source, test_label.Str(), test_hash, f, int64(len(test_data)))
 	require.Nil(t, err, "Error writing to file store")
 
 	// check that the file has been written
@@ -316,10 +319,10 @@ func TestCopyCachedResults(t *testing.T) {
 	require.True(t, exists)
 
 	// clean up test files
-	deleted, err := fstore.Delete(test_source, test_label.Str(), test_hash, 0)
+	deleted, err := fstore.Delete(test_source, test_label.Str(), test_hash)
 	require.Nil(t, err)
 	require.True(t, deleted)
-	deleted, err = fstore.Delete(expected_source, test_label.Str(), test_hash, 0)
+	deleted, err = fstore.Delete(expected_source, test_label.Str(), test_hash)
 	require.Nil(t, err)
 	require.True(t, deleted)
 }

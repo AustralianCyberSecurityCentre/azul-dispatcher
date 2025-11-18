@@ -2,8 +2,8 @@
 # local testing of integration
 # first argument is prefix of tests to run, if empty runs all
 
-DP__LOG_LEVEL=TRACE \
-DP__LOG_PRETTY=TRUE \
+BED__LOG_LEVEL=TRACE \
+BED__LOG_PRETTY=TRUE \
 DP__EVENTS__KAFKA__ENDPOINT=localhost:9092 \
 DP__STREAMS__BACKEND=s3 \
 DP__STREAMS__S3__ENDPOINT=localhost:9000 \

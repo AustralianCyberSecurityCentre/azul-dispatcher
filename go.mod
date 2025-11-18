@@ -5,7 +5,7 @@ go 1.25.0
 toolchain go1.25.1
 
 require (
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v9 v9.0.2
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v9 v9.0.10
 	github.com/allegro/bigcache/v3 v3.1.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
@@ -13,7 +13,7 @@ require (
 	github.com/eko/gocache/store/bigcache/v4 v4.1.2 // Version 4.2.x has a bug that breaks cache hits. refer to https://github.com/eko/gocache/issues/225
 	github.com/glaslos/tlsh v0.4.0
 	github.com/golang/mock v1.6.0
-	github.com/minio/minio-go/v7 v7.0.95
+	github.com/minio/minio-go/v7 v7.0.97 // indirect
 	github.com/prometheus/client_golang v1.23.2
 	github.com/redis/go-redis/v9 v9.13.0
 	github.com/rs/zerolog v1.34.0
@@ -24,13 +24,10 @@ require (
 )
 
 // Uncomment and set correct version to get import of a dev version of bedrock you have
-// replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v9 v9.0.13 => ../azul-bedrock
+// replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v9 v9.0.2 => ../azul-bedrock
 
 require (
 	dario.cat/mergo v1.0.2
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.19.0
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.11.0
-	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.2
 	github.com/IBM/sarama v1.46.0
 	github.com/deathowl/go-metrics-prometheus v0.0.0-20221009205350-f2a1482ba35b
 	github.com/gin-contrib/pprof v1.5.3
@@ -44,7 +41,10 @@ require (
 )
 
 require (
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.19.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.11.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.2 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.2 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.5.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
@@ -79,6 +79,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
+	github.com/klauspost/crc32 v1.3.0 // indirect
 	github.com/knadh/koanf/maps v0.1.2 // indirect
 	github.com/knadh/koanf/providers/env v1.1.0 // indirect
 	github.com/knadh/koanf/providers/structs v1.0.0 // indirect

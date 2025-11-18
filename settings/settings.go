@@ -40,6 +40,10 @@ type DPStreamsS3 struct {
 	Region string `koanf:"region"`
 	// S3 bucket name to store to (will attempt to create if not exists)
 	Bucket string `koanf:"bucket"`
+	// Enable automatic deletion of data that is older than what the source would keep.
+	EnableAutomaticAgeOff bool `koanf:"enable_automatic_ageoff"`
+	// If automatic ageoff is disabled, should the old rules be cleaned up?
+	EnableCleanupAutoAgeOff bool `koanf:"enable_automatic_ageoff_cleanup"`
 }
 
 type DPStreamCache struct {
@@ -175,10 +179,6 @@ type DPEvents struct {
 type DPSettings struct {
 	// restapi server will listen for connections from this address
 	ListenAddr string `koanf:"listen_addr"`
-	// logging level to render to stdout
-	LogLevel string `koanf:"log_level"`
-	// Render nice coloured log output (slower performance)
-	LogPretty bool `koanf:"log_pretty"`
 	// for custom log files, the folder to place these file in
 	LogPath string    `koanf:"log_path"`
 	Streams DPStreams `koanf:"streams"`
@@ -187,8 +187,6 @@ type DPSettings struct {
 
 var defaults DPSettings = DPSettings{
 	ListenAddr: ":8111",
-	LogLevel:   "INFO",
-	LogPretty:  true,
 	LogPath:    "/tmp/logs/dispatcher/",
 	Streams: DPStreams{
 		APIAllowDelete: false,

@@ -5,11 +5,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goccy/go-json"
-
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/dedupe"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/manager"
@@ -23,7 +23,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/tracking"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
-	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/store"
+	"github.com/goccy/go-json"
 )
 
 var ctx = context.Background()
@@ -174,11 +174,11 @@ func (ev *Events) InitialiseKafka() {
 	// if we can't connect to kafka, crash
 	kc, err := topics.NewTopicControl(ev.prov)
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msg("could not initialise kafka admin client")
+		bedSet.Logger.Fatal().Err(err).Msg("could not initialise kafka admin client")
 	}
 	err = kc.EnsureAllTopics()
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msg("could not contact kafka")
+		bedSet.Logger.Fatal().Err(err).Msg("could not contact kafka")
 	}
 
 	// some pipelines need to read existing events from kafka before we can start processing requests

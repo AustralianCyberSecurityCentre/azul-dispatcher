@@ -10,7 +10,7 @@ import (
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/client"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
-	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,7 +19,7 @@ func GetConnection(url string, nameExtra string) *client.Client {
 	c := client.NewClient(url, url, author, "restapi-test-key")
 	err := c.PublishPlugin()
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msg("Could not obtain client connection to dispatcher")
+		bedSet.Logger.Fatal().Err(err).Msg("Could not obtain client connection to dispatcher")
 	}
 	return c
 }

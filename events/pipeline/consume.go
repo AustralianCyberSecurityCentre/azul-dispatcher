@@ -8,10 +8,11 @@ import (
 	"github.com/goccy/go-json"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
+	fstore "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
-	fstore "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/store"
 )
 
 type ConsumeError struct {
@@ -34,13 +35,13 @@ func HandleConsumerError(consumer *consumer.ConsumeParams, pipeline string, inFl
 	}
 	msg, err := json.Marshal(inFlight)
 	if err != nil {
-		st.Logger.Err(err).Str("event", string(msg)).Msg("could not marshal json message during pipeline error handling")
+		bedSet.Logger.Err(err).Str("event", string(msg)).Msg("could not marshal json message during pipeline error handling")
 		return
 	}
 
 	description := fmt.Sprintf(desc, args...)
 	prom.EventsConsumePipelineError.WithLabelValues(pipeline).Inc()
-	st.Logger.Err(inErr).Str("user-agent", consumer.UserAgent).Str("plugin", consumer.Name).Str("pipeline", pipeline).Int("bytes", len(msg)).Msg(description)
+	bedSet.Logger.Err(inErr).Str("user-agent", consumer.UserAgent).Str("plugin", consumer.Name).Str("pipeline", pipeline).Int("bytes", len(msg)).Msg(description)
 
 	logLineStruct := ConsumeError{
 		Time:        time.Now().Format(time.RFC3339),
@@ -55,12 +56,12 @@ func HandleConsumerError(consumer *consumer.ConsumeParams, pipeline string, inFl
 	}
 	logline, err := json.Marshal(logLineStruct)
 	if err != nil {
-		st.Logger.Err(err).Str("event", logLineStruct.Event).Msg("HandleConsumerError possibly corrupt json event")
+		bedSet.Logger.Err(err).Str("event", logLineStruct.Event).Msg("HandleConsumerError possibly corrupt json event")
 		// clear event and retry
 		logLineStruct.Event = ""
 		logline, err = json.Marshal(logLineStruct)
 		if err != nil {
-			st.Logger.Err(err).Msg("HandleConsumerError could not encode even with dropped event")
+			bedSet.Logger.Err(err).Msg("HandleConsumerError could not encode even with dropped event")
 			return
 		}
 	}
@@ -117,19 +118,19 @@ func (p *ConsumePipeline) RunConsumeActions(messages []*msginflight.MsgInFlight,
 					states[pipeName+"-"+state]++
 				} else {
 					// if replacement nil and state len 0, invalid - non-fatal error
-					st.Logger.Error().Str("modifier", pipeName).Msg("invalid to not raise state when filtering")
+					bedSet.Logger.Error().Str("modifier", pipeName).Msg("invalid to not raise state when filtering")
 				}
 				countRemoved++
 			} else if len(state) > 0 {
 				// if replacement not nil and state not nil, invalid - non-fatal error
-				st.Logger.Error().Str("modifier", pipeName).Msg("invalid to raise state when not filtering")
+				bedSet.Logger.Error().Str("modifier", pipeName).Msg("invalid to raise state when not filtering")
 			}
 		}
 		durationSeconds := float64(time.Now().UnixNano()-startTime) / 1e9
 		prom.EventsConsumePipelineDuration.WithLabelValues(pipeName).Observe(durationSeconds)
 		if countRemoved > 0 {
 			prom.EventsConsumePipelineRemoved.WithLabelValues(pipeName).Add(float64(countRemoved))
-			st.Logger.Debug().Str("modifier", pipeName).Int("count", countRemoved).Msg("consumer modifier deleted message")
+			bedSet.Logger.Debug().Str("modifier", pipeName).Int("count", countRemoved).Msg("consumer modifier deleted message")
 		}
 	}
 	// filter nil

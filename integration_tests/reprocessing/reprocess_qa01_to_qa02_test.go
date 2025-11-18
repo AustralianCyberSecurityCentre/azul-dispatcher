@@ -15,6 +15,7 @@ import (
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/client"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/reprocessor"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
@@ -50,7 +51,7 @@ func testCreateProviders(provCtx context.Context) {
 
 	tc, err = topics.NewTopicControl(prov)
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msg("could not initialise kafka admin client")
+		bedSet.Logger.Fatal().Err(err).Msg("could not initialise kafka admin client")
 	}
 }
 
@@ -127,14 +128,14 @@ func testCreateTopics() {
 
 	err := tc.CreateAllTopics()
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msgf("Failed to create topics")
+		bedSet.Logger.Fatal().Err(err).Msgf("Failed to create topics")
 	}
 	time.Sleep(5 * time.Second)
 
 	configureTopicsForQA02()
 	err = tc.CreateAllTopics()
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msgf("Failed to create topics")
+		bedSet.Logger.Fatal().Err(err).Msgf("Failed to create topics")
 	}
 	time.Sleep(5 * time.Second)
 }
@@ -185,7 +186,7 @@ func TestCopyEventBinary(t *testing.T) {
 	defer st.ResetSettings()
 	st.Events.Reprocess.UpgradeSources = true
 	st.Settings.Events.IgnoreTopicMismatch = true
-	st.Settings.LogLevel = "debug"
+	bedSet.Settings.LogLevel = "debug"
 	testdata.InitGlobalContext()
 	defer testdata.CloseGlobalContext()
 	testCreateProviders(testdata.GetGlobalTestContext())
@@ -225,10 +226,10 @@ func TestCopyEventBinary(t *testing.T) {
 			RequireExpedite: true, RequireLive: true, RequireHistoric: true,
 		})
 		require.Nil(t, err)
-		st.Logger.Printf("topics ready? %v - info %v", info.Ready, info)
+		bedSet.Logger.Printf("topics ready? %v - info %v", info.Ready, info)
 		data = append(data, newdata.Events...)
 		if info.Ready && int(info.Fetched) == 0 {
-			st.Logger.Printf("consumed all")
+			bedSet.Logger.Printf("consumed all")
 			success = true
 			// Keep going for full 45 seconds if we don't have all the data yet.
 			if len(data) == 0 {

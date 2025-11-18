@@ -10,6 +10,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 )
@@ -53,13 +54,13 @@ type ProduceActionInfo struct {
 func HandleProducerError(userAgent string, pipeline string, inFlight *msginflight.MsgInFlight, inErr error, desc string, args ...any) {
 	msg, err := json.Marshal(inFlight)
 	if err != nil {
-		st.Logger.Err(err).Str("event", string(msg)).Msg("could not marshal json message during pipeline error handling")
+		bedSet.Logger.Err(err).Str("event", string(msg)).Msg("could not marshal json message during pipeline error handling")
 		return
 	}
 
 	description := fmt.Sprintf(desc, args...)
 	prom.EventsProducePipelineError.WithLabelValues(pipeline).Inc()
-	st.Logger.Err(inErr).Str("client", userAgent).Str("pipeline", pipeline).Int("bytes", len(msg)).Msg(description)
+	bedSet.Logger.Err(inErr).Str("client", userAgent).Str("pipeline", pipeline).Int("bytes", len(msg)).Msg(description)
 
 	logLineStruct := ProducerError{
 		Time:        time.Now().Format(time.RFC3339),
@@ -72,7 +73,7 @@ func HandleProducerError(userAgent string, pipeline string, inFlight *msginfligh
 	}
 	logline, err := json.Marshal(logLineStruct)
 	if err != nil {
-		st.Logger.Err(inErr).Str("event", logLineStruct.Event).Msg("could not marshal restapi log line")
+		bedSet.Logger.Err(inErr).Str("event", logLineStruct.Event).Msg("could not marshal restapi log line")
 		return
 	}
 	st.ChLogProducerErr <- logline
@@ -106,7 +107,7 @@ func NewProducePipeline(actions []ProduceAction) *ProducePipeline {
 // RunProduceActions executes each pipeline action in order. Pipelines may have any side effects required.
 // Messages produced by action sources are processed by following action sources
 func (p *ProducePipeline) RunProduceActions(messages []*msginflight.MsgInFlight, meta *ProduceParams) ([]*msginflight.MsgInFlight, *ProduceActionInfo) {
-	st.Logger.Trace().Int("len", len(messages)).Msg("new messages before modifiers")
+	bedSet.Logger.Trace().Int("len", len(messages)).Msg("new messages before modifiers")
 	produceActionInfo := &ProduceActionInfo{
 		ProducersThatDroppedEvents: map[string]int{},
 	}
@@ -143,12 +144,12 @@ func (p *ProducePipeline) RunProduceActions(messages []*msginflight.MsgInFlight,
 		durationSeconds := float64(time.Now().UnixNano()-startTime) / 1e9
 		prom.EventsProducePipelineDuration.WithLabelValues(pipeName).Observe(durationSeconds)
 		if countRemoved > 0 {
-			st.Logger.Trace().Str("modifier", pipeName).Int("count", countRemoved).Msg("removed messages")
+			bedSet.Logger.Trace().Str("modifier", pipeName).Int("count", countRemoved).Msg("removed messages")
 			prom.EventsProducePipelineRemoved.WithLabelValues(pipeName).Add(float64(countRemoved))
 		}
 		if countAdded > 0 {
 			prom.EventsProducePipelineAdded.WithLabelValues(pipeName).Add(float64(countAdded))
-			st.Logger.Trace().Str("modifier", pipeName).Int("count", countAdded).Msg("additional messages")
+			bedSet.Logger.Trace().Str("modifier", pipeName).Int("count", countAdded).Msg("additional messages")
 		}
 	}
 	// filter nil
@@ -159,6 +160,6 @@ func (p *ProducePipeline) RunProduceActions(messages []*msginflight.MsgInFlight,
 		}
 		ret = append(ret, messages[i])
 	}
-	st.Logger.Trace().Int("len", len(ret)).Msg("new messages after modifiers")
+	bedSet.Logger.Trace().Int("len", len(ret)).Msg("new messages after modifiers")
 	return ret, produceActionInfo
 }

@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
 	sarama_internals "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider/sarama_internals"
 	stats "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
@@ -20,7 +21,7 @@ type SaramaKafkaProvider struct {
 }
 
 func NewSaramaProvider(bootstrap string, ctx context.Context) (*SaramaKafkaProvider, error) {
-	st.Logger.Info().Str("bootstrap", bootstrap).Msg("new consumer manager")
+	bedSet.Logger.Info().Str("bootstrap", bootstrap).Msg("new consumer manager")
 
 	version := sarama.V3_0_0_0.String()
 	kafkaVersion, err := sarama.ParseKafkaVersion(version)
@@ -48,7 +49,7 @@ func (kp *SaramaKafkaProvider) CreateConsumer(consumerName, group, offset, patte
 		return nil, err
 	}
 
-	st.Logger.Debug().Str("group", group).
+	bedSet.Logger.Debug().Str("group", group).
 		Str("offset", offset).
 		Str("pattern", pattern).
 		Msg("consumer subscribed to topics")
@@ -126,7 +127,7 @@ func (sp *SaramaKafkaProvider) CreateProducer() (ProducerInterface, error) {
 	// NOTE - this must be done to avoid memory leaks!
 	go func() {
 		for err := range asyncProd.Errors() {
-			st.Logger.Warn().Err(err).Msg("Error occurred in producer.")
+			bedSet.Logger.Warn().Err(err).Msg("Error occurred in producer.")
 			// Get all the asynchronous errors.
 			stats.KafkaTransmitErrorCount.WithLabelValues(err.Msg.Topic).Inc()
 		}
@@ -182,7 +183,7 @@ func (kc *SaramaKafkaTrackingConsumer) Poll() *sarama_internals.Message {
 	select {
 	case kafkaMessage, ok := <-kc.Consumer.DataChan:
 		if !ok {
-			st.Logger.Error().Msgf("Unexpected err")
+			bedSet.Logger.Error().Msgf("Unexpected err")
 		}
 		stats.KafkaReceiveMessageBytes.WithLabelValues(kc.Consumer.Name, kc.Consumer.Group, kc.Consumer.TopicRegex.String()).Add(float64(len(kafkaMessage.Value)))
 		return kafkaMessage
@@ -273,7 +274,7 @@ func (sa *SaramaKafkaAdmin) CreateTopics(topics []st.GenericKafkaTopicSpecificat
 	// sa.adminClient.CreateTopic("abc", &sarama.TopicDetail{}) // Alternative which only allows one topic at a time.
 	resp, err := sa.broker.CreateTopics(&sarama.CreateTopicsRequest{Version: 4, TopicDetails: transformedTopics, Timeout: sa.timeout})
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msg("Failed to create topics.")
+		bedSet.Logger.Fatal().Err(err).Msg("Failed to create topics.")
 	}
 
 	saramaHandleCreateTopicResult(resp)
@@ -293,7 +294,7 @@ func (sa *SaramaKafkaAdmin) UpdateTopicPartitions(topicToNewPartitionCount map[s
 	}
 	response, err := sa.broker.CreatePartitions(&request)
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msg("Failed to increase topic partitions")
+		bedSet.Logger.Fatal().Err(err).Msg("Failed to increase topic partitions")
 	}
 	saramaHandlePartitionUpdateResult(response)
 }
@@ -319,7 +320,7 @@ func (sa *SaramaKafkaAdmin) UpdateTopicsConfig(topics []st.GenericKafkaTopicSpec
 	}
 	resp, err := sa.broker.AlterConfigs(&request)
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msgf("Failed to update topic configurations %v", resp)
+		bedSet.Logger.Fatal().Err(err).Msgf("Failed to update topic configurations %v", resp)
 	}
 	saramaHandleUpdateTopicResult(resp)
 }
@@ -341,7 +342,7 @@ func (sa *SaramaKafkaAdmin) DescribeTopicConfig(topics []st.GenericKafkaTopicSpe
 	}
 	resp, err := sa.broker.DescribeConfigs(&req)
 	if err != nil {
-		st.Logger.Fatal().Err(err).Msg("Failed to describe topic configurations")
+		bedSet.Logger.Fatal().Err(err).Msg("Failed to describe topic configurations")
 	}
 	return resp.Resources
 
@@ -358,7 +359,7 @@ func (sa *SaramaKafkaAdmin) Close() {
 	/*Close all remaining connections.*/
 	err := sa.broker.Close()
 	if err != nil {
-		st.Logger.Err(err).Msg("error occurred when shutting down a sarama admin client.")
+		bedSet.Logger.Err(err).Msg("error occurred when shutting down a sarama admin client.")
 	}
 }
 
@@ -367,7 +368,7 @@ func saramaHandleCreateTopicResult(results *sarama.CreateTopicsResponse) {
 	for topicName, createResult := range results.TopicErrors {
 		// If there is an error and the error isn't just that the topic already exists
 		if createResult.Err != sarama.ErrNoError && createResult.Err != sarama.ErrTopicAlreadyExists {
-			st.Logger.Fatal().Msgf("Failed to create topic %s with error message %s", topicName, createResult.Error())
+			bedSet.Logger.Fatal().Msgf("Failed to create topic %s with error message %s", topicName, createResult.Error())
 		}
 	}
 }
@@ -377,7 +378,7 @@ func saramaHandlePartitionUpdateResult(results *sarama.CreatePartitionsResponse)
 	for topicName, createResult := range results.TopicPartitionErrors {
 		// If there is an error and the error isn't just that the topic already exists
 		if createResult.Err != sarama.ErrNoError && createResult.Err != sarama.ErrTopicAlreadyExists {
-			st.Logger.Fatal().Msgf("Failed to modify partitions for topic %s with error message %s", topicName, createResult.Error())
+			bedSet.Logger.Fatal().Msgf("Failed to modify partitions for topic %s with error message %s", topicName, createResult.Error())
 		}
 	}
 }
@@ -387,7 +388,7 @@ func saramaHandleUpdateTopicResult(results *sarama.AlterConfigsResponse) {
 	for _, rresult := range results.Resources {
 		// If there is an error and the error isn't just that the topic already exists
 		if sarama.KError(rresult.ErrorCode) != sarama.ErrNoError && sarama.KError(rresult.ErrorCode) != sarama.ErrTopicAlreadyExists {
-			st.Logger.Fatal().Msgf("Failed to update topic config %s with error message %s", rresult.Name, rresult.ErrorMsg)
+			bedSet.Logger.Fatal().Msgf("Failed to update topic config %s with error message %s", rresult.Name, rresult.ErrorMsg)
 		}
 	}
 }

@@ -4,8 +4,8 @@
 # first argument is prefix of bench to run, if empty runs all
 # running benchmarks prints stuff to console which makes the results real hard to read
 
-DP__LOG_LEVEL="WARN" \
-DP__LOG_PRETTY=TRUE \
+BED__LOG_LEVEL="WARN" \
+BED__LOG_PRETTY=TRUE \
 DP__EVENTS__KAFKA__ENDPOINT=localhost:9092 \
 DP__STREAMS__BACKEND=s3 \
 DP__STREAMS__S3__ENDPOINT=localhost:9000 \
