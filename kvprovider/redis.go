@@ -49,10 +49,14 @@ func newRedisProvider(dbnum int) (*RedisProvider, error) {
 		return nil, errors.New("no endpoint for redis")
 	}
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     st.Events.Redis.Endpoint,
-		Username: st.Events.Redis.Username,
-		Password: st.Events.Redis.Password,
-		DB:       dbnum,
+		Addr:         st.Events.Redis.Endpoint,
+		Username:     st.Events.Redis.Username,
+		Password:     st.Events.Redis.Password,
+		MaxRetries:   st.Events.Redis.MaxRetries,
+		DialTimeout:  time.Second * time.Duration(st.Events.Redis.ConnectionTimeoutSeconds),
+		ReadTimeout:  time.Second * time.Duration(st.Events.Redis.ConnectionTimeoutSeconds),
+		WriteTimeout: time.Second * time.Duration(st.Events.Redis.ConnectionTimeoutSeconds),
+		DB:           dbnum,
 	})
 	ret := RedisProvider{
 		Redis: rdb,
