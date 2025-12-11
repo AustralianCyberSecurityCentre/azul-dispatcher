@@ -247,7 +247,7 @@ var defaults DPSettings = DPSettings{
 			Endpoint:                 "",
 			Username:                 "",
 			Password:                 "",
-			MaxRetries:               5,
+			MaxRetries:               20,
 			ConnectionTimeoutSeconds: 20,
 		},
 		IgnoreTopicMismatch:          true,
