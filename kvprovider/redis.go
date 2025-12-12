@@ -49,10 +49,16 @@ func newRedisProvider(dbnum int) (*RedisProvider, error) {
 		return nil, errors.New("no endpoint for redis")
 	}
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     st.Events.Redis.Endpoint,
-		Username: st.Events.Redis.Username,
-		Password: st.Events.Redis.Password,
-		DB:       dbnum,
+		Addr:            st.Events.Redis.Endpoint,
+		Username:        st.Events.Redis.Username,
+		Password:        st.Events.Redis.Password,
+		MaxRetries:      st.Events.Redis.MaxRetries,
+		DialTimeout:     time.Second * time.Duration(st.Events.Redis.ConnectionTimeoutSeconds),
+		ReadTimeout:     time.Second * time.Duration(st.Events.Redis.ConnectionTimeoutSeconds),
+		WriteTimeout:    time.Second * time.Duration(st.Events.Redis.ConnectionTimeoutSeconds),
+		DB:              dbnum,
+		MinRetryBackoff: time.Duration(100) * time.Millisecond,
+		MaxRetryBackoff: time.Duration(2) * time.Second,
 	})
 	ret := RedisProvider{
 		Redis: rdb,
@@ -77,7 +83,16 @@ func (prov *RedisProvider) Set(ctx context.Context, key string, value any, expir
 }
 
 func (prov *RedisProvider) Del(ctx context.Context, key ...string) (int64, error) {
-	return prov.Redis.Del(ctx, key...).Result()
+	var result int64
+	var err error
+	for i := 0; i < st.Events.Redis.MaxRetries; i++ {
+		result, err = prov.Redis.Del(ctx, key...).Result()
+		if err == nil {
+			return result, err
+		}
+		time.Sleep(time.Second * time.Duration(st.Events.Redis.ConnectionTimeoutSeconds))
+	}
+	return result, err
 }
 
 func (prov *RedisProvider) Scan(ctx context.Context, cursor uint64, match string, count int64) ([]string, uint64, error) {

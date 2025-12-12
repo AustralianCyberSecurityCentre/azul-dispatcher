@@ -143,9 +143,11 @@ type DPEventReprocess struct {
 }
 
 type DPRedis struct {
-	Endpoint string `koanf:"endpoint"`
-	Username string `koanf:"username"`
-	Password string `koanf:"password"`
+	Endpoint                 string `koanf:"endpoint"`
+	Username                 string `koanf:"username"`
+	Password                 string `koanf:"password"`
+	MaxRetries               int    `koanf:"max_retries"`
+	ConnectionTimeoutSeconds int    `Koanf:"connection_timeout_seconds"`
 }
 
 type DPEvents struct {
@@ -242,9 +244,11 @@ var defaults DPSettings = DPSettings{
 		},
 		EnableExtendedKafkaMetrics: false,
 		Redis: DPRedis{
-			Endpoint: "",
-			Username: "",
-			Password: "",
+			Endpoint:                 "",
+			Username:                 "",
+			Password:                 "",
+			MaxRetries:               10,
+			ConnectionTimeoutSeconds: 20,
 		},
 		IgnoreTopicMismatch:          true,
 		GlobalReplicaCount:           1,
