@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/client"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/client"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/restapi"

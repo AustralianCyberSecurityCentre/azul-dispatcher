@@ -54,7 +54,7 @@ COPY . /src
 # you must include a version such as thing@latest
 ARG BEDROCK_REPLACE=""
 RUN if [ "$BEDROCK_REPLACE" != "" ] ; then \
-    cd /src && go mod edit -replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v9=$BEDROCK_REPLACE && go mod tidy ;fi
+    cd /src && go mod edit -replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v10=$BEDROCK_REPLACE && go mod tidy ;fi
 
 # rakyll/magicmime requires static compilation ldflags (ie. -ldflags '-extldflags "-static"')
 RUN --mount=type=ssh,id=id --mount=type=secret,id=testSecret export $(cat /run/secrets/testSecret) && \

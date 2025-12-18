@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/settings"
 	prov "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	sarama_internals "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider/sarama_internals"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"

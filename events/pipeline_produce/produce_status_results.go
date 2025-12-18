@@ -1,8 +1,8 @@
 package pipeline_produce
 
 import (
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/events"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/msginflight"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/tracking"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"

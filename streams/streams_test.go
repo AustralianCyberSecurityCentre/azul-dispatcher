@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/store"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/store"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/identify"
 	"github.com/gin-gonic/gin"
