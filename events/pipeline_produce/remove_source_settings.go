@@ -3,8 +3,8 @@ package pipeline_produce
 import (
 	"strconv"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/msginflight"
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/msginflight"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/settings"
 
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 )

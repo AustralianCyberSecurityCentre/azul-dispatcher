@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/testutils"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/testutils"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	bedsettings "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
+	bedsettings "github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/settings"
 	"github.com/stretchr/testify/require"
 )
 

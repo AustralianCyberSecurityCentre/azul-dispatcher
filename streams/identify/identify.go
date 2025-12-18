@@ -6,7 +6,7 @@ package identify
 import (
 	"log"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/events"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/events"
 )
 
 const EmbeddedContentMaxBytes = 100

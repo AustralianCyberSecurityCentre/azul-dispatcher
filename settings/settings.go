@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-viper/mapstructure/v2"
 
-	bedsettings "github.com/AustralianCyberSecurityCentre/azul-bedrock/v9/gosrc/settings"
+	bedsettings "github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/settings"
 )
 
 var Settings *DPSettings
