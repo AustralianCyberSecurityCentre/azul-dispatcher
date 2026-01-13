@@ -1,5 +1,5 @@
 {
-  "model_version": 5,
+  "model_version": 6,
   "kafka_key": "ab3808f6d20b3c01513f89186becdcde",
   "timestamp": "2021-03-29T14:24:08.54928032+11:00",
   "author": {
@@ -47,7 +47,7 @@
     "sha1": "c72ec27e19a853c517f1b603f943e27a6e540192",
     "md5": "2c1c509459046dbe17ea389c4ce7c590",
     "size": 1469,
-    "file_format_legacy": "JAR"
+    "file_format": "java/jar"
   },
   "action": "mapped",
   "flags": {}

@@ -1,5 +1,5 @@
 {
-  "model_version": 5,
+  "model_version": 6,
   "timestamp": "2020-07-20T10:31:40.738362Z",
   "author": {
     "name": "anony-moose",
@@ -28,7 +28,7 @@
     "sha1": "a1e25a8c7498b39863166ee5bcd4616a8098892d",
     "md5": "97c2e3618064b1cca21f5a8eb782a1e3",
     "size": 121,
-    "file_format_legacy": "Text",
+    "file_format": "text/plain",
     "datastreams": [
       {
         "label": "content",
@@ -39,7 +39,7 @@
         "md5": "97c2e3618064b1cca21f5a8eb782a1e3",
         "mime": "text/plain",
         "magic": "ASCII text",
-        "file_format_legacy": "Text"
+        "file_format": "text/plain"
       }
     ]
   },
