@@ -1,5 +1,5 @@
 {
-  "model_version": 5,
+  "model_version": 6,
   "timestamp": "2021-03-29T14:44:53.946229644+11:00",
   "author": {
     "name": "vtdownload",
@@ -23,7 +23,7 @@
         "action": "sourced",
         "sha256": "fa008aeed5f7252cf3c60a9c57126c037ef54b8527ca141a4d2f326cec7396fb-1564891220",
         "timestamp": "2021-03-29T14:23:50+11:00",
-        "file_format_legacy": "PDF",
+        "file_format": "document/pdf",
         "size": 285625,
         "filename": "sea-170410-c-next-day-disclosure-return-share-buyback.pdf"
       },
@@ -36,7 +36,7 @@
         "action": "download_requested",
         "sha256": "fa008aeed5f7252cf3c60a9c57126c037ef54b8527ca141a4d2f326cec7396fb",
         "timestamp": "2021-03-29T14:26:28.629447756+11:00",
-        "file_format_legacy": "PDF",
+        "file_format": "document/pdf",
         "size": 285625
       },
       {
@@ -48,7 +48,7 @@
         "action": "downloaded",
         "sha256": "fa008aeed5f7252cf3c60a9c57126c037ef54b8527ca141a4d2f326cec7396fb",
         "timestamp": "2021-03-29T14:44:53.946229644+11:00",
-        "file_format_legacy": "PDF",
+        "file_format": "document/pdf",
         "size": 285625
       }
     ],
@@ -60,11 +60,11 @@
     "sha1": "b92f105db5556226d3339fd61795a5fbc07c837e",
     "md5": "5092d351ba34a58da0e9c7db1f75ee9a",
     "size": 285625,
-    "file_format_legacy": "PDF",
+    "file_format": "document/pdf",
     "features": [
       {
-        "name": "file_format_legacy",
-        "value": "PDF",
+        "name": "file_format",
+        "value": "document/pdf",
         "type": "string"
       },
       {
@@ -89,7 +89,7 @@
         "md5": "5092d351ba34a58da0e9c7db1f75ee9a",
         "mime": "application/pdf",
         "magic": "PDF document, version 1.6",
-        "file_format_legacy": "PDF"
+        "file_format": "document/pdf"
       }
     ]
   },

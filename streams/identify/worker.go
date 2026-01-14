@@ -30,7 +30,6 @@ func (worker *Worker) doWork(w Work) error {
 	md.Mime = id.Mime
 	md.Magic = id.Magic
 	md.FileFormat = id.FileFormat
-	md.FileFormatLegacy = id.FileFormatLegacy
 	md.FileExtension = id.FileExtension
 	if err != nil {
 		return err

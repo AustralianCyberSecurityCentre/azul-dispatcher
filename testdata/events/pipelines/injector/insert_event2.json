@@ -1,5 +1,5 @@
 {
-  "model_version": 5,
+  "model_version": 6,
   "kafka_key": "2",
   "timestamp": "2021-03-29T23:26:19Z",
   "author": {
@@ -17,7 +17,7 @@
       "size": 888888,
       "mime": "application/x-dosexec",
       "magic": "PE32 executable for MS Windows (GUI) Intel 80386 32-bit",
-      "file_format_legacy": "Win32 EXE",
+      "file_format": "executable/pe32",
       "features": [
         {
           "name": "filename",
@@ -35,7 +35,7 @@
           "md5": "123434343",
           "mime": "application/x-dosexec",
           "magic": "PE32 executable for MS Windows (GUI) Intel 80386 32-bit",
-          "file_format_legacy": "Win32 EXE"
+          "file_format": "executable/pe32"
         }
       ]
     },

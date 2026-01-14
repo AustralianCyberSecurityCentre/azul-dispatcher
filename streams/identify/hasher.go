@@ -152,7 +152,6 @@ func (h *Hasher) Cook() (*events.BinaryEntityDatastream, error) {
 	if md.Size == 0 {
 		md.Mime = "inode/x-empty"
 		md.Magic = "empty"
-		md.FileFormatLegacy = "Data"
 		md.FileFormat = "unknown"
 		md.FileExtension = ""
 	}

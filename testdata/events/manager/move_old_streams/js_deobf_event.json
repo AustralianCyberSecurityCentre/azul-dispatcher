@@ -1,5 +1,5 @@
 {
-  "model_version": 5,
+  "model_version": 6,
   "kafka_key": "2939d95ad5e43fa1dc2c061705f718dd",
   "timestamp": "2025-01-18T10:09:24.283939Z",
   "author": {
@@ -78,7 +78,6 @@
     "size": 25,
     "mime": "text/plain",
     "magic": "ASCII text, with CRLF line terminators",
-    "file_format_legacy": "Text",
     "file_format": "text/plain",
     "file_extension": "txt",
     "datastreams": [
@@ -92,7 +91,6 @@
         "md5": "29a8e3e42ee259f011d129b24b7a4017",
         "mime": "text/plain",
         "magic": "ASCII text, with CRLF line terminators",
-        "file_format_legacy": "Text",
         "file_format": "text/plain",
         "file_extension": "txt"
       },
@@ -106,7 +104,6 @@
         "md5": "3fee7faaa83586f4850149313c634617",
         "mime": "text/plain",
         "magic": "ASCII text",
-        "file_format_legacy": "Text",
         "file_format": "text/plain",
         "file_extension": "txt"
       }

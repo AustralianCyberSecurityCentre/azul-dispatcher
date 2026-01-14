@@ -1,5 +1,5 @@
 {
-  "model_version": 5,
+  "model_version": 6,
   "timestamp": "2021-03-03T13:33:33Z",
   "author": {
     "name": "MimeDecoder",
@@ -33,7 +33,7 @@
             "action": "sourced",
             "sha256": "ccccbe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82-1612629803",
             "timestamp": "2021-02-07T21:38:56+11:00",
-            "file_format_legacy": "Email",
+            "file_format": "document/email",
             "size": 343964,
             "filename": "foobar.mht"
           },
@@ -46,7 +46,7 @@
             "action": "download_requested",
             "sha256": "ccccbe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
             "timestamp": "2021-02-07T21:40:31.872294+11:00",
-            "file_format_legacy": "Email",
+            "file_format": "document/email",
             "size": 343964
           },
           {
@@ -58,7 +58,7 @@
             "action": "downloaded",
             "sha256": "ccccce8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
             "timestamp": "2021-02-07T21:40:33.075142+11:00",
-            "file_format_legacy": "Email",
+            "file_format": "document/email",
             "size": 343964
           },
           {
@@ -74,7 +74,7 @@
               "encoding": "base64"
             },
             "timestamp": "2021-02-14T12:12:21.426232Z",
-            "file_format_legacy": "GIF",
+            "file_format": "image/gif",
             "size": 35054,
             "filename": "ukr_kh1.gif"
           }
@@ -87,7 +87,7 @@
         "sha1": "b2",
         "md5": "a1",
         "size": 343964,
-        "file_format_legacy": "Email",
+        "file_format": "document/email",
         "features": [
           {
             "name": "filename",
@@ -95,8 +95,8 @@
             "type": "filepath"
           },
           {
-            "name": "file_format_legacy",
-            "value": "Email",
+            "name": "file_format",
+            "value": "document/email",
             "type": "string"
           }
         ],
@@ -110,7 +110,7 @@
             "md5": "a1",
             "mime": "mail/rfc2822",
             "magic": "Something Something",
-            "file_format_legacy": "Email"
+            "file_format": "document/email"
           }
         ]
       },

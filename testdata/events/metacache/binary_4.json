@@ -1,5 +1,5 @@
 {
-  "model_version": 5,
+  "model_version": 6,
   "timestamp": "2099-02-14T12:12:21.426232Z",
   "author": {
     "name": "rupert",
@@ -21,7 +21,7 @@
         "action": "uploaded",
         "sha256": "ccccbe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
         "timestamp": "2021-02-07T21:40:33.075142+11:00",
-        "file_format_legacy": "Email",
+        "file_format": "document/email",
         "size": 343964
       }
     ],
@@ -33,7 +33,7 @@
     "sha1": "b2",
     "md5": "a1",
     "size": 343964,
-    "file_format_legacy": "Email",
+    "file_format": "document/email",
     "datastreams": [
       {
         "label": "content",
@@ -44,7 +44,7 @@
         "md5": "a1",
         "mime": "mail/rfc2822",
         "magic": "Something Something",
-        "file_format_legacy": "Email"
+        "file_format": "document/email"
       }
     ]
   },

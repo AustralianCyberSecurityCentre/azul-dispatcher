@@ -7,7 +7,7 @@
   },
   "action": "augmented",
   "flags": {},
-  "model_version": 5,
+  "model_version": 6,
   "timestamp": "2025-01-18T10:09:24.283939Z",
   "source": {
     "name": "samples",
@@ -28,7 +28,7 @@
 
         "filename": "9bfebfe523694f8b7d2eb570864e361554f1a9e7fa2cb418208929413854e8ae.zip",
         "size": 4929057,
-        "file_format_legacy": "ZIP",
+        "file_format": "archive/zip",
         "timestamp": "2025-01-18T10:09:18Z"
       },
       {
@@ -42,7 +42,7 @@
 
         "filename": "140CPU65260_Copro_Exec_V5.0.bin",
         "size": 4970693,
-        "file_format_legacy": "ZIP",
+        "file_format": "archive/zip",
         "relationship": { "action": "extracted" },
         "timestamp": "2025-01-18T10:09:20.064132Z"
       },
@@ -57,7 +57,7 @@
 
         "filename": "FLASH0/fw/hw.ini",
         "size": 25,
-        "file_format_legacy": "Text",
+        "file_format": "text/plain",
         "relationship": { "action": "unzipped" },
         "timestamp": "2025-01-18T10:09:23.750742Z"
       },
@@ -83,7 +83,7 @@
     "md5": "29a8e3e42ee259f011d129b24b7a4017",
     "mime": "text/plain",
     "magic": "ASCII text, with CRLF line terminators",
-    "file_format_legacy": "Text",
+    "file_format": "text/plain",
     "file_format": "text/plain",
     "file_extension": "txt",
     "datastreams": [
@@ -97,7 +97,7 @@
         "md5": "29a8e3e42ee259f011d129b24b7a4017",
         "mime": "text/plain",
         "magic": "ASCII text, with CRLF line terminators",
-        "file_format_legacy": "Text",
+        "file_format": "text/plain",
         "file_format": "text/plain",
         "file_extension": "txt"
       },
@@ -111,7 +111,7 @@
         "md5": "3fee7faaa83586f4850149313c634617",
         "mime": "text/plain",
         "magic": "ASCII text",
-        "file_format_legacy": "Text",
+        "file_format": "text/plain",
         "file_format": "text/plain",
         "file_extension": "txt"
       }
