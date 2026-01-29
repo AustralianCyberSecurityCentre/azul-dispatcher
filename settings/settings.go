@@ -93,6 +93,8 @@ type DPKafka struct {
 	ConnectRetries int64 `koanf:"connect_retries"`
 	// prefixes to use when accesing topics in kafka
 	TopicPrefix string `koanf:"topic_prefix"`
+	// ConsumerGroup Retention time
+	ConsumerGroupRetentionDays int64 `koanf:"consumer_group_retention_days"`
 	// poll wait for standard consumer
 	PollWaitEvents string `koanf:"poll_wait_events"`
 	// poll wait for reprocessor
@@ -232,6 +234,7 @@ var defaults DPSettings = DPSettings{
 			ConnectRetries:              10,
 			Endpoint:                    "",
 			TopicPrefix:                 "test01",
+			ConsumerGroupRetentionDays:  30,
 			PollWaitEvents:              "1ms",
 			PollWaitPipeline:            "1s",
 			PollWaitReprocessor:         "1s",

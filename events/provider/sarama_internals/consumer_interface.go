@@ -40,6 +40,7 @@ func startSaramaConsumer(ctx context.Context, kafkaVersion sarama.KafkaVersion, 
 	config.ClientID = "saramaConsumer"
 	config.Consumer.Fetch.Default = int32(st.Events.Kafka.ConsumerFetchBatchBytes)
 	config.Consumer.Fetch.Max = int32(st.Events.Kafka.MessageMaxBytes)
+	config.Consumer.Offsets.Retention = time.Hour * 24 * time.Duration(st.Events.Kafka.ConsumerGroupRetentionDays)
 
 	// Set the appropriate offset.
 	offset = strings.ToLower(offset)
