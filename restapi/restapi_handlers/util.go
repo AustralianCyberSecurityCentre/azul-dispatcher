@@ -16,7 +16,7 @@ import (
 // Error replies to the request with the specified error message and HTTP code.
 // It does not otherwise end the request; the caller should ensure no further
 // writes are done to the gin context.
-func JSONErrorWithEnum(c *gin.Context, code int, title string, baseErr error, errorEnum models.ErrorStringEnum, errorParams map[string]string){
+func JSONErrorWithEnum(c *gin.Context, code int, title string, baseErr error, errorEnum models.ErrorStringEnum, errorParams map[string]string) {
 	if baseErr == nil {
 		baseErr = errors.New("no error provided")
 	}

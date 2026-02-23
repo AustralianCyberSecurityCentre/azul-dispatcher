@@ -412,15 +412,14 @@ func (ev *Events) PostEvent(c *gin.Context) {
 			}
 			totalFailures = response.TotalFailures
 		}
-		
-		usedFilters = strings.Join(eventsFilteredPerPipelineFilter, ",")
+
+		usedFilters := strings.Join(eventsFilteredPerPipelineFilter, ",")
 		baseError := fmt.Errorf("failed to produce any of the provided events as they were all filtered out by the following filters [%s], with %d response failures which are: %v", usedFilters, totalFailures, respFailures)
 		errorEnum := models.ErrorStringEnumAllEventsFiltered
 		errorParams := map[string]string{
-			{"filters": usedFilters },
-			{"total_failures": strconv.Itoa(totalFailures)},
-			{"response_failures", string.format("%v", respFailures)},
-		}
+			"filters":           usedFilters,
+			"total_failures":    strconv.Itoa(totalFailures),
+			"response_failures": fmt.Sprintf("%v", respFailures),
 		}
 		if _, ok := produceActionInfo.ProducersThatDroppedEvents[pipeline_dual.PipelineAgeOffName]; ok {
 			baseError = errors.New("all submitted events aged off immediately, is the submission time older than ageoff?")
