@@ -22,6 +22,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/client/getevents"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/client/postevents"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/events"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/msginflight"
 	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
@@ -411,15 +412,27 @@ func (ev *Events) PostEvent(c *gin.Context) {
 			}
 			totalFailures = response.TotalFailures
 		}
-		baseError := fmt.Errorf("failed to produce any of the provided events as they were all filtered out by the following filters [%s], with %d response failures which are: %v", strings.Join(eventsFilteredPerPipelineFilter, ","), totalFailures, respFailures)
+
+		usedFilters := strings.Join(eventsFilteredPerPipelineFilter, ",")
+		baseError := fmt.Errorf("failed to produce any of the provided events as they were all filtered out by the following filters [%s], with %d response failures which are: %v", usedFilters, totalFailures, respFailures)
+		errorEnum := models.ErrorStringEnumAllEventsFiltered
+		errorParams := map[string]string{
+			"filters":           usedFilters,
+			"total_failures":    strconv.Itoa(totalFailures),
+			"response_failures": fmt.Sprintf("%v", respFailures),
+		}
 		if _, ok := produceActionInfo.ProducersThatDroppedEvents[pipeline_dual.PipelineAgeOffName]; ok {
 			baseError = errors.New("all submitted events aged off immediately, is the submission time older than ageoff?")
+			errorParams = map[string]string{}
+			errorEnum = models.ErrorStringEnumAllEventsAgedOffImmediately
 		}
-		restapi_handlers.JSONError(
+		restapi_handlers.JSONErrorWithEnum(
 			c,
 			425, // Too Early - Indicates that the server is unwilling to risk processing a request that might be replayed.
 			title,
 			baseError,
+			errorEnum,
+			errorParams,
 		)
 		return
 	}

@@ -16,7 +16,7 @@ import (
 // Error replies to the request with the specified error message and HTTP code.
 // It does not otherwise end the request; the caller should ensure no further
 // writes are done to the gin context.
-func JSONError(c *gin.Context, code int, title string, baseErr error) {
+func JSONErrorWithEnum(c *gin.Context, code int, title string, baseErr error, errorEnum models.ErrorStringEnum, errorParams map[string]string) {
 	if baseErr == nil {
 		baseErr = errors.New("no error provided")
 	}
@@ -29,7 +29,7 @@ func JSONError(c *gin.Context, code int, title string, baseErr error) {
 	}
 
 	// generate standard error response
-	response := models.Error{Status: fmt.Sprint(code), Title: title, Detail: baseErr.Error()}
+	response := models.Error{Status: fmt.Sprint(code), Title: title, Detail: baseErr.Error(), ErrorEnum: errorEnum}
 	out, err := json.Marshal(response)
 	if err != nil {
 		bedSet.Logger.Err(err).Int("code", code).Str("title", title).Str("detail", baseErr.Error()).
@@ -45,4 +45,11 @@ func JSONError(c *gin.Context, code int, title string, baseErr error) {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+// Error replies to the request with the specified error message and HTTP code.
+// It does not otherwise end the request; the caller should ensure no further
+// writes are done to the gin context.
+func JSONError(c *gin.Context, code int, title string, baseErr error) {
+	JSONErrorWithEnum(c, code, title, baseErr, models.ErrorStringEnumUnset, map[string]string{})
 }
