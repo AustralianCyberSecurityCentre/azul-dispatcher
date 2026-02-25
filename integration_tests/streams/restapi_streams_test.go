@@ -125,5 +125,5 @@ func TestUploadDownloadBinary(t *testing.T) {
 	// download that will fail
 	bin2, err = conn.DownloadBinary("source", events.DataLabelContent, "6e80a5bf1f6e165f65965076290a61638dfde0f2972474d73b954a10962aaaaa")
 	require.NotNil(t, err)
-	require.Equal(t, err.Error(), `http response error 404 - {"status":"404","title":"not found","detail":"not found"}`)
+	require.Equal(t, err.Error(), `http response error 404 - {"status":"404","title":"not found","detail":"not found","error_enum":"ErrorStringEnumUnset"}`)
 }
