@@ -359,7 +359,7 @@ func TestCopyEventSystemAvro(t *testing.T) {
 	// check published event against the original
 	event.KafkaKey = data[0].KafkaKey
 	event.TrackAuthor = ".myauthor.1.2"
-	event.TrackLink = "sha2561.sha2562..myauthor.1.2"
+	event.TrackLink = "sha2561.sha2562.0001_01_01T00_00_00Z_00..myauthor.1.2"
 	testMarshalEqual(t, event, &data[0])
 
 	// check events were migrated
