@@ -192,7 +192,7 @@ func (p *Producer) publish(confirm bool, evs ...*msginflight.MsgInFlight) error 
 	bedSet.Logger.Debug().Int("count", successfulEventCount).Int("failed", len(errorList)).Strs("topics", usedTopics).Strs("authors", usedAuthors).Msg("events produced")
 	if len(errorList) > 0 {
 		var errorSb strings.Builder
-		errorSb.WriteString(fmt.Sprintf("successfully submitted %d/%d events with the failed events providing the following errors: ", successfulEventCount, len(evs)))
+		fmt.Fprintf(&errorSb, "successfully submitted %d/%d events with the failed events providing the following errors: ", successfulEventCount, len(evs))
 		for erIdx := range errorList {
 			errorSb.WriteString(errorList[erIdx].Error())
 			errorSb.WriteString(";\n")
