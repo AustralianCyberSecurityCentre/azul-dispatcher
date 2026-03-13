@@ -10,7 +10,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
 	github.com/eko/gocache/lib/v4 v4.2.3
-	github.com/eko/gocache/store/bigcache/v4 v4.2.4 // Version 4.2.x has a bug that breaks cache hits. refer to https://github.com/eko/gocache/issues/225
+	github.com/eko/gocache/store/bigcache/v4 v4.1.2 // Version 4.2.x has a bug that breaks cache hits. refer to https://github.com/eko/gocache/issues/225
 	github.com/glaslos/tlsh v0.4.0
 	github.com/golang/mock v1.6.0
 	github.com/minio/minio-go/v7 v7.0.99 // indirect
