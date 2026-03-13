@@ -8,9 +8,9 @@ import (
 
 	"github.com/goccy/go-json"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/client"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/events"
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/client"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/events"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/settings"
 	"github.com/stretchr/testify/require"
 )
 

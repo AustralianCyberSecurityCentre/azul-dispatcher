@@ -3,7 +3,7 @@ package prom
 import (
 	"net/http"
 
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/settings"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/settings"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

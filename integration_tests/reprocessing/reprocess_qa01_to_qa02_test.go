@@ -13,9 +13,9 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pauser"
 	sarama_internals "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider/sarama_internals"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/client"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/events"
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/client"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/events"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/reprocessor"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
