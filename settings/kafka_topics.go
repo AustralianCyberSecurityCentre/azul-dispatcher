@@ -5,9 +5,9 @@ import (
 	"slices"
 
 	"dario.cat/mergo"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/events"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/models"
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/events"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/models"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/settings"
 	"gopkg.in/yaml.v3"
 )
 

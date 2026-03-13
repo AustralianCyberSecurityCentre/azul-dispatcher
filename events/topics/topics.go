@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v10/gosrc/events"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/events"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 )
 
