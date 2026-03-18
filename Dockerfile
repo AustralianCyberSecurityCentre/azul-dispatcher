@@ -24,7 +24,7 @@ RUN git config --global url."git@github.com:AustralianCyberSecurityCentre/".inst
 
 # Install yara, needed for identify.
 ARG YARA_GIT=https://github.com/VirusTotal/yara
-ARG YARA_TAG=v4.3.2
+ARG YARA_TAG=v4.5.5
 RUN mkdir -p /go/yara && \
     git clone --branch $YARA_TAG $YARA_GIT /go/yara && \
     cd /go/yara && \
@@ -38,7 +38,7 @@ RUN mkdir -p /go/yara && \
 # contains a number of bugs for office and archive file types
 # Install updated libmagic
 ARG FILE_GIT=https://github.com/file/file
-ARG FILE_TAG=FILE5_46
+ARG FILE_TAG=FILE5_47
 RUN git clone --branch $FILE_TAG $FILE_GIT /go/file && \
     cd /go/file/ && \
     autoreconf -f -i && \
