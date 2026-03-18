@@ -24,7 +24,7 @@ RUN git config --global url."git@github.com:AustralianCyberSecurityCentre/".inst
 
 # Install yara, needed for identify.
 ARG YARA_GIT=https://github.com/VirusTotal/yara
-ARG YARA_TAG=v4.5.5
+ARG YARA_TAG=v4.3.2
 RUN mkdir -p /go/yara && \
     git clone --branch $YARA_TAG $YARA_GIT /go/yara && \
     cd /go/yara && \
