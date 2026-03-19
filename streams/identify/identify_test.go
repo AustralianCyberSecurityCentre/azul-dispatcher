@@ -88,7 +88,7 @@ func TestBasicWorker(t *testing.T) {
 	testVerifyFiletype(t, "25ed3194250f3fc23145ca1d51e58b50004968d31223a89a7736b09377f7be47", "Benign text file containing the words 'This is some test text data.' for 795 lines.",
 		"text/plain", "text/plain", "ASCII text")
 	testVerifyFiletype(t, "992fa72f92e9b57ede1ba5e7e947f71019f60bde3a33d64d767c9e388f4a766b", "Benign password protected ARJ file.",
-		"archive/arj", "application/x-arj", "ARJ archive data, v11, password-protected (v1), slash-switched, created 17 dec 1980+43")
+		"archive/arj", "application/x-arj", "ARJ archive data, v11, password-protected (v1), slash-switched, created Dec 17 2023 21:06:62, modified Dec 17 2023 21:06:62, original name: u_benign_passworded_arj.arj, os: Unix")
 	testVerifyFiletype(t, "ffc7df1b29a93d861ad70ed3d5bccdfa4312140185520cc6a58cce5b9e11215a", "Benign auto open Macro document.",
 		"document/office/word", "application/msword", "Composite Document File V2 Document, Little Endian, Os: Windows, Version 5.1, Code page: 1252, Title: Test Document, Author: User01, Template: Normal.dot, Last Saved By: User1234, Revision Number: 7, Name of Creating Application: Microsoft Office Word, Total Editing Time: 32:00, Create Time/Date: Thu Mar 26 21:59:00 2015, Last Saved Time/Date: Thu Mar 26 22:45:00 2015, Number of Pages: 1, Number of Words: 16, Number of Characters: 95, Security: 0")
 	testVerifyFiletype(t, "6e979eaf8a5b76ff14ec2784a5eac0ff509730bfebb351af37b8c9b6a6cc20e2", "Benign Open XML document.",
@@ -147,7 +147,7 @@ func TestBasic(t *testing.T) {
 		"md5": "07c80b56fa111ef5c6e84e3dbd08c4de",
 		"tlsh":"T1e7f0abe318af8ea8e5a4e0329c52120c4fc6f1c1c496771c9a59cae58203adcbc6a017",
 		"mime": "application/x-arj",
-		"magic": "ARJ archive data, v11, password-protected (v1), slash-switched, created 17 dec 1980+43",
+		"magic": "ARJ archive data, v11, password-protected (v1), slash-switched, created Dec 17 2023 21:06:62, modified Dec 17 2023 21:06:62, original name: u_benign_passworded_arj.arj, os: Unix",
 		"file_format": "archive/arj",
 		"file_extension": "arj"
 	  }`)
