@@ -5,7 +5,7 @@ go 1.26.0
 toolchain go1.26.1
 
 require (
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v11 v11.0.11
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v11 v11.0.16
 	github.com/allegro/bigcache/v3 v3.1.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
@@ -80,9 +80,9 @@ require (
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/klauspost/crc32 v1.3.0 // indirect
 	github.com/knadh/koanf/maps v0.1.2 // indirect
-	github.com/knadh/koanf/providers/env v1.1.0 // indirect
+	github.com/knadh/koanf/providers/env/v2 v2.0.0 // indirect
 	github.com/knadh/koanf/providers/structs v1.0.0 // indirect
-	github.com/knadh/koanf/v2 v2.3.3 // indirect
+	github.com/knadh/koanf/v2 v2.3.4 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
