@@ -1,7 +1,7 @@
 version: "2"
 services:
   kafka:
-    image: docker.io/apache/kafka:4.1.0
+    image: docker.io/apache/kafka:4.2.0@sha256:9516fb7634bad307d17c33b589fde9023003b0cb761374f500002b980a3149b9
     ports:
       - "9092:9092"
     environment:
