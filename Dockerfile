@@ -10,7 +10,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV GOOS=linux GOARCH=amd64 GO111MODULE=on GOPATH=/tmp/go
 # flags necessary for gossdeep
 ENV CGO_LDFLAGS_ALLOW="^-[Il].*$"
-ENV GOPRIVATE=github.com/AustralianCyberSecurityCentre/*
 
 ARG XDG_CONFIG_HOME
 
@@ -47,7 +46,6 @@ RUN git clone --branch $FILE_TAG $FILE_GIT /go/file && \
     make install && \
     ldconfig -v && file --version
 
-# note - this also copies in .ssh folder, so be careful
 COPY . /src
 
 # if BEDROCK_REPLACE, bedrock is in a different place
@@ -57,10 +55,9 @@ RUN if [ "$BEDROCK_REPLACE" != "" ] ; then \
     cd /src && go mod edit -replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v11=$BEDROCK_REPLACE && go mod tidy ;fi
 
 # rakyll/magicmime requires static compilation ldflags (ie. -ldflags '-extldflags "-static"')
-RUN --mount=type=ssh,id=id --mount=type=secret,id=testSecret export $(cat /run/secrets/testSecret) && \
+RUN --mount=type=secret,id=testSecret export $(cat /run/secrets/testSecret) && \
     cd /src && go test ./...
-RUN --mount=type=ssh,id=id cd /src && \
-    go build -v -a -tags static_all -o /go/bin/dispatcher main.go
+RUN cd /src && go build -v -a -tags static_all -o /go/bin/dispatcher main.go
 
 ##
 # Main Image
