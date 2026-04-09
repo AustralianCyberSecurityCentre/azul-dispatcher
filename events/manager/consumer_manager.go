@@ -14,6 +14,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
+	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 )
 
 var lastDeleteRequestTime time.Time
@@ -150,6 +151,45 @@ func (m *ConsumerManager) getEventReader(p *consumer.ConsumeParams, lastPauseTim
 	bedSet.Logger.Trace().Str("name", p.Name).Str("version", p.Version).Str("entityType", p.Model.Str()).
 		Msg("created new event reader")
 	return c, nil
+}
+
+func (m *ConsumerManager) StartPeriodicCheckAndDeleteOldConsumers(ctx context.Context) {
+	go func(ctx context.Context) {
+		ticker := time.NewTicker(time.Duration(st.Events.OldConsumerGroupDropperCheckFrequencyMinutes) * time.Minute)
+		for {
+			select {
+			case <-ctx.Done():
+				bedSet.Logger.Info().Msg("Shutting down periodic check and delete of old consumer groups")
+				return
+			case _ = <-ticker.C:
+				m.CheckAndDeleteOldConsumers()
+			}
+		}
+	}(ctx)
+}
+
+// Check for old consumers that haven't consumed any events in 24 hours and drop those consumer groups.
+func (m *ConsumerManager) CheckAndDeleteOldConsumers() {
+	oldReaders := map[string]*eventReader{}
+	// Find all the old consumers
+	for name, eventReader := range m.eventReaders {
+		if time.Since(eventReader.last) > time.Duration(st.Events.OldConsumerGroupDroppedMinutes)*time.Minute {
+			oldReaders[name] = eventReader
+		}
+	}
+	// Don't lock consumers for deletion if there is nothing to do.
+	if (len(oldReaders) == 0){
+		return
+	}
+
+	m.consumersDeleteLock.Lock()
+	defer m.consumersDeleteLock.Unlock()
+	// Delete all the old consumers
+	for name, eventReader := range oldReaders {
+		eventReader.Stop()
+		delete(m.eventReaders, name)
+		bedSet.Logger.Warn().Str("consumer", name).Msg("Closing un-used consumer that hasn't been used in a long time.")
+	}
 }
 
 func (m *ConsumerManager) DeleteAllPluginEventReaders() {

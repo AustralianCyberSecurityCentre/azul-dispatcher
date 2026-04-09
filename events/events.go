@@ -137,6 +137,7 @@ func NewEvents(prov provider.ProviderInterface, kvstore *kvprovider.KVMulti, s s
 	}, s)
 
 	manager := manager.NewConsumerManager(prov, passiveConsumerPipe, activeConsumerPipe, kvstore)
+	manager.StartPeriodicCheckAndDeleteOldConsumers(ctx)
 
 	producePipe := pipeline.NewProducePipeline([]pipeline.ProduceAction{
 		// Filters out messages that are too old for the source
