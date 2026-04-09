@@ -104,7 +104,7 @@ func TestDeleteAllPluginEventReaders(t *testing.T) {
 
 }
 
-func TestDeleteOldConsumers(t *testing.T){
+func TestDeleteOldConsumers(t *testing.T) {
 	cm := setupConsumerManager(t)
 	// No consumers works without breaking anything
 	cm.CheckAndDeleteOldConsumers()
@@ -130,11 +130,11 @@ func TestDeleteOldConsumers(t *testing.T){
 	require.Equal(t, len(cm.eventReaders), 3)
 	cm.CheckAndDeleteOldConsumers()
 	require.Equal(t, len(cm.eventReaders), 1)
-	
+
 	keys := make([]string, 0, len(cm.eventReaders))
 	for k := range cm.eventReaders {
 		keys = append(keys, k)
 	}
 	require.Equal(t, keys, []string{"b"})
-	
+
 }

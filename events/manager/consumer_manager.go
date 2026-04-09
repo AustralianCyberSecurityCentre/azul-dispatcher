@@ -178,7 +178,7 @@ func (m *ConsumerManager) CheckAndDeleteOldConsumers() {
 		}
 	}
 	// Don't lock consumers for deletion if there is nothing to do.
-	if (len(oldReaders) == 0){
+	if len(oldReaders) == 0 {
 		return
 	}
 
