@@ -161,7 +161,7 @@ func (m *ConsumerManager) StartPeriodicCheckAndDeleteOldConsumers(ctx context.Co
 			case <-ctx.Done():
 				bedSet.Logger.Info().Msg("Shutting down periodic check and delete of old consumer groups")
 				return
-			case _ = <-ticker.C:
+			case <-ticker.C:
 				m.CheckAndDeleteOldConsumers()
 			}
 		}
