@@ -80,7 +80,7 @@ func TestSimpleConsumer(t *testing.T) {
 	stillMore := true
 	for stillMore {
 		select {
-		case _ = <-ticker.C:
+		case <-ticker.C:
 			stillMore = false
 			break
 		case _, ok := <-c.DataChan:
@@ -99,7 +99,7 @@ func TestSimpleConsumer(t *testing.T) {
 	var msg *sarama_internals.Message
 	var ok bool
 	select {
-	case _ = <-ticker.C:
+	case <-ticker.C:
 		t.Error("Took longer than 1seconds to consume kafka message.")
 		DeleteTopic(ctx, pattern)
 		return
@@ -145,7 +145,7 @@ func TestSimpleTracker(t *testing.T) {
 	stillMore := true
 	for stillMore {
 		select {
-		case _ = <-ticker.C:
+		case <-ticker.C:
 			stillMore = false
 			break
 		case _, ok := <-c.DataChan:
@@ -164,7 +164,7 @@ func TestSimpleTracker(t *testing.T) {
 	var msg *sarama_internals.Message
 	var ok bool
 	select {
-	case _ = <-ticker.C:
+	case <-ticker.C:
 		t.Error("Took longer than 1seconds to consume kafka message.")
 		DeleteTopic(ctx, pattern)
 		return

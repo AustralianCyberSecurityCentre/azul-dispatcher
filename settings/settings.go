@@ -178,6 +178,10 @@ type DPEvents struct {
 	LostTasksAfterMinutes    int64   `koanf:"lost_tasks_after_minutes"`
 	LostTasksIntervalMinutes int64   `koanf:"lost_tasks_check_minutes"`
 	LostTasksBulkCreateLimit int     `koanf:"lost_tasks_bulk_create_limit"`
+	// How long a consumer group can not have recieved a request before the consumer group is closed.
+	OldConsumerGroupDroppedMinutes int `koanf:"old_consumer_group_dropped_minutes"`
+	// How often to check for consumer groups that haven't recieved any requests.
+	OldConsumerGroupDropperCheckFrequencyMinutes int `koanf:"old_consumer_group_dropper_check_frequency_minutes"`
 }
 
 type DPSettings struct {
@@ -253,17 +257,19 @@ var defaults DPSettings = DPSettings{
 			MaxRetries:               10,
 			ConnectionTimeoutSeconds: 20,
 		},
-		IgnoreTopicMismatch:          true,
-		GlobalReplicaCount:           1,
-		GlobalPartitionCount:         1,
-		Sources:                      "",
-		Topics:                       "",
-		MaxConsumedEventsPerConsumer: 10000,
-		APIEventFetchLimit:           1000,
-		APIDefaultEventWait:          5,
-		LostTasksAfterMinutes:        30,
-		LostTasksIntervalMinutes:     30,
-		LostTasksBulkCreateLimit:     10,
+		IgnoreTopicMismatch:                          true,
+		GlobalReplicaCount:                           1,
+		GlobalPartitionCount:                         1,
+		Sources:                                      "",
+		Topics:                                       "",
+		MaxConsumedEventsPerConsumer:                 10000,
+		APIEventFetchLimit:                           1000,
+		APIDefaultEventWait:                          5,
+		LostTasksAfterMinutes:                        30,
+		LostTasksIntervalMinutes:                     30,
+		LostTasksBulkCreateLimit:                     10,
+		OldConsumerGroupDroppedMinutes:               60 * 24, // One day by default,
+		OldConsumerGroupDropperCheckFrequencyMinutes: 60,
 	},
 }
 
