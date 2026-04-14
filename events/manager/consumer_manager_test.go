@@ -103,3 +103,38 @@ func TestDeleteAllPluginEventReaders(t *testing.T) {
 	require.True(t, true)
 
 }
+
+func TestDeleteOldConsumers(t *testing.T) {
+	cm := setupConsumerManager(t)
+	// No consumers works without breaking anything
+	cm.CheckAndDeleteOldConsumers()
+
+	// Add new consumer "a"
+	reader, err := newEventReader(cm.prov, "a", &consumer.ConsumeParams{IsTask: true}, time.Now())
+	require.Nil(t, err)
+	reader.last = time.Now().Add(-30 * time.Hour)
+	cm.eventReaders["a"] = reader
+
+	// Add new consumer "b"
+	reader, err = newEventReader(cm.prov, "b", &consumer.ConsumeParams{IsTask: true}, time.Now())
+	require.Nil(t, err)
+	cm.eventReaders["b"] = reader
+
+	// Add new consumer "c"
+	reader, err = newEventReader(cm.prov, "c", &consumer.ConsumeParams{IsTask: true}, time.Now())
+	require.Nil(t, err)
+	reader.last = time.Now().Add(-25 * time.Hour)
+	cm.eventReaders["c"] = reader
+
+	// Delete a as it is too old but not b
+	require.Equal(t, len(cm.eventReaders), 3)
+	cm.CheckAndDeleteOldConsumers()
+	require.Equal(t, len(cm.eventReaders), 1)
+
+	keys := make([]string, 0, len(cm.eventReaders))
+	for k := range cm.eventReaders {
+		keys = append(keys, k)
+	}
+	require.Equal(t, keys, []string{"b"})
+
+}
