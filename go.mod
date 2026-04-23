@@ -5,7 +5,7 @@ go 1.26.0
 toolchain go1.26.1
 
 require (
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v11 v11.0.38
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v11 v11.0.68
 	github.com/allegro/bigcache/v3 v3.1.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
@@ -24,7 +24,7 @@ require (
 )
 
 // Uncomment and set correct version to get import of a dev version of bedrock you have
-// replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v11 v10.0.39 => ../azul-bedrock
+// replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v11 v11.0.68 => ../azul-bedrock
 
 require (
 	dario.cat/mergo v1.0.2
