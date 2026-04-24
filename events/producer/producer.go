@@ -156,7 +156,11 @@ func (p *Producer) publish(confirm bool, evs ...*msginflight.MsgInFlight) error 
 			continue
 		}
 		key := *evs[i].Base.KafkaKey
-
+		if(evs[i].Event.GetBase() != nil){
+			if(evs[i].Event.GetBase().Author.Name == "Yara-cyberlab" || evs[i].Event.GetBase().Author.Name == "Yara-crowdstrike"){
+				bedSet.Logger.Warn().Msgf("Producing Yara event: %v", evs[i])
+			}
+		}
 		err = p.producer.Produce(&sarama.ProducerMessage{
 			Topic: topic,
 			Value: sarama.ByteEncoder(cooked),
@@ -166,6 +170,7 @@ func (p *Producer) publish(confirm bool, evs ...*msginflight.MsgInFlight) error 
 		if err != nil {
 			// Message couldn't be processed so don't include it in stats.
 			errorList = append(errorList, err)
+			bedSet.Logger.Error().Msgf("FAILED TO PRODUCE An EVENT!!! %v", evs[i].Event)
 			continue
 		}
 
