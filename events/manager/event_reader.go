@@ -188,29 +188,31 @@ func (c *eventReader) pull(pipe *pipeline.ConsumePipeline, p *consumer.ConsumePa
 		promTimeAfterParse := time.Now().UnixNano()
 		promTotalTimeParse += promTimeAfterParse - promTimeAfterSubscriptions
 		
-		consumedYaraEvents := 0
+		consumedYaraEventsBefore := 0
+		var modelConsumed events.Model
 		for _, msg := range msgInFlights{
 			if(msg !=nil && msg.Base != nil && msg.Base.Author != nil){
 				if(msg.Base.Author.Name == "Yara-cyberlab" || msg.Base.Author.Name == "Yara-crowdstrike"){
-					consumedYaraEvents += 1
+					consumedYaraEventsBefore += 1
+					modelConsumed = msg.Base.Model
 				}
 			}
 		}
-		if consumedYaraEvents > 0{
-			bedSet.Logger.Warn().Msgf("Consuming %d yara events before consumer actions", consumedYaraEvents)
+		if consumedYaraEventsBefore > 0{
+			bedSet.Logger.Warn().Msgf("Consuming %d yara events before consumer actions - %v", consumedYaraEventsBefore, modelConsumed)
 		}
 		states, newEvents := pipe.RunConsumeActions(msgInFlights, p)
 
-		consumedYaraEvents = 0
+		consumedYaraEventsAfter := 0
 		for _, msg := range msgInFlights{
 			if(msg !=nil && msg.Base != nil && msg.Base.Author != nil){
 				if(msg.Base.Author.Name == "Yara-cyberlab" || msg.Base.Author.Name == "Yara-crowdstrike"){
-					consumedYaraEvents += 1
+					consumedYaraEventsAfter += 1
 				}
 			}
 		}
-		if consumedYaraEvents > 0{
-			bedSet.Logger.Warn().Msgf("Consuming %d yara events after consumer actions", consumedYaraEvents)
+		if consumedYaraEventsAfter != consumedYaraEventsBefore{
+			bedSet.Logger.Warn().Msgf("Consuming %d yara events after consumer actions - %v", consumedYaraEventsAfter, modelConsumed)
 		}
 		
 
