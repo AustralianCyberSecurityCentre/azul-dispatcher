@@ -158,7 +158,7 @@ func (p *Producer) publish(confirm bool, evs ...*msginflight.MsgInFlight) error 
 		key := *evs[i].Base.KafkaKey
 		if(evs[i].Event.GetBase() != nil){
 			if(evs[i].Event.GetBase().Author.Name == "Yara-cyberlab" || evs[i].Event.GetBase().Author.Name == "Yara-crowdstrike"){
-				bedSet.Logger.Warn().Msgf("Producing Yara event: %v", evs[i])
+				bedSet.Logger.Warn().Msgf("Producing Yara event: %v - %v", evs[i], evs[i].Event.GetBase().Model)
 			}
 		}
 		err = p.producer.Produce(&sarama.ProducerMessage{
