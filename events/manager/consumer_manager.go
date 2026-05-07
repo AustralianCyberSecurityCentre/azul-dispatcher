@@ -55,6 +55,11 @@ func (m *ConsumerManager) FetchEventsPassive(p *consumer.ConsumeParams) ([]*msgi
 	return m.fetchEvents(m.passiveMessagePipeline, p)
 }
 
+// Fetch events associated with a topic.
+func (m *ConsumerManager) FetchTopicEvents(p *consumer.ConsumeParams) ([]*msginflight.MsgInFlight, *models.EventResponseInfo, error) {
+	return m.fetchEvents(m.passiveMessagePipeline, p)
+}
+
 // Only set pause time if it's a plugin and it's not paused because otherwise setting the time could cause
 // new non-plugin consumers to skip topics ahead.
 func (m *ConsumerManager) getLastPauseTimeAndDeletePluginConsumers(p *consumer.ConsumeParams) (bool, time.Time, error) {

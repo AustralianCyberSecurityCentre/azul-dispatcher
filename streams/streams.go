@@ -5,6 +5,7 @@ It acts as the HTTP storage abstraction for the system.
 package streams
 
 import (
+	"fmt"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
@@ -32,6 +33,7 @@ func NewStreams() *Streams {
 	}
 	switch st.Streams.Backend {
 	case "s3":
+		fmt.Println("s3iam")
 		// external s3 api
 		if len(st.Streams.S3.AccessKey) == 0 && len(st.Streams.S3.SecretKey) == 0 {
 			// Use credentials from service accounts by default
@@ -51,6 +53,7 @@ func NewStreams() *Streams {
 				panic(err.Error())
 			}
 		} else {
+			fmt.Println("s3")
 			// Use a hardcoded access/secret key combo
 			fstore, err = store.NewS3Store(
 				st.Streams.S3.Endpoint,
@@ -71,11 +74,13 @@ func NewStreams() *Streams {
 			}
 		}
 	case "azure":
+		fmt.Println("azure")
 		fstore, err = store.NewAzureStore(st.Streams.Azure.Endpoint, st.Streams.Azure.Container, st.Streams.Azure.StorageAccount, st.Streams.Azure.AccessKey, prom.StreamsOperationDuration)
 		if err != nil {
 			panic(err.Error())
 		}
 	case "local":
+		fmt.Println("local")
 		// local file store
 		fstore, err = store.NewLocalStore(st.Streams.Local.Path)
 		if err != nil {

@@ -46,6 +46,14 @@ func (ev *Events) GetEventsPassive(c *gin.Context) {
 	ev.getEvents(ev.consumerManager.FetchEventsPassive, c)
 }
 
+
+func (ev *Events) GetTopicEvents(c *gin.Context) {
+	// When using this API you cannot do so as a task.
+	qv := c.Request.URL.Query()
+	c.Request.URL.RawQuery = qv.Encode()
+	ev.getEvents(ev.consumerManager.FetchEventsPassive, c)
+}
+
 // GetEventsActiveImplicit pulls messages from Kafka for the requested plugin name + version.
 func (ev *Events) GetEventsActiveImplicit(c *gin.Context) {
 	// When using this API you must do so as a task

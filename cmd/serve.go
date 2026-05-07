@@ -28,6 +28,8 @@ var serveCmd = &cobra.Command{
 		ctx, cancelFunc := context.WithCancel(context.Background())
 		defer cancelFunc()
 
+		fmt.Println("hello, serve.go")
+
 		// Disable or enable extendedKafkaMetrics
 		if st.Events.EnableExtendedKafkaMetrics {
 			prometheusClient := prometheusmetrics.NewPrometheusProvider(
@@ -36,18 +38,24 @@ var serveCmd = &cobra.Command{
 		} else {
 			metrics.UseNilMetrics = true
 		}
-
+        
+		fmt.Printf("ENDPOINT: %s", st.Events.Kafka.Endpoint)
 		qprov, err := provider.NewSaramaProvider(st.Events.Kafka.Endpoint, ctx)
 		if err != nil {
 			panic(err)
 		}
+		fmt.Println("hello, qprov")
+
 		kvprov, err := kvprovider.NewRedisProviders()
 		if err != nil {
 			fmt.Println("Error creating redis client:", err)
 			os.Exit(1)
 		}
+		fmt.Println("hello, kvprov")
 
 		dp := restapi.NewDispatcher(qprov, kvprov, ctx)
+		fmt.Println("hello, dp")
+
 		// FUTURE use viper in cobra to allow overriding of ListenAddr/other settings
 		log.Fatal(http.ListenAndServe(st.Settings.ListenAddr, dp.Router))
 	},
