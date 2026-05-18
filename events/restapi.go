@@ -10,12 +10,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 
@@ -45,7 +47,6 @@ func (ev *Events) GetEventsPassive(c *gin.Context) {
 	c.Request.URL.RawQuery = qv.Encode()
 	ev.getEvents(ev.consumerManager.FetchEventsPassive, c)
 }
-
 
 func (ev *Events) GetTopicEvents(c *gin.Context) {
 	// When using this API you cannot do so as a task.
@@ -507,5 +508,139 @@ func (ev *Events) PostEventSimulate(c *gin.Context) {
 	_, err = c.Writer.Write(out)
 	if err != nil {
 		bedSet.Logger.Err(err).Msg("failed Write")
+	}
+}
+
+// GetDebugTopicEvents is a debugging endpoint that returns events from a topic starting at a specified offset.
+// This endpoint does not consume events (no consumer group tracking) and is intended for debugging and inspection.
+func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
+	c.Writer.Header().Set("Content-Type", "application/json")
+
+	qv := c.Request.URL.Query()
+
+	// Parse required parameters
+	topic := qv.Get("topic")
+	offset := qv.Get("offset")
+
+	if topic == "" {
+		restapi_handlers.JSONError(c, 400, "missing required parameter", fmt.Errorf("topic is required"))
+		return
+	}
+
+	if offset == "" {
+		restapi_handlers.JSONError(c, 400, "missing required parameter", fmt.Errorf("offset is required (earliest, latest, or numeric value)"))
+		return
+	}
+
+	// Validate offset format
+	if offset != "earliest" && offset != "latest" {
+		if _, err := strconv.ParseInt(offset, 10, 64); err != nil {
+			restapi_handlers.JSONError(c, 400, "invalid offset format", fmt.Errorf("offset must be 'earliest', 'latest', or a numeric value"))
+			return
+		}
+	}
+
+	// Parse optional parameters
+	partition := int32(0)
+	partitionStr := qv.Get("partition")
+	if partitionStr != "" {
+		p, err := strconv.ParseInt(partitionStr, 10, 32)
+		if err != nil {
+			restapi_handlers.JSONError(c, 400, "invalid partition format", fmt.Errorf("partition must be a numeric value"))
+			return
+		}
+		partition = int32(p)
+	}
+
+	limit := 100
+	limitStr := qv.Get("limit")
+	if limitStr != "" {
+		l, err := strconv.Atoi(limitStr)
+		if err != nil {
+			restapi_handlers.JSONError(c, 400, "invalid limit format", fmt.Errorf("limit must be a numeric value"))
+			return
+		}
+		if l > 1000 {
+			limit = 1000 // Cap at 1000 to prevent excessive data transfer
+		} else if l > 0 {
+			limit = l
+		}
+	}
+	fmt.Println("debug get topic events with topic:", topic, "offset:", offset, "partition:", partition, "limit:", limit)
+
+	brokers := []string{"localhost:9092"}
+
+	config := sarama.NewConfig()
+	config.Consumer.Return.Errors = true
+	config.Version, _ = sarama.ParseKafkaVersion("4.2.0")
+
+	// Create consumer
+	consumer, err := sarama.NewConsumer(brokers, config)
+	if err != nil {
+		log.Fatalf("Error creating consumer: %v", err)
+	}
+	defer consumer.Close()
+
+	// Consume from partition 0, starting at the oldest offset
+	partitionConsumer, err := consumer.ConsumePartition(topic, 0, sarama.OffsetOldest)
+	if err != nil {
+		log.Fatalf("Error starting partition consumer: %v", err)
+	}
+	defer partitionConsumer.Close()
+
+	latestOffset := partitionConsumer.HighWaterMarkOffset() - 1
+
+
+	// Define event item structure for response
+	type EventItem struct {
+		Offset int64  `json:"offset"`
+		Value  string `json:"value"`
+	}
+
+	response := map[string]interface{}{
+		"topic":     topic,
+		"partition": partition,
+		"offset":    offset,
+		"events":    []EventItem{},
+		"info": map[string]interface{}{
+			"count": 0,
+		},
+	}
+
+	eventsList := make([]EventItem, 0, limit)
+
+	for msg := range partitionConsumer.Messages() {
+
+
+		var value string
+		if msg.Value != nil {
+			value = string(msg.Value)
+		}
+
+		eventsList = append(eventsList, EventItem{
+			Offset: msg.Offset,
+			Value:  value,
+		})
+		//count++
+
+		if msg.Offset >= latestOffset {
+			fmt.Println("Reached latest offset, ending poll")
+			break
+		}
+	}
+
+	response["events"] = eventsList
+	response["info"].(map[string]interface{})["count"] = len(eventsList)
+
+	// Marshal and write response
+	out, err := json.Marshal(response)
+	if err != nil {
+		restapi_handlers.JSONError(c, 500, "failed to marshal response", err)
+		return
+	}
+
+	_, err = c.Writer.Write(out)
+	if err != nil {
+		bedSet.Logger.Err(err).Msg("failed to write response")
 	}
 }

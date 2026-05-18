@@ -72,6 +72,10 @@ func NewDispatcher(prov provider.ProviderInterface, kvprov *kvprovider.KVMulti, 
 	lpath = "/api/v2/event/simulate"
 	router.POST(lpath, MetricHandler(lpath, event.PostEventSimulate))
 
+	// debugging endpoint for fetching events from a specific topic/offset
+	lpath = "/api/v2/debug/events"
+	router.GET(lpath, MetricHandler(lpath, event.GetDebugTopicEvents))
+
 	// post new binary stream
 	lpath = "/api/v3/stream/:source/:label"
 	router.POST(lpath, MetricHandler(lpath, stream.PostStream))
@@ -95,11 +99,6 @@ func NewDispatcher(prov provider.ProviderInterface, kvprov *kvprovider.KVMulti, 
 	// using alternate router, need to redirect
 	// memory monitoring, required for us to debug memory usage in dispatcher
 	pprof.Register(router, "debug/pprof")
-
-	router.GET("/test", func(c *gin.Context) {
-		msg := []byte("hello client")
-		c.Writer.Write(msg)
-	})
 
 	// prometheus metrics endpoint
 	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
