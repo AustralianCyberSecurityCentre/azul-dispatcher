@@ -33,6 +33,8 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline_dual"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/producer"
+	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
+	saramago "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider/sarama_internals"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/restapi/restapi_handlers"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
@@ -513,28 +515,48 @@ func (ev *Events) PostEventSimulate(c *gin.Context) {
 
 // GetDebugTopicEvents is a debugging endpoint that returns events from a topic starting at a specified offset.
 // This endpoint does not consume events (no consumer group tracking) and is intended for debugging and inspection.
+/*
+TODO:
+- get number of partitions based on topic if no partition specified (use admin client?)
+- format events properly, including all info returned by kafka
+- implement limit DONE
+- fix offset specification to support earliest, latest and numeric offsets DONE
+- figure out how to retrieve broker addresses from config rather than hardcoding DONE
+   SaramaProvider is the provider interface stored by events. So we just need to add a method to the interface
+   and implement the method for SaramaProvider to retrieve whatever config is needed for this endpoint.
+   MemoryProvider is the only other provider, so it will need a method too.
+*/
 func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "application/json")
+
+	var err error = nil
+
+	// In practice this will only ever be a SaramaProvider, not a MemoryProvider.
+	prov := ev.prov.(*provider.SaramaKafkaProvider)
 
 	qv := c.Request.URL.Query()
 
 	// Parse required parameters
 	topic := qv.Get("topic")
-	offset := qv.Get("offset")
-
 	if topic == "" {
 		restapi_handlers.JSONError(c, 400, "missing required parameter", fmt.Errorf("topic is required"))
 		return
 	}
 
-	if offset == "" {
+	offset := sarama.OffsetOldest
+	offsetStr := qv.Get("offset")
+	if offsetStr == "" {
 		restapi_handlers.JSONError(c, 400, "missing required parameter", fmt.Errorf("offset is required (earliest, latest, or numeric value)"))
 		return
 	}
 
-	// Validate offset format
-	if offset != "earliest" && offset != "latest" {
-		if _, err := strconv.ParseInt(offset, 10, 64); err != nil {
+	// sarama.OffsetOldest is default (see above)
+	if offsetStr == "newest" {
+		offset = sarama.OffsetNewest
+	}
+
+	if offsetStr != "oldest" && offsetStr != "newest" {
+		if offset, err = strconv.ParseInt(offsetStr, 10, 64); err != nil {
 			restapi_handlers.JSONError(c, 400, "invalid offset format", fmt.Errorf("offset must be 'earliest', 'latest', or a numeric value"))
 			return
 		}
@@ -552,7 +574,7 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 		partition = int32(p)
 	}
 
-	limit := 100
+	limit := int(^uint(0) >> 1) // int_max determined at runtime based on system width
 	limitStr := qv.Get("limit")
 	if limitStr != "" {
 		l, err := strconv.Atoi(limitStr)
@@ -560,36 +582,54 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 			restapi_handlers.JSONError(c, 400, "invalid limit format", fmt.Errorf("limit must be a numeric value"))
 			return
 		}
-		if l > 1000 {
-			limit = 1000 // Cap at 1000 to prevent excessive data transfer
-		} else if l > 0 {
-			limit = l
-		}
+		limit = l
 	}
 	fmt.Println("debug get topic events with topic:", topic, "offset:", offset, "partition:", partition, "limit:", limit)
 
-	brokers := []string{"localhost:9092"}
+	broker := []string{prov.GetBootstrap()}
+	var topicMap map[string]sarama.TopicDetail
+	topicMap, err = saramago.GetTopicDetailsMap(broker)
+
+
+    // either one topic was specified and we get info for that topic or we get info for all topics if none specified
+	if topic != "" {
+		if topicDetails, ok := topicMap[topic]; !ok {
+
+			restapi_handlers.JSONError(c, 404, "topic not found", fmt.Errorf("topic must correspond to a topic known by the broker"))
+
+		}
+	}
+
+	// What happens if we get no partition WITH a numeric offset?
+	//  -> probably should just error on this
+	// other permutations of offset, topic, and partition?
+	// offset by itself: get all topics on all partitions from oldest/newest (error on numeric)
+	// offset with topic: ok if not numeric, just get all events for that topic on all partitions
+	// offset with topic and partition: get exactly this, numeric is ok
+	// topic by itself: default to oldest offset and all partitions
+	// topic and partition: default to oldest offset on single partition for specific topic
+	// just partition: get events for all topics that have events on that partition(?) from oldest
 
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
-	config.Version, _ = sarama.ParseKafkaVersion("4.2.0")
+	config.Version = prov.GetKafkaVersion()
 
 	// Create consumer
-	consumer, err := sarama.NewConsumer(brokers, config)
+	fmt.Println(prov.GetBootstrap())
+	consumer, err := sarama.NewConsumer(broker, config)
 	if err != nil {
 		log.Fatalf("Error creating consumer: %v", err)
 	}
 	defer consumer.Close()
 
 	// Consume from partition 0, starting at the oldest offset
-	partitionConsumer, err := consumer.ConsumePartition(topic, 0, sarama.OffsetOldest)
+	partitionConsumer, err := consumer.ConsumePartition(topic, partition, offset)
 	if err != nil {
 		log.Fatalf("Error starting partition consumer: %v", err)
 	}
 	defer partitionConsumer.Close()
 
 	latestOffset := partitionConsumer.HighWaterMarkOffset() - 1
-
 
 	// Define event item structure for response
 	type EventItem struct {
@@ -608,24 +648,28 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 	}
 
 	eventsList := make([]EventItem, 0, limit)
+	fmt.Println("about to loop on messages")
+	fmt.Println(latestOffset)
+	if latestOffset > 0 { // Loop hangs if we don't first check this
+		count := 0
+		for msg := range partitionConsumer.Messages() {
 
-	for msg := range partitionConsumer.Messages() {
+			fmt.Println("loop")
+			var value string
+			if msg.Value != nil {
+				value = string(msg.Value)
+			}
 
+			eventsList = append(eventsList, EventItem{
+				Offset: msg.Offset,
+				Value:  value,
+			})
+			count++
 
-		var value string
-		if msg.Value != nil {
-			value = string(msg.Value)
-		}
-
-		eventsList = append(eventsList, EventItem{
-			Offset: msg.Offset,
-			Value:  value,
-		})
-		//count++
-
-		if msg.Offset >= latestOffset {
-			fmt.Println("Reached latest offset, ending poll")
-			break
+			if msg.Offset >= latestOffset || count == limit {
+				fmt.Println("Reached latest offset, ending poll")
+				break
+			}
 		}
 	}
 
