@@ -50,13 +50,6 @@ func (ev *Events) GetEventsPassive(c *gin.Context) {
 	ev.getEvents(ev.consumerManager.FetchEventsPassive, c)
 }
 
-func (ev *Events) GetTopicEvents(c *gin.Context) {
-	// When using this API you cannot do so as a task.
-	qv := c.Request.URL.Query()
-	c.Request.URL.RawQuery = qv.Encode()
-	ev.getEvents(ev.consumerManager.FetchEventsPassive, c)
-}
-
 // GetEventsActiveImplicit pulls messages from Kafka for the requested plugin name + version.
 func (ev *Events) GetEventsActiveImplicit(c *gin.Context) {
 	// When using this API you must do so as a task
@@ -538,24 +531,14 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 
 	// Parse required parameters
 	topic := qv.Get("topic")
-	if topic == "" {
-		restapi_handlers.JSONError(c, 400, "missing required parameter", fmt.Errorf("topic is required"))
-		return
-	}
 
 	offset := sarama.OffsetOldest
 	offsetStr := qv.Get("offset")
-	if offsetStr == "" {
-		restapi_handlers.JSONError(c, 400, "missing required parameter", fmt.Errorf("offset is required (earliest, latest, or numeric value)"))
-		return
-	}
-
-	// sarama.OffsetOldest is default (see above)
 	if offsetStr == "newest" {
 		offset = sarama.OffsetNewest
 	}
 
-	if offsetStr != "oldest" && offsetStr != "newest" {
+	if offsetStr != "" && offsetStr != "oldest" && offsetStr != "newest" {
 		if offset, err = strconv.ParseInt(offsetStr, 10, 64); err != nil {
 			restapi_handlers.JSONError(c, 400, "invalid offset format", fmt.Errorf("offset must be 'earliest', 'latest', or a numeric value"))
 			return
@@ -574,11 +557,6 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 		partition = int32(p)
 	}
 
-	// there is no good reason to look at a specific partition on all topics
-	if partitionStr != "" && topic == "" {
-		restapi_handlers.JSONError(c, 400, "partition may only specified on an explicit topic", fmt.Errorf("partition must be accompanied by topic"))
-	}
-
 	limit := int(^uint(0) >> 1) // int_max determined at runtime based on system width
 	limitStr := qv.Get("limit")
 	if limitStr != "" {
@@ -588,7 +566,6 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 			return
 		}
 	}
-	fmt.Println("debug get topic events with topic:", topic, "offset:", offset, "partition:", partition, "limit:", limit)
 
 	broker := []string{prov.GetBootstrap()}
 	var topicMap map[string]sarama.TopicDetail
@@ -641,21 +618,25 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 	}
 
 	count := 0
-	if partitionStr == "" { // no partition specififed, so iterate through all partitions
-		for _, t := range topicList {
-			newTopic := topicItem{NumPartitions: topicMap[t].NumPartitions, ReplicationFactor: topicMap[t].ReplicationFactor}
-			for part := int32(0); part < topicMap[t].NumPartitions; part++ {
-				eventsList := getEventsForPartition(t, part, offset, &consumer, &count, limit)
+	for _, t := range topicList {
+		newTopic := topicItem{NumPartitions: topicMap[t].NumPartitions, ReplicationFactor: topicMap[t].ReplicationFactor}
+		if partitionStr == "" { // no partition specififed, so iterate through all partitions
+			for partition = int32(0); partition < topicMap[t].NumPartitions; partition++ {
+				eventsList, err := getEventsForPartition(t, partition, offset, &consumer, &count, limit)
+				if err != nil {
+					restapi_handlers.JSONError(c, 404, "partition not found", fmt.Errorf("request contained parition that does not exist for queried topic"))
+					return
+				}
 				newTopic.Events = append(newTopic.Events, eventsList...)
 			}
-			response["topics"].(map[string]topicItem)[t] = newTopic
+		} else {
+			newTopic.Events, err = getEventsForPartition(t, partition, offset, &consumer, &count, limit)
+			if err != nil {
+				restapi_handlers.JSONError(c, 404, "partition not found", fmt.Errorf("request contained parition that does not exist for queried topic"))
+				return
+			}
 		}
-	} else {
-		for _, t := range topicList { // only look partition specified in request
-			newTopic := topicItem{NumPartitions: topicMap[t].NumPartitions, ReplicationFactor: topicMap[t].ReplicationFactor}
-			newTopic.Events = getEventsForPartition(t, partition, offset, &consumer, &count, limit)
-			response["topics"].(map[string]topicItem)[t] = newTopic
-		}
+		response["topics"].(map[string]topicItem)[t] = newTopic
 	}
 	response["info"].(map[string]int)["count"] = count
 
@@ -687,13 +668,13 @@ type topicItem struct {
 	ReplicationFactor int16       `json:"replicationFactor"`
 }
 
-func getEventsForPartition(topic string, partition int32, offset int64, consumer *sarama.Consumer, count *int, limit int) []eventItem {
+func getEventsForPartition(topic string, partition int32, offset int64, consumer *sarama.Consumer, count *int, limit int) ([]eventItem, error) {
 	eventsList := make([]eventItem, 0)
 
 	// TODO: handle error for partitions out of range instead of crashing here
 	partitionConsumer, err := (*consumer).ConsumePartition(topic, partition, offset)
 	if err != nil {
-		log.Fatalf("Error starting partition consumer: %v", err)
+		return eventsList, err
 	}
 
 	latestOffset := partitionConsumer.HighWaterMarkOffset() - 1
@@ -720,12 +701,11 @@ func getEventsForPartition(topic string, partition int32, offset int64, consumer
 			*count++
 
 			if msg.Offset >= latestOffset || *count == limit {
-				fmt.Println("Reached latest offset, ending poll")
 				break
 			}
 		}
 	}
 	partitionConsumer.Close()
 
-	return eventsList
+	return eventsList, err
 }

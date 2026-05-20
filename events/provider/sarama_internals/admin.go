@@ -44,7 +44,7 @@ func GetTopicDetailsMap(brokers []string) (map[string]sarama.TopicDetail, error)
 		bedSet.Logger.Warn().Err(err).Msg("Couldn't get kafka topic details due to an error.")
 		return map[string]sarama.TopicDetail{}, err
 	}
-    return topicMap, err
+	return topicMap, err
 }
 
 // Get topics or return an empty list if there are no topics that match the query or kafka can't currently be contacted.

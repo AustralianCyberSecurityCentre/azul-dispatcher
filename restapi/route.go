@@ -2,7 +2,6 @@ package restapi
 
 import (
 	"context"
-	"fmt"
 
 	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events"
@@ -49,11 +48,8 @@ func ErrorLoggerMiddleware(c *gin.Context) {
 
 func NewDispatcher(prov provider.ProviderInterface, kvprov *kvprovider.KVMulti, ctx context.Context) *Dispatcher {
 	var stream = streams.NewStreams()
-    fmt.Println("hello, streams")
 	var event = events.NewEvents(prov, kvprov, stream.Store, ctx)
-    fmt.Println("hello, event")
 	event.InitialiseKafka()
-    fmt.Println("hello, kafka")
 	gin.SetMode(gin.ReleaseMode) // don't print route list on start
 
 	bedSet.Logger.Info().Msg("Start Dispatcher RestAPI")
@@ -71,10 +67,6 @@ func NewDispatcher(prov provider.ProviderInterface, kvprov *kvprovider.KVMulti, 
 	// simulate all plugin filters on a single event, to see if they would silently skip
 	lpath = "/api/v2/event/simulate"
 	router.POST(lpath, MetricHandler(lpath, event.PostEventSimulate))
-
-	// debugging endpoint for fetching events from a specific topic/offset
-	lpath = "/api/v2/debug/events"
-	router.GET(lpath, MetricHandler(lpath, event.GetDebugTopicEvents))
 
 	// post new binary stream
 	lpath = "/api/v3/stream/:source/:label"
