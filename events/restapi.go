@@ -506,19 +506,8 @@ func (ev *Events) PostEventSimulate(c *gin.Context) {
 	}
 }
 
-// GetDebugTopicEvents is a debugging endpoint that returns events from a topic starting at a specified offset.
+// GetDebugTopicEvents is a debugging endpoint that returns events from a topic starting at a specified offset, with the option to explicitly specify a partition.
 // This endpoint does not consume events (no consumer group tracking) and is intended for debugging and inspection.
-/*
-TODO:
-- get number of partitions based on topic if no partition specified (use admin client?)
-- format events properly, including all info returned by kafka
-- implement limit DONE
-- fix offset specification to support earliest, latest and numeric offsets DONE
-- figure out how to retrieve broker addresses from config rather than hardcoding DONE
-   SaramaProvider is the provider interface stored by events. So we just need to add a method to the interface
-   and implement the method for SaramaProvider to retrieve whatever config is needed for this endpoint.
-   MemoryProvider is the only other provider, so it will need a method too.
-*/
 func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "application/json")
 
@@ -530,6 +519,7 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 	qv := c.Request.URL.Query()
 
 	// Parse required parameters
+	// FUTURE: Should topic, offset, and partition be CSVs rather than single value strings?
 	topic := qv.Get("topic")
 
 	offset := sarama.OffsetOldest
@@ -571,21 +561,13 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 	var topicMap map[string]sarama.TopicDetail
 	topicMap, err = saramago.GetTopicDetailsMap(broker)
 
-	// either one topic was specified and we get info for that topic or we get info for all topics if none specified
+	// Either one topic was specified and we get info for that topic or a topic is not specified and we get info for all topics
 	if topic != "" {
 		if _, ok := topicMap[topic]; !ok {
 			restapi_handlers.JSONError(c, 404, "topic not found", fmt.Errorf("topic must correspond to a topic known by the broker"))
 			return
 		}
 	}
-
-	// permutations of offset, topic, and partition:
-	// offset by itself: get all topics on all partitions from oldest/newest (error on numeric)
-	// offset with topic: ok if not numeric, just get all events for that topic on all partitions
-	// offset with topic and partition: get exactly this, numeric is ok
-	// topic by itself: default to oldest offset and all partitions
-	// topic and partition: default to oldest offset on single partition for specific topic
-	// just partition: get events for all topics that have events on that partition(?) from oldest
 
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
@@ -599,7 +581,6 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 	defer consumer.Close()
 
 	// Define event item structure for response
-
 	response := map[string]interface{}{
 		"topics": map[string]topicItem{},
 		"info": map[string]int{
@@ -671,7 +652,6 @@ type topicItem struct {
 func getEventsForPartition(topic string, partition int32, offset int64, consumer *sarama.Consumer, count *int, limit int) ([]eventItem, error) {
 	eventsList := make([]eventItem, 0)
 
-	// TODO: handle error for partitions out of range instead of crashing here
 	partitionConsumer, err := (*consumer).ConsumePartition(topic, partition, offset)
 	if err != nil {
 		return eventsList, err
