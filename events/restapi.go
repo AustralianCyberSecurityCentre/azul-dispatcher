@@ -511,8 +511,6 @@ func (ev *Events) PostEventSimulate(c *gin.Context) {
 func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "application/json")
 
-	var err error = nil
-
 	// In practice this will only ever be a SaramaProvider, not a MemoryProvider.
 	prov := ev.prov.(*provider.SaramaKafkaProvider)
 
@@ -529,10 +527,12 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 	}
 
 	if offsetStr != "" && offsetStr != "oldest" && offsetStr != "newest" {
-		if offset, err = strconv.ParseInt(offsetStr, 10, 64); err != nil {
+		o, err := strconv.ParseInt(offsetStr, 10, 64)
+		if err != nil {
 			restapi_handlers.JSONError(c, 400, "invalid offset format", fmt.Errorf("offset must be 'earliest', 'latest', or a numeric value"))
 			return
 		}
+		offset = o
 	}
 
 	// Parse optional parameters
