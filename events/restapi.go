@@ -561,6 +561,9 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 	broker := []string{prov.GetBootstrap()}
 	var topicMap map[string]sarama.TopicDetail
 	topicMap, err := saramago.GetTopicDetailsMap(broker)
+	if err != nil {
+		restapi_handlers.JSONError(c, 500, "could not fetch topic info", fmt.Errorf("error fetching topic info from broker"))
+	}
 
 	// Either one topic was specified and we get info for that topic or a topic is not specified and we get info for all topics
 	if topic != "" {
