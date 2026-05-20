@@ -41,7 +41,6 @@ var serveCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-
 		kvprov, err := kvprovider.NewRedisProviders()
 		if err != nil {
 			fmt.Println("Error creating redis client:", err)
@@ -49,7 +48,6 @@ var serveCmd = &cobra.Command{
 		}
 
 		dp := restapi.NewDispatcher(qprov, kvprov, ctx)
-
 		// FUTURE use viper in cobra to allow overriding of ListenAddr/other settings
 		log.Fatal(http.ListenAndServe(st.Settings.ListenAddr, dp.Router))
 	},
