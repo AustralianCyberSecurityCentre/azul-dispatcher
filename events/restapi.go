@@ -550,16 +550,17 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 	limit := int(^uint(0) >> 1) // int_max determined at runtime based on system width
 	limitStr := qv.Get("limit")
 	if limitStr != "" {
-		limit, err = strconv.Atoi(limitStr)
+		l, err := strconv.Atoi(limitStr)
 		if err != nil {
 			restapi_handlers.JSONError(c, 400, "invalid limit format", fmt.Errorf("limit must be a numeric value"))
 			return
 		}
+		limit = l
 	}
 
 	broker := []string{prov.GetBootstrap()}
 	var topicMap map[string]sarama.TopicDetail
-	topicMap, err = saramago.GetTopicDetailsMap(broker)
+	topicMap, err := saramago.GetTopicDetailsMap(broker)
 
 	// Either one topic was specified and we get info for that topic or a topic is not specified and we get info for all topics
 	if topic != "" {
