@@ -26,7 +26,7 @@
               "name": "bob",
               "category": "user"
             },
-            "action": "uploaded",
+            "action": "sourced",
             "sha256": "b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
             "timestamp": "2021-02-07T21:40:33.075142+11:00",
             "file_format": "document/email",
@@ -68,7 +68,7 @@
           }
         ]
       },
-      "action": "uploaded",
+      "action": "sourced",
       "dequeued": "8c5e67a7ad83fd5cd19fffb7d94941af-MimeDecoder-2021.02.14",
       "flags": {
         "expedite": true
@@ -97,7 +97,7 @@
                 "name": "bob",
                 "category": "user"
               },
-              "action": "uploaded",
+              "action": "sourced",
               "sha256": "b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
               "timestamp": "2021-02-07T21:40:33.075142+11:00",
               "file_format": "document/email",

@@ -18,7 +18,7 @@ var td_empty_path = testdata.GetEventBytes(td_dir + "empty_path.json")
 
 func appendToPath(data []byte, extraDepth int) []byte {
 	for i := 0; i < extraDepth; i++ {
-		data, _ = sjson.SetRawBytes(data, fmt.Sprintf("source.path.%d", i), []byte(`{"relationship": {"action": "extracted","type": "overlay","offset": "0xca00"}}`))
+		data, _ = sjson.SetRawBytes(data, fmt.Sprintf("source.path.%d", i), []byte(`{"sha256": "dac804f3662b2228e43af80f6e0769614bf53d6c8ea16241c80d779de1308c20", "action": "extracted", "author": {"name": "test2"}, "relationship": {"action": "extracted","type": "overlay","offset": "0xca00"}}`))
 	}
 	return data
 }

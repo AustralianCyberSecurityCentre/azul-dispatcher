@@ -14,10 +14,10 @@
     "path": [
       {
         "author": {
-          "name": ""
+          "name": "test"
         },
-        "action": "",
-        "sha256": "",
+        "action": "sourced",
+        "sha256": "dac804f3662b2228e43af80f6e0769614bf53d6c8ea16241c80d779de1308c20",
         "timestamp": "0001-01-01T00:00:00Z"
       }
     ],

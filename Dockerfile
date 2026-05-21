@@ -12,26 +12,59 @@ ENV GOOS=linux GOARCH=amd64 GO111MODULE=on GOPATH=/tmp/go
 ENV CGO_LDFLAGS_ALLOW="^-[Il].*$"
 
 ARG XDG_CONFIG_HOME
-
+# llvm installed as a lower RAM usage linker for cargo (rust) build of yara
 COPY debian.txt /tmp/src/
 RUN apt-get update && \
     apt-get upgrade -y && \
+    apt-get install llvm -y && \
+    apt-get install libssl-dev -y && \
     apt-get install -y --no-install-recommends \
     $(grep -vE "^\s*(#|$)" /tmp/src/debian.txt | tr "\n" " ") && \
     rm -rf /tmp/src/debian.txt /var/lib/apt/lists/*
 RUN git config --global url."git@github.com:AustralianCyberSecurityCentre/".insteadOf "https://github.com/AustralianCyberSecurityCentre/"
 
-# Install yara, needed for identify.
-ARG YARA_GIT=https://github.com/VirusTotal/yara
-ARG YARA_TAG=v4.3.2
-RUN mkdir -p /go/yara && \
-    git clone --branch $YARA_TAG $YARA_GIT /go/yara && \
-    cd /go/yara && \
-    ./bootstrap.sh && \
-    ./configure && \
-    rm /go/yara/tests -rf && \
-    make && \
-    make install
+# Install yara-x for identify - needed for golang bedrock
+# Install Rust and yara-x
+ENV RUST_VERSION=1.95.0
+RUN gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys 85AB96E6FA1BE5FE
+# Download Rust tarball + signature
+RUN curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz \
+    && curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc
+# Verify signature
+RUN gpg --verify rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc
+
+# perform rust install
+RUN tar xzf rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz \
+    && rust-${RUST_VERSION}-x86_64-unknown-linux-gnu/install.sh \
+         --prefix=/usr/local \
+         --without=rust-docs \
+    && rm -rf rust-${RUST_VERSION}-*
+
+# perform yara-x install
+# Attempts to limit cargo RAM usage during builds.
+# ENV CARGO_INCREMENTAL=0
+# ENV RUSTFLAGS="-C debuginfo=0 -C codegen-units=1 -C link-arg=-fuse-ld=lld"
+ENV RUSTFLAGS="-C link-arg=-fuse-ld=lld"
+
+RUN cargo install cargo-c
+RUN git clone https://github.com/VirusTotal/yara-x.git && \
+    cd yara-x && \
+    cargo cinstall -p yara-x-capi --release --libdir /usr/lib
+RUN rm -rf yara-x
+
+# Verify that yara-x install was successfull
+
+RUN cat <<'EOF' > test.c
+#include <yara_x.h>
+int main() {
+    YRX_RULES* rules;
+    yrx_compile("rule dummy { condition: true }", &rules);
+    yrx_rules_destroy(rules);
+}
+EOF
+RUN gcc `pkg-config --cflags yara_x_capi` test.c `pkg-config --libs yara_x_capi`
+RUN rm test.c
+# End of yara-x/rust install
 
 # default libmagic is updated slowly for debian distros and
 # contains a number of bugs for office and archive file types
@@ -87,14 +120,8 @@ RUN cd /go/file && \
     rm /go/file -rf && \
     file --version
 
-# Install Yara
-COPY --from=builder /go/yara /go/yara
-RUN cd /go/yara && \
-    make install && \
-    cd /go && \
-    rm /go/yara -rf && \
-    yara --version
-
+# Copy the yara install from the build agent
+COPY --from=builder /usr/local/lib /usr/local/lib
 COPY --from=builder /go/bin/dispatcher /go/bin/
 ARG UID=21000
 ARG GID=21000

@@ -18,7 +18,7 @@
           "name": "bob",
           "category": "user"
         },
-        "action": "uploaded",
+        "action": "sourced",
         "sha256": "b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
         "timestamp": "2021-02-07T21:40:33.075142+11:00",
         "file_format": "document/email",
@@ -60,7 +60,7 @@
       }
     ]
   },
-  "action": "uploaded",
+  "action": "sourced",
   "flags": {
     "bypass_cache": true
   }

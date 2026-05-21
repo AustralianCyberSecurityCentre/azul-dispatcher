@@ -129,7 +129,7 @@ Or malware report scraper may request a download from VirusTotal with fields:
 
 - `entity-id`: \<report_ref\>.\<hash\>
 
-- `event`: download_requested
+- `event`: download-requested
 
 ### Event Filtering
 
