@@ -606,7 +606,7 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 	for _, t := range topicList {
 		newTopic := topicItem{NumPartitions: topicMap[t].NumPartitions, ReplicationFactor: topicMap[t].ReplicationFactor}
 		if partitionStr == "" { // no partition specififed, so iterate through all partitions
-			for partition = int32(0); partition < topicMap[t].NumPartitions; partition++ {
+			for partition = int32(0); partition < topicMap[t].NumPartitions && count < limit; partition++ {
 				eventsList, err := getEventsForPartition(t, partition, offset, &consumer, &count, limit)
 				if err != nil {
 					restapi_handlers.JSONError(c, 404, "partition not found", fmt.Errorf("request contained parition that does not exist for queried topic"))
@@ -622,6 +622,9 @@ func (ev *Events) GetDebugTopicEvents(c *gin.Context) {
 			}
 		}
 		response["topics"].(map[string]topicItem)[t] = newTopic
+		if count >= limit {
+			break
+		}
 	}
 	response["info"].(map[string]int)["count"] = count
 
