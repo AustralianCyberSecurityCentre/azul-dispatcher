@@ -98,7 +98,7 @@ RUN cd /src && go build -v -a -tags static_all -o /go/bin/dispatcher main.go
 FROM $REGISTRY/$BASE_IMAGE:$BASE_TAG
 ENV DEBIAN_FRONTEND=noninteractive
 # required for yara to find .so libraries
-ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
+ENV LD_LIBRARY_PATH="/usr/local/lib"
 
 COPY debian.txt /tmp/src/
 RUN apt-get update && \
