@@ -49,11 +49,10 @@ ENV RUSTFLAGS="-C link-arg=-fuse-ld=lld"
 RUN cargo install cargo-c
 RUN git clone https://github.com/VirusTotal/yara-x.git && \
     cd yara-x && \
-    cargo cinstall -p yara-x-capi --release --libdir /usr/lib
+    cargo cinstall -p yara-x-capi --release --libdir /usr/local/lib
 RUN rm -rf yara-x
 
 # Verify that yara-x install was successfull
-
 RUN cat <<'EOF' > test.c
 #include <yara_x.h>
 int main() {
@@ -122,6 +121,19 @@ RUN cd /go/file && \
 
 # Copy the yara install from the build agent
 COPY --from=builder /usr/local/lib /usr/local/lib
+
+# Verify that yara-x was copied over successfully
+RUN cat <<'EOF' > test.c
+#include <yara_x.h>
+int main() {
+    YRX_RULES* rules;
+    yrx_compile("rule dummy { condition: true }", &rules);
+    yrx_rules_destroy(rules);
+}
+EOF
+RUN gcc `pkg-config --cflags yara_x_capi` test.c `pkg-config --libs yara_x_capi`
+RUN rm test.c
+
 COPY --from=builder /go/bin/dispatcher /go/bin/
 ARG UID=21000
 ARG GID=21000
