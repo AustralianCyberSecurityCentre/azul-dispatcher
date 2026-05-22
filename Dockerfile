@@ -110,8 +110,17 @@ RUN apt-get update && \
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
 # Need to include the includes as well.
 COPY --from=builder /usr/local/include/ /usr/local/include/
-# Copy file binary
-COPY --from=builder /usr/local/bin/file /usr/local/bin/file
+
+# # default libmagic for debian can get out of date 
+# contains a number of bugs for office and archive file types
+# Install updated libmagic
+COPY --from=builder /go/file /go/file
+RUN cd /go/file && \
+    make install && \
+    ldconfig -v && \
+    cd /go && \
+    rm /go/file -rf && \
+    file --version
 
 COPY --from=builder /go/bin/dispatcher /go/bin/
 ARG UID=21000
