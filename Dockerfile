@@ -47,7 +47,7 @@ RUN tar xzf rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz \
 ENV RUSTFLAGS="-C link-arg=-fuse-ld=lld"
 
 RUN cargo install cargo-c
-RUN git clone https://github.com/VirusTotal/yara-x.git && \
+RUN git clone -b v1.16.0 https://github.com/VirusTotal/yara-x.git && \
     cd yara-x && \
     cargo cinstall -p yara-x-capi --release --libdir /usr/local/lib/
 RUN rm -rf yara-x
