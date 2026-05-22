@@ -109,7 +109,7 @@ RUN apt-get update && \
 # Copy the yara and file install from the build agent
 COPY --from=builder /usr/local/lib/libyara_x_capi.1.* /usr/local/lib/
 # Create the symlinks to libyara_x_capi.1.16.0 (or whatever version it's up to until version 2 and then this will need an update)
-RUN cd /usr/local/lib/ && ln -s libyara_x_capi.so libyara_x_capi.1.* && ln -s libyara_x_capi.so.1 libyara_x_capi.1.*
+RUN cd /usr/local/lib/ && ln -s ./libyara_x_capi.1.* libyara_x_capi.so && ln -s ./libyara_x_capi.1.* libyara_x_capi.so.1
 COPY --from=builder /usr/local/lib/pkgconfig /usr/local/lib/pkgconfig
 
 # Need to include the includes as well.
