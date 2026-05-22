@@ -102,7 +102,6 @@ ENV LD_LIBRARY_PATH="/usr/local/lib:/usr/local/lib/x86_64-linux-gnu/"
 COPY debian.txt /tmp/src/
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install coreutils -y && \
     apt-get install -y --no-install-recommends \
     $(grep -vE "^\s*(#|$)" /tmp/src/debian.txt | tr "\n" " ") && \
     rm -rf /tmp/src/debian.txt /var/lib/apt/lists/*
