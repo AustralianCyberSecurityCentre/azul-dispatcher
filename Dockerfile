@@ -99,6 +99,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 # required for yara to find .so libraries
 ENV LD_LIBRARY_PATH="/usr/local/lib:/usr/local/lib/x86_64-linux-gnu/"
 
+COPY debian.txt /tmp/src/
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    $(grep -vE "^\s*(#|$)" /tmp/src/debian.txt | tr "\n" " ") && \
+    rm -rf /tmp/src/debian.txt /var/lib/apt/lists/*
+
 # Copy the yara and file install from the build agent
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
 # Need to include the includes as well.
