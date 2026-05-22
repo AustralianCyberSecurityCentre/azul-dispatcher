@@ -109,6 +109,7 @@ RUN apt-get update && \
 
 # Copy the yara and file install from the build agent
 COPY --from=builder /usr/local/lib/libyara_x_capi* /usr/local/lib/
+COPY --from=builder /usr/local/lib/pkgconfig /usr/local/lib/pkgconfig
 
 # Need to include the includes as well.
 COPY --from=builder /usr/local/include/ /usr/local/include/
