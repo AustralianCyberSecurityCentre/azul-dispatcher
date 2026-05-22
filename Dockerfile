@@ -49,7 +49,7 @@ ENV RUSTFLAGS="-C link-arg=-fuse-ld=lld"
 RUN cargo install cargo-c
 RUN git clone https://github.com/VirusTotal/yara-x.git && \
     cd yara-x && \
-    cargo cinstall -p yara-x-capi --release --libdir /usr/local/lib
+    cargo cinstall -p yara-x-capi --release --libdir /usr/local/lib/
 RUN rm -rf yara-x
 
 # Verify that yara-x install was successfull
@@ -97,32 +97,22 @@ RUN cd /src && go build -v -a -tags static_all -o /go/bin/dispatcher main.go
 FROM $REGISTRY/$BASE_IMAGE:$BASE_TAG
 ENV DEBIAN_FRONTEND=noninteractive
 # required for yara to find .so libraries
-ENV LD_LIBRARY_PATH="/usr/local/lib"
+ENV LD_LIBRARY_PATH="/usr/local/lib:/usr/local/lib/x86_64-linux-gnu/"
 
-COPY debian.txt /tmp/src/
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install flex bison -y && \
-    apt-get install -y --no-install-recommends \
-    $(grep -vE "^\s*(#|$)" /tmp/src/debian.txt | tr "\n" " ") && \
-    rm -rf /tmp/src/debian.txt /var/lib/apt/lists/*
+# Copy the yara and file install from the build agent
+COPY --from=builder /usr/local/lib/ /usr/local/lib/
+# Need to include the includes as well.
+COPY --from=builder /usr/local/include/ /usr/local/include/
+# Copy file binary
+COPY --from=builder /usr/local/bin/file /usr/local/bin/file
 
+COPY --from=builder /go/bin/dispatcher /go/bin/
+ARG UID=21000
+ARG GID=21000
+RUN groupadd -g $GID azul && useradd --create-home --shell /bin/bash -u $UID -g $GID azul
+USER azul
 
-# # default libmagic for debian can get out of date 
-# contains a number of bugs for office and archive file types
-# Install updated libmagic
-COPY --from=builder /go/file /go/file
-RUN cd /go/file && \
-    make install && \
-    ldconfig -v && \
-    cd /go && \
-    rm /go/file -rf && \
-    file --version
-
-# Copy the yara install from the build agent
-COPY --from=builder /usr/local/lib/* /usr/local/lib/*
-
-# Verify that yara-x was copied over successfully
+# Verify that yara-x was copied over successfully and works in user context
 RUN cat <<'EOF' > test.c
 #include <yara_x.h>
 int main() {
@@ -131,14 +121,10 @@ int main() {
     yrx_rules_destroy(rules);
 }
 EOF
-RUN gcc `pkg-config --cflags yara_x_capi` test.c `pkg-config --libs yara_x_capi`
+RUN ls -lh /usr/local/lib/* && gcc `pkg-config --cflags yara_x_capi` test.c `pkg-config --libs yara_x_capi`
 RUN rm test.c
+RUN file --version
 
-COPY --from=builder /go/bin/dispatcher /go/bin/
-ARG UID=21000
-ARG GID=21000
-RUN groupadd -g $GID azul && useradd --create-home --shell /bin/bash -u $UID -g $GID azul
-USER azul
 EXPOSE 8111
 ENTRYPOINT ["/go/bin/dispatcher"]
 CMD ["serve"]
