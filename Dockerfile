@@ -88,7 +88,7 @@ RUN if [ "$BEDROCK_REPLACE" != "" ] ; then \
 
 # rakyll/magicmime requires static compilation ldflags (ie. -ldflags '-extldflags "-static"')
 RUN --mount=type=secret,id=testSecret export $(cat /run/secrets/testSecret) && \
-    cd /src && go test ./...
+    cd /src && go test ./... -p 1
 RUN cd /src && go build -v -a -tags static_all -o /go/bin/dispatcher main.go
 
 ##
@@ -120,7 +120,7 @@ RUN cd /go/file && \
     file --version
 
 # Copy the yara install from the build agent
-COPY --from=builder /usr/local/lib /usr/local/lib
+COPY --from=builder /usr/local/lib/* /usr/local/lib/*
 
 # Verify that yara-x was copied over successfully
 RUN cat <<'EOF' > test.c
