@@ -107,7 +107,9 @@ RUN apt-get update && \
     rm -rf /tmp/src/debian.txt /var/lib/apt/lists/*
 
 # Copy the yara and file install from the build agent
-COPY --from=builder /usr/local/lib/libyara_x_capi* /usr/local/lib/
+COPY --from=builder /usr/local/lib/libyara_x_capi.1.* /usr/local/lib/
+# Create the symlinks to libyara_x_capi.1.16.0 (or whatever version it's up to until version 2 and then this will need an update)
+RUN cd /usr/local/lib/ && ln -s libyara_x_capi.so libyara_x_capi.1.* && ln -s libyara_x_capi.so.1 libyara_x_capi.1.*
 COPY --from=builder /usr/local/lib/pkgconfig /usr/local/lib/pkgconfig
 
 # Need to include the includes as well.
