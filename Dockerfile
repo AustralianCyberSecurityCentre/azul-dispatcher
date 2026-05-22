@@ -102,12 +102,14 @@ ENV LD_LIBRARY_PATH="/usr/local/lib:/usr/local/lib/x86_64-linux-gnu/"
 COPY debian.txt /tmp/src/
 RUN apt-get update && \
     apt-get upgrade -y && \
+    apt-get install coreutils -y && \
     apt-get install -y --no-install-recommends \
     $(grep -vE "^\s*(#|$)" /tmp/src/debian.txt | tr "\n" " ") && \
     rm -rf /tmp/src/debian.txt /var/lib/apt/lists/*
 
 # Copy the yara and file install from the build agent
-COPY --from=builder /usr/local/lib/ /usr/local/lib/
+COPY --from=builder /usr/local/lib/libyara_x_capi* /usr/local/lib/
+
 # Need to include the includes as well.
 COPY --from=builder /usr/local/include/ /usr/local/include/
 
@@ -137,7 +139,7 @@ int main() {
     yrx_rules_destroy(rules);
 }
 EOF
-RUN ls -lh /usr/local/lib/* && gcc `pkg-config --cflags yara_x_capi` test.c `pkg-config --libs yara_x_capi`
+RUN gcc `pkg-config --cflags yara_x_capi` test.c `pkg-config --libs yara_x_capi`
 RUN rm test.c
 RUN file --version
 
