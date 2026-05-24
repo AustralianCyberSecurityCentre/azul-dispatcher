@@ -47,7 +47,8 @@ RUN tar xzf rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz \
 ENV RUSTFLAGS="-C link-arg=-fuse-ld=lld"
 
 RUN cargo install cargo-c
-RUN git clone -b v1.16.0 https://github.com/VirusTotal/yara-x.git && \
+ENV YARA_X_VERSION_TAG=1.16.0
+RUN git clone -b v$YARA_X_VERSION_TAG https://github.com/VirusTotal/yara-x.git && \
     cd yara-x && \
     cargo cinstall -p yara-x-capi --release --libdir /usr/local/lib/
 RUN rm -rf yara-x
@@ -107,9 +108,9 @@ RUN apt-get update && \
     rm -rf /tmp/src/debian.txt /var/lib/apt/lists/*
 
 # Copy the yara and file install from the build agent
-COPY --from=builder /usr/local/lib/libyara_x_capi.1.* /usr/local/lib/
+COPY --from=builder /usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG /usr/local/lib/
 # Create the symlinks to libyara_x_capi.1.16.0 (or whatever version it's up to until version 2 and then this will need an update)
-RUN cd /usr/local/lib/ && ln -s ./libyara_x_capi.so.1.* libyara_x_capi.so && ln -s ./libyara_x_capi.so.1.* libyara_x_capi.so.1
+RUN cd /usr/local/lib/ && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so.1
 COPY --from=builder /usr/local/lib/pkgconfig /usr/local/lib/pkgconfig
 
 # Need to include the includes as well.
