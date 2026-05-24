@@ -3,6 +3,7 @@
 ARG REGISTRY="docker.io/library"
 ARG BASE_IMAGE=golang
 ARG BASE_TAG=1.26-trixie@sha256:a085df697019cb63b40a70f6a92b948f7dc9df96dfcb2c20ba6eed25ce28f5b3
+ARG YARA_X_VERSION_TAG="1.16.0"
 
 FROM $REGISTRY/$BASE_IMAGE:$BASE_TAG AS builder
 ENV DEBIAN_FRONTEND=noninteractive
@@ -47,7 +48,8 @@ RUN tar xzf rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz \
 ENV RUSTFLAGS="-C link-arg=-fuse-ld=lld"
 
 RUN cargo install cargo-c
-ENV YARA_X_VERSION_TAG=1.16.0
+ARG YARA_X_VERSION_TAG
+ENV YARA_X_VERSION_TAG=${YARA_X_VERSION_TAG}
 RUN git clone -b v$YARA_X_VERSION_TAG https://github.com/VirusTotal/yara-x.git && \
     cd yara-x && \
     cargo cinstall -p yara-x-capi --release --libdir /usr/local/lib/
@@ -107,6 +109,8 @@ RUN apt-get update && \
     $(grep -vE "^\s*(#|$)" /tmp/src/debian.txt | tr "\n" " ") && \
     rm -rf /tmp/src/debian.txt /var/lib/apt/lists/*
 
+ARG YARA_X_VERSION_TAG
+ENV YARA_X_VERSION_TAG=${YARA_X_VERSION_TAG}
 # Copy the yara and file install from the build agent
 COPY --from=builder /usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG /usr/local/lib/
 # Create the symlinks to libyara_x_capi.1.16.0 (or whatever version it's up to until version 2 and then this will need an update)
