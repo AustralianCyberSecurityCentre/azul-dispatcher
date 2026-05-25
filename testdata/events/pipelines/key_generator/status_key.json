@@ -31,7 +31,7 @@
               "category": "loader"
             },
             "action": "sourced",
-            "sha256": "aaaabe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82-1612629803",
+            "sha256": "aaaabe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
             "timestamp": "2021-02-07T21:38:56+11:00",
             "file_format": "document/email",
             "size": 343964,
@@ -43,7 +43,7 @@
               "version": "1.1",
               "category": "plugin"
             },
-            "action": "download_requested",
+            "action": "sourced",
             "sha256": "aaaabe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
             "timestamp": "2021-02-07T21:40:31.872294+11:00",
             "file_format": "document/email",
@@ -55,7 +55,7 @@
               "version": "1.1",
               "category": "plugin"
             },
-            "action": "downloaded",
+            "action": "sourced",
             "sha256": "aaaabe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82",
             "timestamp": "2021-02-07T21:40:33.075142+11:00",
             "file_format": "document/email",
@@ -97,7 +97,7 @@
           }
         ]
       },
-      "action": "downloaded",
+      "action": "sourced",
       "dequeued": "dac804f3662b2228e43af80f6e0769614bf53d6c8ea16241c80d779de1308c20-pluigin-2023.01.01",
       "flags": {}
     },

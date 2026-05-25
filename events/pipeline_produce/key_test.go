@@ -21,16 +21,16 @@ func TestKeyDescriptor(t *testing.T) {
 		err        bool
 	}{
 		// valid key
-		{events.ModelBinary, "simple", "simple.json", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.vtdownload.downloaded.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
+		{events.ModelBinary, "simple", "simple.json", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.vtdownload.sourced.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
 		// should still match, same as simple with small alterations
-		{events.ModelBinary, "whitespace", "simple.txt", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.vtdownload.downloaded.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
-		{events.ModelBinary, "reordered", "reordered.json", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.vtdownload.downloaded.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
-		{events.ModelBinary, "existing_key", "existing_key.json", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.vtdownload.downloaded.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
+		{events.ModelBinary, "whitespace", "simple.txt", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.vtdownload.sourced.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
+		{events.ModelBinary, "reordered", "reordered.json", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.vtdownload.sourced.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
+		{events.ModelBinary, "existing_key", "existing_key.json", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.vtdownload.sourced.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
 		// should produce different key
-		{events.ModelBinary, "source_security_change", "source_security_change.json", "virustotal.RESTRICTED.2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.vtdownload.downloaded.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
-		{events.ModelBinary, "path_security_change", "path_security_change.json", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.PROVIDED.RESTRICTED.vtdownload.downloaded.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
-		{events.ModelBinary, "source_ref_change", "source_ref_change.json", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.xxxxxxxx.submitter_region.63.vtdownload.downloaded.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
-		{events.ModelBinary, "author_change", "author_change.json", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.vtdownload.downloaded.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.SlimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
+		{events.ModelBinary, "source_security_change", "source_security_change.json", "virustotal.RESTRICTED.2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.vtdownload.sourced.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
+		{events.ModelBinary, "path_security_change", "path_security_change.json", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.PROVIDED.RESTRICTED.vtdownload.sourced.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
+		{events.ModelBinary, "source_ref_change", "source_ref_change.json", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.xxxxxxxx.submitter_region.63.vtdownload.sourced.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.MimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
+		{events.ModelBinary, "author_change", "author_change.json", "virustotal..2021-02-06T16:43:23.interface.web.submitter_city.kharkiv.submitter_country.UA.submitter_id.0a9e3094.submitter_region.63.vtdownload.sourced.b9debe8afbdc6d0f552ca4d41fc8a5760778f2724d1560f6b4b0fc28bd837a82.SlimeDecoder.extracted.ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69.", false},
 		// should use different method to produce key
 		{events.ModelStatus, "status", "status_key.json", "dac804f3662b2228e43af80f6e0769614bf53d6c8ea16241c80d779de1308c20-pluigin-2023.01.01.MimeDecoder", false},
 		{events.ModelPlugin, "plugin", "plugin.json", "RatConfigs-JRat.2020.06.02", false},
@@ -59,16 +59,16 @@ func TestKey(t *testing.T) {
 		err        bool
 	}{
 		// valid key
-		{events.ModelBinary, "simple", "simple.json", "b77549952b9354551975192f6c09e3c7", false},
+		{events.ModelBinary, "simple", "simple.json", "e299c2cfa5345f98ea34ff0455de22b7", false},
 		// should still match, same as simple with small alterations
-		{events.ModelBinary, "whitespace", "simple.txt", "b77549952b9354551975192f6c09e3c7", false},
-		{events.ModelBinary, "reordered", "reordered.json", "b77549952b9354551975192f6c09e3c7", false},
-		{events.ModelBinary, "existing_key", "existing_key.json", "b77549952b9354551975192f6c09e3c7", false},
+		{events.ModelBinary, "whitespace", "simple.txt", "e299c2cfa5345f98ea34ff0455de22b7", false},
+		{events.ModelBinary, "reordered", "reordered.json", "e299c2cfa5345f98ea34ff0455de22b7", false},
+		{events.ModelBinary, "existing_key", "existing_key.json", "e299c2cfa5345f98ea34ff0455de22b7", false},
 		// should produce different key
-		{events.ModelBinary, "source_security_change", "source_security_change.json", "6f15f707b81e3b611c63f65f3bed84a3", false},
-		{events.ModelBinary, "path_security_change", "path_security_change.json", "4643bc0ea3ca0e97d4f9f820611cced6", false},
-		{events.ModelBinary, "source_ref_change", "source_ref_change.json", "fb5d549a5b78adfbd5b606bf0814be32", false},
-		{events.ModelBinary, "author_change", "author_change.json", "b261b7b235b49105eb7632e6afaac8da", false},
+		{events.ModelBinary, "source_security_change", "source_security_change.json", "6c5f818d929c8db4ae0cc1f36dc14867", false},
+		{events.ModelBinary, "path_security_change", "path_security_change.json", "e568cb3839f4d866a583fcff6409b742", false},
+		{events.ModelBinary, "source_ref_change", "source_ref_change.json", "34bc6c679cf84bd88d9fbfe7c7d2f873", false},
+		{events.ModelBinary, "author_change", "author_change.json", "006648451545351e9f8a11d40d601f18", false},
 		// should use different method to produce key
 		{events.ModelStatus, "status", "status_key.json", "52bfc3a94719718fabb7d50f39ce52f5", false},
 		{events.ModelPlugin, "plugin", "plugin.json", "68e3d23d6ab9facfbd4e3d5f7543c636", false},

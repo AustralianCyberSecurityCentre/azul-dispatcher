@@ -521,6 +521,12 @@ func (s *RestapiTestSuite) TestPluginPausesEvents() {
 	})
 	require.Nil(t, err)
 	require.Equal(t, 0, info.Fetched)
+	// Call again to confirm this is working an ensure subsequent calls to fetch zero events don't fail
+	_, info, err = s.conn1.GetBinaryEvents(&client.FetchEventsStruct{
+		Count: 1000, Deadline: 1, RequireLive: true, RequireHistoric: true, IsTask: true,
+	})
+	require.Nil(t, err)
+	require.Equal(t, 0, info.Fetched)
 
 	// Ingestor fetching should still find 3 events (note no historic which is why 3 instead of 6)
 	_, info, err = s.conn2.GetBinaryEvents(&client.FetchEventsStruct{
@@ -531,8 +537,8 @@ func (s *RestapiTestSuite) TestPluginPausesEvents() {
 	require.Equal(t, 3, info.Fetched)
 
 	// Remove pause and fetch plugins should get 0 events because plugin (live and historic) are at latest
-	// Set pause time to be just after pause ends.
-	newTime := time.Now().Add(-pauser.PAUSE_TIME_BEFORE_RESUME - time.Duration(1)*time.Minute)
+	// Set pause time to be 10 minutes after pause ends.
+	newTime := time.Now().Add(-(pauser.PAUSE_TIME_BEFORE_RESUME + time.Duration(10)*time.Minute))
 	s.kvstore.PausePluginProcessingStartTime.Set(testdata.GetGlobalTestContext(), pauser.PAUSE_PLUGIN_FLAG_KEY, newTime, 0)
 	isPaused, err := pauser.IsPluginProcessingPaused(testdata.GetGlobalTestContext(), s.kvstore)
 	require.Nil(t, err)
