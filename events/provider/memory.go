@@ -250,5 +250,9 @@ func (p *MemoryAdmin) DeleteTopics(topicNames []string) error {
 	return nil
 }
 
+func (p *MemoryAdmin) ResetConsumerOffsets(group string) error {
+	return nil
+}
+
 func (p *MemoryAdmin) Close() {
 }

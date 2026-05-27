@@ -64,6 +64,21 @@ func (kp *SaramaKafkaProvider) CreateConsumer(consumerName, group, offset, patte
 	return &conn, nil
 }
 
+func (kp *SaramaKafkaProvider) ResetConsumer(group string) error {
+	// we need an admin
+	admin, err := kp.CreateAdmin()
+	if err != nil {
+		return err
+	}
+
+	err = admin.ResetConsumerOffsets(group)
+	if err != nil {
+		bedSet.Logger.Err(err).Msg("Could not reset consumer offset")
+	}
+
+	return err
+}
+
 func repeatablePartitioner(topic string) sarama.Partitioner {
 	if topic == "access_log" || topic == "error_log" {
 		return sarama.NewRandomPartitioner(topic)
@@ -354,6 +369,30 @@ func (sa *SaramaKafkaAdmin) DescribeTopicConfig(topics []st.GenericKafkaTopicSpe
 	}
 	return resp.Resources
 
+}
+
+func (sa *SaramaKafkaAdmin) ResetConsumerOffsets(group string) error {
+	// Fetch all partitions
+	listConsumerGroupOffsetsRequest := sarama.OffsetFetchRequest{Version: 3}
+	resp, err := sa.broker.FetchOffset(&listConsumerGroupOffsetsRequest)
+	if err != nil {
+		bedSet.Logger.Err(err).Msg("Failed to fetch ConsumerGroup's offset(s)")
+		return err
+	}
+
+	// Create a offset commit request and set all offsets to oldest FUTURE: should offset be an option?
+	resetConsumerGroupOffsetsRequest := sarama.OffsetCommitRequest{Version: 3, ConsumerGroup: group, ConsumerGroupGeneration: sarama.GroupGenerationUndefined}
+	for topic, partitions := range resp.Blocks {
+		for partition, block := range partitions {
+			resetConsumerGroupOffsetsRequest.AddBlock(topic, partition, sarama.OffsetOldest, time.Now().UnixMilli(), block.Metadata)
+		}
+	}
+
+	_, err = sa.broker.CommitOffset(&resetConsumerGroupOffsetsRequest)
+	if err != nil {
+		bedSet.Logger.Err(err).Msg("Failed to reset ConsumerGroup's offset(s)")
+	}
+	return err
 }
 
 func (sa *SaramaKafkaAdmin) DeleteTopics(topicNames []string) error {

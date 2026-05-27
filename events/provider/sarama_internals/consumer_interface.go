@@ -72,6 +72,7 @@ func startSaramaConsumer(ctx context.Context, kafkaVersion sarama.KafkaVersion, 
 				topicList = consumer.GetTopics()
 			}
 			if ctx.Err() != nil {
+				client.Close()
 				return
 			}
 			// `Consume` is called inside an infinite loop to allow for server-side rebalance.
@@ -98,6 +99,7 @@ func startSaramaConsumer(ctx context.Context, kafkaVersion sarama.KafkaVersion, 
 			}
 			// check if context was cancelled, signaling that the consumer should stop
 			if ctx.Err() != nil {
+				client.Close()
 				return
 			}
 		}

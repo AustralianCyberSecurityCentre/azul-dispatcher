@@ -211,6 +211,22 @@ func parseParams(c *gin.Context) (*consumer.ConsumeParams, error) {
 		return nil, fmtBadParam(getevents.DenySelf, err)
 	}
 
+	// TODO: group name, reset time (in minutes?), explicit group reset + any other filter options
+	p.Reset, err = strconv.ParseBool(getWithDefault(qv, "reset", "false"))
+	if err != nil {
+		return nil, fmtBadParam("reset", err)
+	}
+
+	p.Debug, err = strconv.ParseBool(getWithDefault(qv, "debug", "false"))
+	if err != nil {
+		return nil, fmtBadParam("debug", err)
+	}
+
+	p.ExpirySec, err = strconv.Atoi(getWithDefault(qv, "expiry_sec", "600")) // default to 10 minute expiry
+	if err != nil {
+		return nil, fmtBadParam("expiry_sec", err)
+	}
+
 	// list of label:ft1,ft2,ft3
 	dataTypes := qv[getevents.RequireStreams]
 	if len(dataTypes) > 0 {
