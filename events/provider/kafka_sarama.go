@@ -372,6 +372,7 @@ func (sa *SaramaKafkaAdmin) DescribeTopicConfig(topics []st.GenericKafkaTopicSpe
 }
 
 func (sa *SaramaKafkaAdmin) ResetConsumerOffsets(group string) error {
+	bedSet.Logger.Info().Str("group", group).Msg("Resetting consumer offsets for consumer group")
 	// Fetch all partitions
 	listConsumerGroupOffsetsRequest := sarama.OffsetFetchRequest{Version: 3}
 	resp, err := sa.broker.FetchOffset(&listConsumerGroupOffsetsRequest)
@@ -380,11 +381,20 @@ func (sa *SaramaKafkaAdmin) ResetConsumerOffsets(group string) error {
 		return err
 	}
 
+	// print contents of resp for debugging
+	for topic, partitions := range resp.Blocks {
+		for partition, block := range partitions {
+			bedSet.Logger.Debug().Str("group", group).Str("topic", topic).Int32("partition", partition).Int64("offset", block.Offset).Msg("Current ConsumerGroup offset")
+		}
+	}
+
 	// Create a offset commit request and set all offsets to oldest FUTURE: should offset be an option?
 	resetConsumerGroupOffsetsRequest := sarama.OffsetCommitRequest{Version: 3, ConsumerGroup: group, ConsumerGroupGeneration: sarama.GroupGenerationUndefined}
 	for topic, partitions := range resp.Blocks {
 		for partition, block := range partitions {
 			resetConsumerGroupOffsetsRequest.AddBlock(topic, partition, sarama.OffsetOldest, time.Now().UnixMilli(), block.Metadata)
+			// print contents of request for debugging
+			bedSet.Logger.Debug().Str("group", group).Str("topic", topic).Int32("partition", partition).Int64("offset", sarama.OffsetOldest).Msg("Resetting ConsumerGroup offset to oldest")
 		}
 	}
 
