@@ -374,7 +374,7 @@ func (sa *SaramaKafkaAdmin) DescribeTopicConfig(topics []st.GenericKafkaTopicSpe
 func (sa *SaramaKafkaAdmin) ResetConsumerOffsets(group string) error {
 	bedSet.Logger.Info().Str("group", group).Msg("Resetting consumer offsets for consumer group")
 	// Fetch all partitions
-	listConsumerGroupOffsetsRequest := sarama.OffsetFetchRequest{Version: 3}
+	listConsumerGroupOffsetsRequest := sarama.OffsetFetchRequest{Version: 3, ConsumerGroup: group}
 	resp, err := sa.broker.FetchOffset(&listConsumerGroupOffsetsRequest)
 	if err != nil {
 		bedSet.Logger.Err(err).Msg("Failed to fetch ConsumerGroup's offset(s)")
