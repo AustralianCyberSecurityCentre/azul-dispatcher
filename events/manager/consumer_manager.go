@@ -100,8 +100,8 @@ func (m *ConsumerManager) fetchEvents(messagePipeline *pipeline.ConsumePipeline,
 		return []*msginflight.MsgInFlight{}, &models.EventResponseInfo{Ready: false, Paused: true}, nil
 	}
 
-	// If reset == true, we delete the associated EventReader and let it be re-constructed when getEventReader calls 
-	if p.Reset == true {
+	// If reset == true, we delete the associated EventReader and let it be re-constructed when getEventReader calls
+	if p.Reset {
 		m.removeEventReader(p)
 	}
 
@@ -198,13 +198,14 @@ func (m *ConsumerManager) CheckAndDeleteOldConsumers() {
 }
 
 // Reset the offsets of all ConsumerGroup's associated with an eventReader
-func (m *ConsumerManager) removeEventReader(p *consumer.ConsumeParams) {
+func (m *ConsumerManager) removeEventReader(p *consumer.ConsumeParams) error {
+	var err error
 	pluginKey := p.GenerateKafkaPluginKey()
 
-	oldReader, ok := m.eventReaders[pluginKey] 
-	if ok == false {
+	oldReader, ok := m.eventReaders[pluginKey]
+	if !ok {
 		bedSet.Logger.Warn().Str("consumer", pluginKey).Msg("Consumer not found, unable to delete.")
-		return
+		return err
 	}
 
 	// Delete our local event reader and reset ConsumerGroup offsets on the remote
@@ -212,12 +213,17 @@ func (m *ConsumerManager) removeEventReader(p *consumer.ConsumeParams) {
 	defer m.consumersDeleteLock.Unlock()
 
 	oldReader.Stop()
-	for _,sub := range oldReader.subscriptions {
+	for _, sub := range oldReader.subscriptions {
 		// delete ConsumerGroups on KafkaServer
-		m.prov.ResetConsumer(sub.group)
+		err = m.prov.ResetConsumer(sub.group)
+		if err != nil {
+			bedSet.Logger.Error().Str("consumer", pluginKey).Msg("Failed to reset consumer group offsets")
+		}
 	}
 	delete(m.eventReaders, pluginKey)
 	bedSet.Logger.Warn().Str("consumer", pluginKey).Msg("Closing consumer due to reset request.")
+
+	return err
 }
 
 func (m *ConsumerManager) DeleteAllPluginEventReaders() {

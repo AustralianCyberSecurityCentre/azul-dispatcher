@@ -22,7 +22,7 @@ func NewConsumerOptions(pollWait time.Duration) CreateConsumerOptions {
 
 type ProviderInterface interface {
 	CreateConsumer(consumerName, group, offset, pattern string, additionalOptions CreateConsumerOptions) (ConsumerInterface, error)
-	ResetConsumer(group string) (error)
+	ResetConsumer(group string) error
 	CreateProducer() (ProducerInterface, error)
 	CreateAdmin() (AdminInterface, error)
 }
