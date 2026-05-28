@@ -102,7 +102,10 @@ func (m *ConsumerManager) fetchEvents(messagePipeline *pipeline.ConsumePipeline,
 
 	// If reset == true, we delete the associated EventReader and let it be re-constructed when getEventReader calls
 	if p.Reset {
-		m.removeEventReader(p)
+		err = m.removeEventReader(p)
+		if err != nil {
+			return []*msginflight.MsgInFlight{}, nil, err
+		}
 	}
 
 	// Prevent the deletion of consumers until all event collection stops.
