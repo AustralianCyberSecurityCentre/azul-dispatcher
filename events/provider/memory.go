@@ -40,6 +40,10 @@ func (prov *MemoryProvider) CreateAdmin() (AdminInterface, error) {
 	return &c, nil
 }
 
+func (prov *MemoryProvider) ResetConsumer(group string) error {
+	return nil
+}
+
 type MemoryConsumer struct {
 	Mem      *in_memory.InMemory
 	group    string
