@@ -65,13 +65,16 @@ func (kp *SaramaKafkaProvider) CreateConsumer(consumerName, group, offset, patte
 }
 
 func (kp *SaramaKafkaProvider) ResetConsumer(group string) error {
+	// Prefix added to allow two dispatchers with different prefixes to not collide even on the same kafka.
+	groupWithPrefix := fmt.Sprintf("%s-%s", st.Events.Kafka.TopicPrefix, group)
+
 	// we need an admin
 	admin, err := kp.CreateAdmin()
 	if err != nil {
 		return err
 	}
 
-	err = admin.ResetConsumerOffsets(group)
+	err = admin.ResetConsumerOffsets(groupWithPrefix)
 	if err != nil {
 		bedSet.Logger.Err(err).Msg("Could not reset consumer offset")
 	}
