@@ -15,6 +15,7 @@ import (
 const security_dir = "events/pipelines/consume/too_deep/"
 
 var security_empty_path = testdata.GetEventBytes(security_dir + "empty_path.json")
+var download_event = testdata.GetEventBytes(security_dir + "download.json")
 
 func easySetJsonEnv(t *testing.T, field string, v any) {
 	bytes, err := json.Marshal(v)
@@ -121,6 +122,38 @@ func TestSecurityNormal(t *testing.T) {
 			t.Errorf("Security filter failed to block classification %v", cls)
 		}
 		require.Nilf(t, msg, "Security failed to make messages nil with classification %v", cls)
+	}
+}
+
+func TestSecurityNormalDownload(t *testing.T) {
+	setupSecurityEnv(t)
+	inFlight, err := pipeline.NewMsgInFlightFromJson(download_event, events.ModelDownload)
+	require.Nil(t, err)
+
+	fs := FilterSecurity{CachedSecurityResults: map[string]CacheHit{}}
+	be, ok := inFlight.GetDownload()
+	require.True(t, ok)
+
+	// pass security filtering
+	for _, cls := range []string{"LOW", "MEDIUM MOD1", "MEDIUM REL:APPLE"} {
+		be.Source.Security = cls
+		// Check security string when cache value not hit.
+		warning, msg := fs.ConsumeMod(inFlight, &consumer.ConsumeParams{Name: "", Version: "", IsTask: true, MaxSecurity: "MEDIUM MOD1 REL:APPLE"})
+		if warning != "" {
+			t.Errorf("Security filter failed to allow through a download event with classification %v", cls)
+		}
+		require.NotNilf(t, msg, "Security failed to allow a download event message through with classification %v and message %v", cls, msg)
+	}
+
+	// Fail to pass security filtering
+	for _, cls := range []string{"HIGH", "TOP HIGH"} {
+		be.Source.Security = cls
+		// Check security string when cache value not hit.
+		warning, msg := fs.ConsumeMod(inFlight, &consumer.ConsumeParams{Name: "", Version: "", IsTask: true, MaxSecurity: "MEDIUM"})
+		if warning != "max_security" {
+			t.Errorf("Security filter failed to block a download event with classification %v", cls)
+		}
+		require.Nilf(t, msg, "Security failed to make download messages nil with classification %v", cls)
 	}
 }
 
