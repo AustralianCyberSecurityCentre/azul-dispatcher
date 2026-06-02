@@ -18,10 +18,10 @@ type CacheHit struct {
 
 func calculateSecurityResult(authorSecurity, eventSecurity string) (bool, error) {
 	cmd := exec.Command("azul-security", "can-access", authorSecurity, eventSecurity)
-	cmd.Env = append(os.Environ())
+	cmd.Env = os.Environ()
 	out, err := cmd.Output()
 	if err != nil {
-		return false, fmt.Errorf("Bad commandline execution: %v", err)
+		return false, fmt.Errorf("bad commandline execution: %v", err)
 	}
 	simplified_output := strings.ToLower(strings.TrimSpace(string(out)))
 	if simplified_output == "true" {
@@ -29,7 +29,7 @@ func calculateSecurityResult(authorSecurity, eventSecurity string) (bool, error)
 	} else if simplified_output == "false" {
 		return false, nil
 	}
-	return false, fmt.Errorf("Bad security output: %s", out)
+	return false, fmt.Errorf("bad security output: %s", out)
 }
 
 type FilterSecurity struct {
