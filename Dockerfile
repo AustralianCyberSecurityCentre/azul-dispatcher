@@ -86,7 +86,9 @@ RUN rm test.c
 RUN rm /usr/lib/python3.13/EXTERNALLY-MANAGED
 
 RUN pip install uv
-RUN uv pip install --system azul-security --extra-index-url $UV_INDEX_URL --exclude-newer "7 days" --exclude-newer-package=azul-security=false --exclude-newer-package=azul-bedrock=false
+COPY python-deps.txt ./python-deps.txt
+RUN uv pip install --system -r python-deps.txt --extra-index-url $UV_INDEX_URL --exclude-newer "7 days" --exclude-newer-package=azul-security=false --exclude-newer-package=azul-bedrock=false
+RUN rm python-deps.txt
 
 # Upgrade to dev azul dependencies or upgrade non-dev azul dependencies depending on branch.
 RUN if [ "$GIT_BRANCH_NAME" = "refs/heads/dev" ]; then \
@@ -154,7 +156,9 @@ RUN apt-get update && \
 RUN rm /usr/lib/python3.13/EXTERNALLY-MANAGED
 
 RUN pip install uv
-RUN uv pip install --system azul-security --extra-index-url $UV_INDEX_URL --exclude-newer "7 days" --exclude-newer-package=azul-security=false --exclude-newer-package=azul-bedrock=false
+COPY python-deps.txt ./python-deps.txt
+RUN uv pip install --system -r python-deps.txt --extra-index-url $UV_INDEX_URL --exclude-newer "7 days" --exclude-newer-package=azul-security=false --exclude-newer-package=azul-bedrock=false
+RUN rm python-deps.txt
 
 # Upgrade to dev azul dependencies or upgrade non-dev azul dependencies depending on branch.
 RUN if [ "$GIT_BRANCH_NAME" = "refs/heads/dev" ]; then \
