@@ -11,26 +11,26 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/msginflight"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 )
-type CacheHit struct{
+
+type CacheHit struct {
 	hit map[string]bool
 }
 
-func calculateSecurityResult(authorSecurity, eventSecurity string) (bool, error){
+func calculateSecurityResult(authorSecurity, eventSecurity string) (bool, error) {
 	cmd := exec.Command("azul-security", "can-access", authorSecurity, eventSecurity)
 	cmd.Env = append(os.Environ())
 	out, err := cmd.Output()
-	if err != nil{
+	if err != nil {
 		return false, fmt.Errorf("Bad commandline execution: %v", err)
 	}
 	simplified_output := strings.ToLower(strings.TrimSpace(string(out)))
-	if simplified_output == "true"{
+	if simplified_output == "true" {
 		return true, nil
-	} else if(simplified_output == "false"){
+	} else if simplified_output == "false" {
 		return false, nil
 	}
 	return false, fmt.Errorf("Bad security output: %s", out)
 }
-
 
 type FilterSecurity struct {
 	CachedSecurityResults map[string]CacheHit
@@ -40,43 +40,43 @@ func (p *FilterSecurity) GetName() string { return "FilterSecurity" }
 
 // Filter if this message has a security classification that exceeds what is allowed
 func (p *FilterSecurity) ConsumeMod(message *msginflight.MsgInFlight, meta *consumer.ConsumeParams) (string, *msginflight.MsgInFlight) {
-	if len(meta.MaxSecurity) == 0{
+	if len(meta.MaxSecurity) == 0 {
 		return "", message
 	}
 	binary, ok := message.GetBinary()
 	var security string
-	if !ok{
+	if !ok {
 		download, ok := message.GetDownload()
-		if !ok{
+		if !ok {
 			return "", message
 		}
 		security = download.Source.Security
-	} else{
+	} else {
 		security = binary.Source.Security
 	}
-	if(len(security) == 0){
+	if len(security) == 0 {
 		return "", message
 	}
 	// Check cache and do comparison.
 	var result bool
 	var err error
 	userSecurityHit, ok := p.CachedSecurityResults[meta.MaxSecurity]
-	if !ok{
+	if !ok {
 		result, err = calculateSecurityResult(meta.MaxSecurity, security)
-		if err != nil{
+		if err != nil {
 			bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering.")
 		}
 		p.CachedSecurityResults[meta.MaxSecurity] = CacheHit{
 			hit: map[string]bool{security: result},
 		}
-	} else{
+	} else {
 		result, ok = userSecurityHit.hit[security]
-			if !ok{
-				result, err = calculateSecurityResult(meta.MaxSecurity, security)
-				if err != nil{
-					bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering.")
-				}
-				userSecurityHit.hit[security] = result
+		if !ok {
+			result, err = calculateSecurityResult(meta.MaxSecurity, security)
+			if err != nil {
+				bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering.")
+			}
+			userSecurityHit.hit[security] = result
 		}
 	}
 	// check if security allows message to continue.

@@ -16,79 +16,79 @@ const security_dir = "events/pipelines/consume/too_deep/"
 
 var security_empty_path = testdata.GetEventBytes(security_dir + "empty_path.json")
 
-func easySetJsonEnv(t *testing.T, field string, v any){
+func easySetJsonEnv(t *testing.T, field string, v any) {
 	bytes, err := json.Marshal(v)
-	if err != nil{
+	if err != nil {
 		t.Fatalf("Failed to configure security field %s with value %v", field, v)
 	}
 	err = os.Setenv(field, string(bytes))
-	if err != nil{
+	if err != nil {
 		t.Fatalf("Failed when setting security environment variable %s with value %v", field, v)
 	}
 }
 
-func easySetEnv(t *testing.T, field string, v string){
+func easySetEnv(t *testing.T, field string, v string) {
 	err := os.Setenv(field, v)
-	if err != nil{
+	if err != nil {
 		t.Fatalf("Failed when setting security environment variable %s with value %v", field, v)
 	}
 }
 
-func setupSecurityEnv(t *testing.T){
+func setupSecurityEnv(t *testing.T) {
 	// Marshal converts data to []byte
-    easySetJsonEnv(t, "security_minimum_required_access", []string{})
-    easySetEnv(t, "security_default", "LOW")
-    easySetJsonEnv(t, "security_presets", []string{
+	easySetJsonEnv(t, "security_minimum_required_access", []string{})
+	easySetEnv(t, "security_default", "LOW")
+	easySetJsonEnv(t, "security_presets", []string{
 		"low TLP:CLEAR",
 		"high",
 		"REL:APPLE REL:BEE medium",
 		"REL:APPLE REL:BEE REL:CAR medium",
 		"TOP HIGH REL:APPLE REL:BEE REL:CAR",
 	})
-    easySetEnv(t, "security_allow_releasability_priority_gte", "30")
-    easySetJsonEnv(t, "security_labels", map[string]map[string]any{
-            "classification": {
-                "title": "Classifications",
-                "options": []map[string]string{
-                    {"name": "LOW", "priority": "10"},
-                    {"name": "LOW: LY", "priority": "20"},
-                    {"name": "MEDIUM", "priority": "30"},
-                    {"name": "HIGH", "priority": "40"},
-                    {"name": "TOP HIGH", "priority": "50"},
-                },
-            },
-            "caveat": {
-                "title": "Required",
-                "options": []map[string]string{
-                    {"name": "MOD1"},
-                    {"name": "MOD2"},
-                    {"name": "MOD3"},
-                    {"name": "HANOVERLAP"},
-                    {"name": "OVER"},
-                    {"name": "RESTRICTED1", "min_priority": "10", "max_priority": "10"},
-                    {"name": "RESTRICTED2", "min_priority": "30", "max_priority": "50"},
-				},
-            },
-            "releasability": {
-                "title": "Groups",
-                "origin": "REL:APPLE",
-                "origin_alt_name": "APPLEO",
-                "prefix": "REL:",
-                "options": []map[string]string{
-                    {"name": "REL:APPLE"},
-                    {"name": "REL:BEE"},
-                    {"name": "REL:CAR"},
-				},
-            },
-            "tlp": {
-                "title": "TLP",
-                "options": []map[string]string{
-                    {"name": "TLP:CLEAR"},
-                    {"name": "TLP:GREEN"},
-                    {"name": "TLP:AMBER"},
-                    {"name": "TLP:AMBER+STRICT", "enforce_security": "true"},
+	easySetEnv(t, "security_allow_releasability_priority_gte", "30")
+	easySetJsonEnv(t, "security_labels", map[string]map[string]any{
+		"classification": {
+			"title": "Classifications",
+			"options": []map[string]string{
+				{"name": "LOW", "priority": "10"},
+				{"name": "LOW: LY", "priority": "20"},
+				{"name": "MEDIUM", "priority": "30"},
+				{"name": "HIGH", "priority": "40"},
+				{"name": "TOP HIGH", "priority": "50"},
 			},
-            },
+		},
+		"caveat": {
+			"title": "Required",
+			"options": []map[string]string{
+				{"name": "MOD1"},
+				{"name": "MOD2"},
+				{"name": "MOD3"},
+				{"name": "HANOVERLAP"},
+				{"name": "OVER"},
+				{"name": "RESTRICTED1", "min_priority": "10", "max_priority": "10"},
+				{"name": "RESTRICTED2", "min_priority": "30", "max_priority": "50"},
+			},
+		},
+		"releasability": {
+			"title":           "Groups",
+			"origin":          "REL:APPLE",
+			"origin_alt_name": "APPLEO",
+			"prefix":          "REL:",
+			"options": []map[string]string{
+				{"name": "REL:APPLE"},
+				{"name": "REL:BEE"},
+				{"name": "REL:CAR"},
+			},
+		},
+		"tlp": {
+			"title": "TLP",
+			"options": []map[string]string{
+				{"name": "TLP:CLEAR"},
+				{"name": "TLP:GREEN"},
+				{"name": "TLP:AMBER"},
+				{"name": "TLP:AMBER+STRICT", "enforce_security": "true"},
+			},
+		},
 	})
 }
 
@@ -102,7 +102,7 @@ func TestSecurityNormal(t *testing.T) {
 	require.True(t, ok)
 
 	// pass security filtering
-	for _, cls := range([]string{"LOW", "LOW MOD1", "MEDIUM MOD1", "MEDIUM", "MEDIUM REL:APPLE", "MEDIUM REL:APPLE,BEE"}){
+	for _, cls := range []string{"LOW", "LOW MOD1", "MEDIUM MOD1", "MEDIUM", "MEDIUM REL:APPLE", "MEDIUM REL:APPLE,BEE"} {
 		be.Source.Security = cls
 		// Check security string when cache value not hit.
 		warning, msg := fs.ConsumeMod(inFlight, &consumer.ConsumeParams{Name: "", Version: "", IsTask: true, MaxSecurity: "MEDIUM MOD1 REL:APPLE"})
@@ -113,7 +113,7 @@ func TestSecurityNormal(t *testing.T) {
 	}
 
 	// Fail to pass security filtering
-	for _, cls := range([]string{"HIGH", "TOP HIGH", "HIGH MOD1", "HIGH REL:APPLE", "LOW MOD1", "LOW MOD2", "MEDIUM MOD3"}){
+	for _, cls := range []string{"HIGH", "TOP HIGH", "HIGH MOD1", "HIGH REL:APPLE", "LOW MOD1", "LOW MOD2", "MEDIUM MOD3"} {
 		be.Source.Security = cls
 		// Check security string when cache value not hit.
 		warning, msg := fs.ConsumeMod(inFlight, &consumer.ConsumeParams{Name: "", Version: "", IsTask: true, MaxSecurity: "MEDIUM"})
