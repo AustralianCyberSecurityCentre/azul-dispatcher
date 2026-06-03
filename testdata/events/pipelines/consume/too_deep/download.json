@@ -1,0 +1,28 @@
+{
+  "model_version": 6,
+  "author": {
+    "name": "vtfilemapper",
+    "version": "0.27",
+    "category": "plugin"
+  },
+  "action": "requested",
+  "source": {
+    "name": "virustotal",
+    "references": {
+      "interface": "api",
+      "submitter_country": "US",
+      "submitter_id": "ffc28588"
+    },
+    "path": [
+    ],
+    "timestamp": "2019-08-04T03:59:09Z"
+  },
+  "entity": {
+    "hash": "86795438796",
+    "category": "athing",
+    "category_quota": 100,
+    "metadata": { "thing1": 999, "thing2": "another" }
+  },
+  "timestamp": "2021-03-29T03:24:08.54928Z",
+  "kafka_key": "ab3808f6d20b3c01513f89186becdcde"
+}

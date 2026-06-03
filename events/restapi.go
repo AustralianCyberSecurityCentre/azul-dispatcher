@@ -93,6 +93,7 @@ func parseParams(c *gin.Context) (*consumer.ConsumeParams, error) {
 	p.Name = qv.Get(getevents.Name)
 	p.Version = qv.Get(getevents.Version)
 	p.DeploymentKey = qv.Get(getevents.DeploymentKey)
+	p.MaxSecurity = qv.Get(getevents.MaxSecurity)
 	p.RequireExpedite, err = strconv.ParseBool(getWithDefault(qv, getevents.RequireExpedite, "false"))
 	if err != nil {
 		return nil, fmtBadParam(getevents.RequireExpedite, err)
