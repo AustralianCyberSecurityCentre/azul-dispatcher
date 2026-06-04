@@ -375,37 +375,31 @@ func (sa *SaramaKafkaAdmin) DescribeTopicConfig(topics []st.GenericKafkaTopicSpe
 }
 
 func (sa *SaramaKafkaAdmin) ResetConsumerOffsets(group string) error {
-	bedSet.Logger.Info().Str("group", group).Msg("Resetting consumer offsets for consumer group")
-	// Fetch all partitions
-	listConsumerGroupOffsetsRequest := sarama.OffsetFetchRequest{Version: 3, ConsumerGroup: group}
-	resp, err := sa.broker.FetchOffset(&listConsumerGroupOffsetsRequest)
-	if err != nil {
-		bedSet.Logger.Err(err).Msg("Failed to fetch ConsumerGroup's offset(s)")
-		return err
+	bedSet.Logger.Info().Str("group", group).Msg("Deleting consumer group to reset offsets")
+
+	// Delete the consumer group entirely, which clears all offset metadata
+	deleteGroupsRequest := sarama.DeleteGroupsRequest{
+		Version: 0,
+		Groups:  []string{group},
 	}
 
-	// print contents of resp for debugging
-	for topic, partitions := range resp.Blocks {
-		for partition, block := range partitions {
-			bedSet.Logger.Debug().Str("group", group).Str("topic", topic).Int32("partition", partition).Int64("offset", block.Offset).Msg("Current ConsumerGroup offset")
+	time.Sleep(1000 * time.Millisecond)
+
+	var err error
+	var resp *sarama.DeleteGroupsResponse
+	for range 5 {
+		resp, err = sa.broker.DeleteGroups(&deleteGroupsRequest)
+		if err == nil && resp.GroupErrorCodes[group] == sarama.ErrNoError {
+			break
 		}
+		time.Sleep(200 * time.Millisecond)
 	}
 
-	// Create a offset commit request and set all offsets to oldest FUTURE: should offset be an option?
-	resetConsumerGroupOffsetsRequest := sarama.OffsetCommitRequest{Version: 3, ConsumerGroup: group, ConsumerGroupGeneration: sarama.GroupGenerationUndefined}
-	for topic, partitions := range resp.Blocks {
-		for partition, block := range partitions {
-			resetConsumerGroupOffsetsRequest.AddBlock(topic, partition, sarama.OffsetOldest, time.Now().UnixMilli(), block.Metadata)
-			// print contents of request for debugging
-			bedSet.Logger.Debug().Str("group", group).Str("topic", topic).Int32("partition", partition).Int64("offset", sarama.OffsetOldest).Msg("Resetting ConsumerGroup offset to oldest")
-		}
+	if err != nil || resp.GroupErrorCodes[group] != sarama.ErrNoError {
+		bedSet.Logger.Warn().Str("group", group).Err(resp.GroupErrorCodes[group]).Msg("Error deleting group")
 	}
 
-	_, err = sa.broker.CommitOffset(&resetConsumerGroupOffsetsRequest)
-	if err != nil {
-		bedSet.Logger.Err(err).Msg("Failed to reset ConsumerGroup's offset(s)")
-	}
-	return err
+	return nil
 }
 
 func (sa *SaramaKafkaAdmin) DeleteTopics(topicNames []string) error {

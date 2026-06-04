@@ -222,11 +222,6 @@ func parseParams(c *gin.Context) (*consumer.ConsumeParams, error) {
 		return nil, fmtBadParam("debug", err)
 	}
 
-	p.ExpirySec, err = strconv.Atoi(getWithDefault(qv, "expiry_sec", "600")) // default to 10 minute expiry
-	if err != nil {
-		return nil, fmtBadParam("expiry_sec", err)
-	}
-
 	// list of label:ft1,ft2,ft3
 	dataTypes := qv[getevents.RequireStreams]
 	if len(dataTypes) > 0 {
