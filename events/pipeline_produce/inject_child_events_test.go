@@ -241,6 +241,41 @@ func TestChildBinaryCopy(t *testing.T) {
 	require.True(t, deleted)
 }
 
+func TestChildBinaryCopyFailure(t *testing.T) {
+	tables := []struct {
+		test     string
+		parent   []byte
+		insert   [][]byte
+		expected int // can expand to full content but already tested in merge
+	}{
+		{"multiple", []byte(extracted), [][]byte{[]byte(insert_event), []byte(insert_event2)}, 2},
+	}
+	// Using memory store as it errors when Copying a file that doesn't exist unlike LocalStorage
+	fstore := store.NewStoreMem()
+
+	for _, table := range tables {
+		// create directly without New as don't want to set up/mock kafka
+		inj := &InjectChildEvents{
+			consumer: nil,
+			run:      true,
+			store:    fstore,
+			inserts:  map[string][]*events.InsertEvent{},
+		}
+		for _, i := range table.insert {
+			inFlight, err := pipeline.NewMsgInFlightFromJson(i, events.ModelInsert)
+			require.Nil(t, err)
+			insert, _ := inFlight.GetInsert()
+			log.Printf("src %v", insert.Entity.OriginalSource)
+			err = inj.registerInsert("", insert)
+			require.Nil(t, err, table.test)
+		}
+		msg, err := pipeline.NewMsgInFlightFromJson(table.parent, events.ModelBinary)
+		require.Nil(t, err, table.test)
+		_, res := inj.ProduceMod(msg, &produceParams)
+		require.Equal(t, len(res), table.expected, table.test)
+	}
+}
+
 func TestChildBinaryCopyNoSource(t *testing.T) {
 	// Test case when the source file does not exist
 	// we expect no error to occur in this event
