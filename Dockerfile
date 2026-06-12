@@ -46,10 +46,10 @@ ENV RUSTFLAGS="-C link-arg=-fuse-ld=lld"
 ARG YARA_X_VERSION_TAG
 ENV YARA_X_VERSION_TAG=${YARA_X_VERSION_TAG}
 
-RUN if [[ -f "/src/prebuilt/libyara.so" ]]; then \
+RUN if [[ -f "/src/prebuilt/libyara_x_capi.so" ]]; then \
         cp -r ./pkgconfig/* /usr/local/lib/pkgconfig/; \
         cp -r ./include/* /usr/local/include/; \
-        cp /src/prebuilt/libyara.so /usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG; \
+        cp /src/prebuilt/libyara_x_capi.so /usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG; \
         cd /usr/local/lib/ && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so.1; \
     fi
 
