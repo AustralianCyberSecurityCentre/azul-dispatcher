@@ -3,7 +3,8 @@
 ARG REGISTRY="docker.io/library"
 ARG BASE_IMAGE=golang
 ARG BASE_TAG=1.26-trixie@sha256:0dcba0d95dbfb072e9917a106b9e07d7cc298097dc83e9307056ef1889de654d
-ARG YARA_X_VERSION_TAG="1.16.0"
+# Note if this is bumped for faster builds ensure the build agent has the same version of yara.
+ARG YARA_X_VERSION_TAG="1.17.0"
 
 FROM $REGISTRY/$BASE_IMAGE:$BASE_TAG AS builder
 ENV DEBIAN_FRONTEND=noninteractive
@@ -41,46 +42,51 @@ RUN git config --global url."git@github.com:AustralianCyberSecurityCentre/".inst
 # Install yara-x for identify - needed for golang bedrock
 # Install Rust and yara-x
 ENV RUST_VERSION=1.96.0
-RUN gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys 85AB96E6FA1BE5FE
-# Download Rust tarball + signature
-RUN curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz \
-    && curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc
-# Verify signature
-RUN gpg --verify rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc
-
-# perform rust install
-RUN tar xzf rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz \
-    && rust-${RUST_VERSION}-x86_64-unknown-linux-gnu/install.sh \
-         --prefix=/usr/local \
-         --without=rust-docs \
-    && rm -rf rust-${RUST_VERSION}-*
-
-# perform yara-x install
 # Attempts to limit cargo RAM usage during builds.
-# ENV CARGO_INCREMENTAL=0
-# ENV RUSTFLAGS="-C debuginfo=0 -C codegen-units=1 -C link-arg=-fuse-ld=lld"
 ENV RUSTFLAGS="-C link-arg=-fuse-ld=lld"
-
-RUN cargo install cargo-c
 ARG YARA_X_VERSION_TAG
 ENV YARA_X_VERSION_TAG=${YARA_X_VERSION_TAG}
-RUN git clone -b v$YARA_X_VERSION_TAG https://github.com/VirusTotal/yara-x.git && \
-    cd yara-x && \
-    cargo cinstall -p yara-x-capi --release --libdir /usr/local/lib/
-RUN rm -rf yara-x
 
-# Verify that yara-x install was successfull
-RUN cat <<'EOF' > test.c
-#include <yara_x.h>
-int main() {
-    YRX_RULES* rules;
-    yrx_compile("rule dummy { condition: true }", &rules);
-    yrx_rules_destroy(rules);
-}
-EOF
-RUN gcc `pkg-config --cflags yara_x_capi` test.c `pkg-config --libs yara_x_capi`
-RUN rm test.c
-# End of yara-x/rust install
+COPY . /src
+
+RUN if [ -f "/src/prebuilt/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
+        mkdir -p /usr/local/lib/pkgconfig/ && \
+        cp -r /src/prebuilt/pkgconfig/* /usr/local/lib/pkgconfig/ && \
+        cp -r /src/prebuilt/include/* /usr/local/include/ && \
+        cp /src/prebuilt/libyara_x_capi.so.$YARA_X_VERSION_TAG /usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG && \
+        cd /usr/local/lib/ && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so.1; \
+    fi
+
+# Only run if libyara isn't already present.
+# if [[ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]]; then
+
+# Download Rust tarball + signature
+RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
+        gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys 85AB96E6FA1BE5FE && \
+        curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz && \
+        curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc && \
+        gpg --verify rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc; \
+    fi
+
+# perform rust install
+RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
+        tar xzf rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz && \
+        rust-${RUST_VERSION}-x86_64-unknown-linux-gnu/install.sh \
+            --prefix=/usr/local \
+            --without=rust-docs && \
+        rm -rf rust-${RUST_VERSION}-*; \
+    fi
+
+# perform yara-x install
+RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
+     cargo install cargo-c; \
+    fi
+RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
+        git clone -b v$YARA_X_VERSION_TAG https://github.com/VirusTotal/yara-x.git; \
+        cd yara-x; \
+        cargo cinstall -p yara-x-capi --release --libdir /usr/local/lib/; \
+        rm -rf yara-x; \
+    fi
 
 # bypass externally managed restriction in distributed python
 RUN rm /usr/lib/python3.13/EXTERNALLY-MANAGED
@@ -109,8 +115,6 @@ RUN git clone --branch $FILE_TAG $FILE_GIT /go/file && \
     make -j4 && \
     make install && \
     ldconfig -v && file --version
-
-COPY . /src
 
 # if BEDROCK_REPLACE, bedrock is in a different place
 # you must include a version such as thing@latest
