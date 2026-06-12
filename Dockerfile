@@ -64,7 +64,7 @@ RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
         gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys 85AB96E6FA1BE5FE && \
         curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz && \
         curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc && \
-        gpg --verify rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc \
+        gpg --verify rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc; \
     fi
 
 # perform rust install
