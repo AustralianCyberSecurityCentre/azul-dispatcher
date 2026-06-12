@@ -3,7 +3,8 @@
 ARG REGISTRY="docker.io/library"
 ARG BASE_IMAGE=golang
 ARG BASE_TAG=1.26-trixie@sha256:0dcba0d95dbfb072e9917a106b9e07d7cc298097dc83e9307056ef1889de654d
-ARG YARA_X_VERSION_TAG="1.16.0"
+# Note if this is bumped for faster builds ensure the build agent has the same version of yara.
+ARG YARA_X_VERSION_TAG="1.17.0"
 
 FROM $REGISTRY/$BASE_IMAGE:$BASE_TAG AS builder
 ENV DEBIAN_FRONTEND=noninteractive
@@ -48,11 +49,11 @@ ENV YARA_X_VERSION_TAG=${YARA_X_VERSION_TAG}
 
 COPY . /src
 
-RUN if [ -f "/src/prebuilt/libyara_x_capi.so" ]; then \
+RUN if [ -f "/src/prebuilt/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
         mkdir -p /usr/local/lib/pkgconfig/ && \
         cp -r /src/prebuilt/pkgconfig/* /usr/local/lib/pkgconfig/ && \
         cp -r /src/prebuilt/include/* /usr/local/include/ && \
-        cp /src/prebuilt/libyara_x_capi.so /usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG && \
+        cp /src/prebuilt/libyara_x_capi.so.$YARA_X_VERSION_TAG /usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG && \
         cd /usr/local/lib/ && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so.1; \
     fi
 
