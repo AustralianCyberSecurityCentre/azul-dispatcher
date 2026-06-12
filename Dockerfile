@@ -46,10 +46,13 @@ ENV RUSTFLAGS="-C link-arg=-fuse-ld=lld"
 ARG YARA_X_VERSION_TAG
 ENV YARA_X_VERSION_TAG=${YARA_X_VERSION_TAG}
 
-RUN if [[ -f "/src/prebuilt/libyara_x_capi.so" ]]; then \
-        cp -r ./pkgconfig/* /usr/local/lib/pkgconfig/; \
-        cp -r ./include/* /usr/local/include/; \
-        cp /src/prebuilt/libyara_x_capi.so /usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG; \
+COPY . /src
+
+RUN if [ -f "/src/prebuilt/libyara_x_capi.so" ]; then \
+        mkdir -p /usr/local/lib/pkgconfig/ && \
+        cp -r /src/prebuilt/pkgconfig/* /usr/local/lib/pkgconfig/ && \
+        cp -r /src/prebuilt/include/* /usr/local/include/ && \
+        cp /src/prebuilt/libyara_x_capi.so /usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG && \
         cd /usr/local/lib/ && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so.1; \
     fi
 
@@ -57,47 +60,32 @@ RUN if [[ -f "/src/prebuilt/libyara_x_capi.so" ]]; then \
 # if [[ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]]; then
 
 # Download Rust tarball + signature
-RUN if [[ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]]; then \
-        gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys 85AB96E6FA1BE5FE; \
-        curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz; \
-        curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc; \
-        gpg --verify rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc; \
+RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
+        gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys 85AB96E6FA1BE5FE && \
+        curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz && \
+        curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc && \
+        gpg --verify rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc \
     fi
 
 # perform rust install
-RUN if [[ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]]; then \
-        tar xzf rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz; \
+RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
+        tar xzf rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz && \
         rust-${RUST_VERSION}-x86_64-unknown-linux-gnu/install.sh \
             --prefix=/usr/local \
-            --without=rust-docs; \
+            --without=rust-docs && \
         rm -rf rust-${RUST_VERSION}-*; \
     fi
 
 # perform yara-x install
-RUN if [[ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]]; then \
+RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
      cargo install cargo-c; \
     fi
-RUN if [[ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]]; then \
+RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
         git clone -b v$YARA_X_VERSION_TAG https://github.com/VirusTotal/yara-x.git; \
         cd yara-x; \
         cargo cinstall -p yara-x-capi --release --libdir /usr/local/lib/; \
         rm -rf yara-x; \
     fi
-
-# Verify that yara-x install was successfull
-RUN cat <<'EOF' > test.c
-#include <yara_x.h>
-int main() {
-    YRX_RULES* rules;
-    yrx_compile("rule dummy { condition: true }", &rules);
-    yrx_rules_destroy(rules);
-}
-EOF
-RUN if [[ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]]; then \
-        gcc `pkg-config --cflags yara_x_capi` test.c `pkg-config --libs yara_x_capi`; \
-    fi
-RUN rm test.c
-# End of yara-x/rust install
 
 # bypass externally managed restriction in distributed python
 RUN rm /usr/lib/python3.13/EXTERNALLY-MANAGED
@@ -126,8 +114,6 @@ RUN git clone --branch $FILE_TAG $FILE_GIT /go/file && \
     make -j4 && \
     make install && \
     ldconfig -v && file --version
-
-COPY . /src
 
 # if BEDROCK_REPLACE, bedrock is in a different place
 # you must include a version such as thing@latest
