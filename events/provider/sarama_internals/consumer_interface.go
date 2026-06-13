@@ -57,6 +57,7 @@ func startSaramaConsumer(ctx context.Context, kafkaVersion sarama.KafkaVersion, 
 		bedSet.Logger.Error().Err(err).Msg("Error creating consumer group client.")
 		return fmt.Errorf("error creating consumer group client: %v", err)
 	}
+	bedSet.Logger.Info().Str("group", consumer.GetGroup()).Msg("Sarama consumer group client created successfully, starting consumer loop.")
 
 	topicList := consumer.GetTopics()
 
@@ -72,6 +73,8 @@ func startSaramaConsumer(ctx context.Context, kafkaVersion sarama.KafkaVersion, 
 				topicList = consumer.GetTopics()
 			}
 			if ctx.Err() != nil {
+				bedSet.Logger.Info().Msgf("Context cancelled, closing consumer for group %s", consumer.GetGroup())
+				client.Close()
 				return
 			}
 			// `Consume` is called inside an infinite loop to allow for server-side rebalance.
@@ -98,6 +101,8 @@ func startSaramaConsumer(ctx context.Context, kafkaVersion sarama.KafkaVersion, 
 			}
 			// check if context was cancelled, signaling that the consumer should stop
 			if ctx.Err() != nil {
+				bedSet.Logger.Info().Msgf("Context cancelled, closing consumer for group %s", consumer.GetGroup())
+				client.Close()
 				return
 			}
 		}

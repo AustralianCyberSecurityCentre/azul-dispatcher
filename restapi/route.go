@@ -69,6 +69,10 @@ func NewDispatcher(prov provider.ProviderInterface, kvprov *kvprovider.KVMulti, 
 	lpath = "/api/v2/event/simulate"
 	router.POST(lpath, MetricHandler(lpath, event.PostEventSimulate))
 
+	// debugging endpoint for fetching events from a specific topic/offset
+	lpath = "/api/v2/debug/events"
+	router.GET(lpath, MetricHandler(lpath, event.GetDebugTopicEvents))
+
 	// post new binary stream
 	lpath = "/api/v3/stream/:source/:label"
 	router.POST(lpath, MetricHandler(lpath, stream.PostStream))

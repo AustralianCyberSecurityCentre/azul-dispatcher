@@ -12,7 +12,7 @@ It is responsible for:
 
 ## API Description
 
-These endpoints are currently under development.
+These endpoints are currently under development. 
 
 | Method | Endpoint                              | Description                                                  | Response                      |
 | ------ | ------------------------------------- | ------------------------------------------------------------ | ----------------------------- |

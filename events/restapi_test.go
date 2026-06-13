@@ -57,6 +57,7 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
+		ExpirySec:       600,
 	})
 	require.Equal(
 		t,
@@ -78,6 +79,7 @@ func TestParseParams(t *testing.T) {
 		Deadline:                5,
 		IsTask:                  false,
 		RequireUnderContentSize: 1020,
+		ExpirySec:               600,
 	})
 	evs := []*events.BinaryEvent{
 		testdata.GenEventBinary(&testdata.BC{}),
@@ -116,6 +118,7 @@ func TestParseParams(t *testing.T) {
 		IsTask:                  false,
 		RequireUnderContentSize: 1020,
 		RequireOverContentSize:  1000,
+		ExpirySec:               600,
 	})
 
 	require.Equal(t, testFilters(t, params, evs), []int{2})
@@ -137,6 +140,7 @@ func TestParseParams(t *testing.T) {
 		Deadline:               5,
 		IsTask:                 false,
 		RequireOverContentSize: 2000,
+		ExpirySec:              600,
 	})
 	require.Equal(t, testFilters(t, params, evs), []int{3, 4})
 
@@ -152,6 +156,7 @@ func TestParseParams(t *testing.T) {
 		Count:            1,
 		Deadline:         5,
 		IsTask:           false,
+		ExpirySec:        600,
 		RequireEvents:    []events.BinaryAction{events.ActionExtracted, events.ActionAugmented},
 		RequireEventsMap: map[events.BinaryAction]bool{events.ActionExtracted: true, events.ActionAugmented: true},
 	})
@@ -168,6 +173,7 @@ func TestParseParams(t *testing.T) {
 		Count:             1,
 		Deadline:          5,
 		IsTask:            false,
+		ExpirySec:         600,
 		RequireEvents:     []events.BinaryAction{events.ActionSourced},
 		RequireEventsMap:  map[events.BinaryAction]bool{events.ActionSourced: true},
 		RequireSourcesMap: map[string]bool{"testing": true},
@@ -185,6 +191,7 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
+		ExpirySec:       600,
 		DenyEvents:      []events.BinaryAction{events.ActionMapped, events.ActionEnriched},
 		DenyEventsMap:   map[events.BinaryAction]bool{events.ActionMapped: true, events.ActionEnriched: true},
 	})
@@ -201,6 +208,7 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
+		ExpirySec:       600,
 		DenyEvents:      []events.BinaryAction{events.ActionEnriched},
 		DenyEventsMap:   map[events.BinaryAction]bool{events.ActionEnriched: true},
 	})
@@ -216,6 +224,7 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
+		ExpirySec:       600,
 		RequireContent:  true,
 		RequireEvents:   []events.BinaryAction{events.ActionSourced, events.ActionExtracted},
 		RequireEventsMap: map[events.BinaryAction]bool{
@@ -247,6 +256,7 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
+		ExpirySec:       600,
 		DenySelf:        true,
 	})
 	require.Equal(
@@ -284,6 +294,7 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
+		ExpirySec:       600,
 		RequireStreams:  map[events.DatastreamLabel]map[string]bool{"*": {"executable/windows/pe32": true, "executable/windows/dll32": true}},
 	})
 	require.Equal(
@@ -309,6 +320,7 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
+		ExpirySec:       600,
 		RequireStreams:  map[events.DatastreamLabel]map[string]bool{"content": {}, "pcap": {"network/tcpdump": true}},
 	})
 	require.Equal(
@@ -335,6 +347,7 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
+		ExpirySec:       600,
 		RequireStreams: map[events.DatastreamLabel]map[string]bool{
 			"content": {"executable/windows/pe32": true, "executable/windows/dll32": true},
 		},
@@ -357,6 +370,7 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
+		ExpirySec:       600,
 		RequireStreams: map[events.DatastreamLabel]map[string]bool{
 			"content": {"executable/": true},
 		},

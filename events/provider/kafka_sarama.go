@@ -33,6 +33,14 @@ func NewSaramaProvider(bootstrap string, ctx context.Context) (*SaramaKafkaProvi
 	return &skc, nil
 }
 
+func (kp *SaramaKafkaProvider) GetBootstrap() string {
+	return kp.bootstrap
+}
+
+func (kp *SaramaKafkaProvider) GetKafkaVersion() sarama.KafkaVersion {
+	return kp.kafkaVersion
+}
+
 func (kp *SaramaKafkaProvider) CreateConsumer(consumerName, group, offset, pattern string, consumerOptions CreateConsumerOptions) (ConsumerInterface, error) {
 	// Prefix added to allow two dispatchers with different prefixes to not collide even on the same kafka.
 	groupWithPrefix := fmt.Sprintf("%s-%s", st.Events.Kafka.TopicPrefix, group)
@@ -54,6 +62,24 @@ func (kp *SaramaKafkaProvider) CreateConsumer(consumerName, group, offset, patte
 		Str("pattern", pattern).
 		Msg("consumer subscribed to topics")
 	return &conn, nil
+}
+
+func (kp *SaramaKafkaProvider) ResetConsumer(group string) error {
+	// Prefix added to allow two dispatchers with different prefixes to not collide even on the same kafka.
+	groupWithPrefix := fmt.Sprintf("%s-%s", st.Events.Kafka.TopicPrefix, group)
+
+	// we need an admin
+	admin, err := kp.CreateAdmin()
+	if err != nil {
+		return err
+	}
+
+	err = admin.ResetConsumerOffsets(groupWithPrefix)
+	if err != nil {
+		bedSet.Logger.Err(err).Msg("Could not reset consumer offset")
+	}
+
+	return err
 }
 
 func repeatablePartitioner(topic string) sarama.Partitioner {
@@ -346,6 +372,34 @@ func (sa *SaramaKafkaAdmin) DescribeTopicConfig(topics []st.GenericKafkaTopicSpe
 	}
 	return resp.Resources
 
+}
+
+func (sa *SaramaKafkaAdmin) ResetConsumerOffsets(group string) error {
+	bedSet.Logger.Info().Str("group", group).Msg("Deleting consumer group to reset offsets")
+
+	// Delete the consumer group entirely, which clears all offset metadata
+	deleteGroupsRequest := sarama.DeleteGroupsRequest{
+		Version: 0,
+		Groups:  []string{group},
+	}
+
+	time.Sleep(1000 * time.Millisecond)
+
+	var err error
+	var resp *sarama.DeleteGroupsResponse
+	for range 5 {
+		resp, err = sa.broker.DeleteGroups(&deleteGroupsRequest)
+		if err == nil && resp.GroupErrorCodes[group] == sarama.ErrNoError {
+			break
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
+
+	if err != nil || resp.GroupErrorCodes[group] != sarama.ErrNoError {
+		bedSet.Logger.Warn().Str("group", group).Err(resp.GroupErrorCodes[group]).Msg("Error deleting group")
+	}
+
+	return nil
 }
 
 func (sa *SaramaKafkaAdmin) DeleteTopics(topicNames []string) error {
