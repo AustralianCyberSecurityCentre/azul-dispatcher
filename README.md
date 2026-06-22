@@ -219,6 +219,9 @@ Example Build:
 This provides your public and private ssh keys as build arguments to the docker container.
 As the built go binary is extracted from a separate stage, the final docker image will not contain your private key.
 
+NOTE - to increase the speed of yara-x builds there is a script called pull-in-prebuilt.sh
+       this pulls in libyara from the local operating system if it exists and installs it instead of having to rebuild it which is very slow.
+
 ## Run
 
 A docker compose file is provided which will start dispatcher and all required dependencies.

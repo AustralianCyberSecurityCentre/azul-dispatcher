@@ -45,6 +45,7 @@ type ConsumeParams struct {
 	DenyEvents              []events.BinaryAction                      `json:"deny_events"`                // event types for that entity
 	DenyEventsMap           map[events.BinaryAction]bool               `json:"deny_events_map"`            // optimisation of ^
 	DenySelf                bool                                       `json:"deny_self"`                  // do not receive events published by this same author
+	MaxSecurity             string                                     `json:"max_security"`               // Only get events that have a security up to the provided limit.
 }
 
 // Generate the kafka consumer group's prefix

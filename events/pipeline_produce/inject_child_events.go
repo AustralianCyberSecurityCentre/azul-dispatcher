@@ -126,7 +126,10 @@ func (p *InjectChildEvents) ProduceMod(inFlight *msginflight.MsgInFlight, meta *
 			err := p.store.Copy(childSource, childLabel.Str(), child, parentSource, childLabel.Str(), child)
 			if err != nil {
 				pipeline.HandleProducerError(meta.UserAgent, p.GetName(), inFlight, err, "error copying child binary")
-				return nil, nil
+				// Continue on even if the stream is missing. The injection event is still valid but the stream is missing.
+				// This can occur if an injection event has had it's stream age-off (it's source ages off after 2 weeks).
+				// This should only occur if the parent binary is re-uploaded and the injection event aged off with it's original parent.
+				// FUTURE - return nil,nil // If injection events have their own S3 storage that doesn't age off.
 			}
 		}
 		bedSet.Logger.Debug().Str("parent", parent.Entity.Sha256).Str("child", child).Msg("Attaching manual-insert child to parent")

@@ -16,8 +16,8 @@ func TestSetKey(t *testing.T) {
 		expectedID string
 		err        bool
 	}{
-		{"simple", "simple.json", "b77549952b9354551975192f6c09e3c7", false},
-		{"existing_key", "existing_key.json", "b77549952b9354551975192f6c09e3c7", false},
+		{"simple", "simple.json", "e299c2cfa5345f98ea34ff0455de22b7", false},
+		{"existing_key", "existing_key.json", "e299c2cfa5345f98ea34ff0455de22b7", false},
 	}
 	for _, table := range tables {
 		raw := testdata.GetEventBytes("events/pipelines/key_generator/" + table.inputFile)

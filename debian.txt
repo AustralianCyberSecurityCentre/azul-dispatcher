@@ -17,3 +17,5 @@ make
 zlib1g-dev
 libfuzzy-dev
 pkg-config
+python3
+python3-pip

@@ -381,4 +381,50 @@ func TestParseParams(t *testing.T) {
 		[]int{0, 1, 2, 3},
 	)
 
+	// check max security
+	params, err = testDoParseParams("name=test&version=5&r-streams=content,executable/&r-expedite=true&r-live=true&max-security=Medium")
+	require.Nil(t, err)
+	require.Equal(t, params, &consumer.ConsumeParams{
+		Model:           "binary",
+		Name:            "test",
+		Version:         "5",
+		RequireExpedite: true,
+		RequireLive:     true,
+		Count:           1,
+		Deadline:        5,
+		IsTask:          false,
+		RequireStreams: map[events.DatastreamLabel]map[string]bool{
+			"content": {"executable/": true},
+		},
+		MaxSecurity: "Medium",
+	})
+	require.Equal(
+		t,
+		testFilters(t, params, evs),
+		[]int{0, 1, 2, 3},
+	)
+
+	// check max security
+	params, err = testDoParseParams("name=test&version=5&r-streams=content,executable/&r-expedite=true&r-live=true&max-security=Medium Truestrike")
+	require.Nil(t, err)
+	require.Equal(t, params, &consumer.ConsumeParams{
+		Model:           "binary",
+		Name:            "test",
+		Version:         "5",
+		RequireExpedite: true,
+		RequireLive:     true,
+		Count:           1,
+		Deadline:        5,
+		IsTask:          false,
+		RequireStreams: map[events.DatastreamLabel]map[string]bool{
+			"content": {"executable/": true},
+		},
+		MaxSecurity: "Medium Truestrike",
+	})
+	require.Equal(
+		t,
+		testFilters(t, params, evs),
+		[]int{0, 1, 2, 3},
+	)
+
 }
