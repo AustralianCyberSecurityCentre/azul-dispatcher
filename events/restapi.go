@@ -213,14 +213,14 @@ func parseParams(c *gin.Context) (*consumer.ConsumeParams, error) {
 	}
 
 	// TODO: group name, reset time (in minutes?), explicit group reset + any other filter options
-	p.Reset, err = strconv.ParseBool(getWithDefault(qv, "reset", "false"))
+	p.Reset, err = strconv.ParseBool(getWithDefault(qv, getevents.Reset, "false"))
 	if err != nil {
-		return nil, fmtBadParam("reset", err)
+		return nil, fmtBadParam(getevents.Reset, err)
 	}
 
-	p.Debug, err = strconv.ParseBool(getWithDefault(qv, "debug", "false"))
+	p.Debug, err = strconv.ParseBool(getWithDefault(qv, getevents.Debug, "false"))
 	if err != nil {
-		return nil, fmtBadParam("debug", err)
+		return nil, fmtBadParam(getevents.Debug, err)
 	}
 
 	// list of label:ft1,ft2,ft3
