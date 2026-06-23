@@ -1,12 +1,8 @@
 # Start from a Debian image with the latest version of Go installed
 # and a workspace (GOPATH) configured at /go.
-ARG BUILD_REGISTRY="docker.io/library"
-ARG BUILD_IMAGE=golang
-ARG BUILD_TAG=1.26-trixie@sha256:0dcba0d95dbfb072e9917a106b9e07d7cc298097dc83e9307056ef1889de654d
-
-ARG REGISTRY="dhi.io"
-ARG BASE_IMAGE='python'
-ARG BASE_TAG='3.12-debian-dev'
+ARG REGISTRY="docker.io/library"
+ARG BASE_IMAGE=golang
+ARG BASE_TAG=1.26-trixie@sha256:bbf22ddccb3205344f2755ea8fa4fe39f7a8b2b77b9f7b764ec2aad31406f6fc
 # Note if this is bumped for faster builds ensure the build agent has the same version of yara.
 ARG YARA_X_VERSION_TAG="1.18.0"
 
