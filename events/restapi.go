@@ -10,14 +10,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/IBM/sarama"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 
@@ -33,8 +31,6 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline_dual"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/producer"
-	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
-	saramago "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider/sarama_internals"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/restapi/restapi_handlers"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"

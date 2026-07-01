@@ -33,14 +33,6 @@ func NewSaramaProvider(bootstrap string, ctx context.Context) (*SaramaKafkaProvi
 	return &skc, nil
 }
 
-func (kp *SaramaKafkaProvider) GetBootstrap() string {
-	return kp.bootstrap
-}
-
-func (kp *SaramaKafkaProvider) GetKafkaVersion() sarama.KafkaVersion {
-	return kp.kafkaVersion
-}
-
 func (kp *SaramaKafkaProvider) CreateConsumer(consumerName, group, offset, pattern string, consumerOptions CreateConsumerOptions) (ConsumerInterface, error) {
 	// Prefix added to allow two dispatchers with different prefixes to not collide even on the same kafka.
 	groupWithPrefix := fmt.Sprintf("%s-%s", st.Events.Kafka.TopicPrefix, group)
@@ -382,8 +374,6 @@ func (sa *SaramaKafkaAdmin) DeleteConsumerGroup(group string) error {
 		Version: 0,
 		Groups:  []string{group},
 	}
-
-	time.Sleep(1000 * time.Millisecond)
 
 	var err error
 	var resp *sarama.DeleteGroupsResponse
