@@ -12,6 +12,16 @@ import (
 	bedsettings "github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/settings"
 )
 
+type AesEnabledEnum string
+
+// All enums added here need to be added to Python's exception_enums.py as well.
+const (
+	AesStateEnabled  = AesEnabledEnum("enabled")
+	AesStateDisabled = AesEnabledEnum("disabled")
+	// Allows
+	AesStateReadOnly = AesEnabledEnum("readOnly")
+)
+
 var Settings *DPSettings
 var Streams *DPStreams
 var Events *DPEvents
@@ -88,7 +98,8 @@ type DPStreams struct {
 	// Secret key for aes encryption, only required if aes-256 encryption is required.
 	// Length of the key must be exactly 24 characters long or 0.
 	// When set AES encryption is enabled.
-	AesKey string `koanf:"aes_key"`
+	AesKey     string         `koanf:"aes_key"`
+	AesEnabled AesEnabledEnum `koanf:"aes_enabled"`
 }
 
 type DPKafka struct {
