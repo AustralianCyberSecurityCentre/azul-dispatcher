@@ -3,7 +3,7 @@ package manager
 import (
 	"testing"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/events"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"

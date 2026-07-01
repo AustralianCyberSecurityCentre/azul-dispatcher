@@ -1,8 +1,8 @@
 package identify
 
 import (
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/events"
-	bed_identify "github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/identify"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/events"
+	bed_identify "github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/identify"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 )
 

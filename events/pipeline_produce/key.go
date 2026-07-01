@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/events"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/msginflight"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/events"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/msginflight"
 )
 
 // Key generates a unique key id for a given event message based on its content.

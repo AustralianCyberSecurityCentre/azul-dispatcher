@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/models"
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/models"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/settings"
 )
 
 // Error replies to the request with the specified error message and HTTP code.

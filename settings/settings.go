@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-viper/mapstructure/v2"
 
-	bedsettings "github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/settings"
+	bedsettings "github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/settings"
 )
 
 var Settings *DPSettings
@@ -84,6 +84,11 @@ type DPStreams struct {
 
 	// Store files with a fixed XOR pattern to avoid AV detections
 	XOREncoding bool `koanf:"xor_encoding"`
+
+	// Secret key for aes encryption, only required if aes-256 encryption is required.
+	// Length of the key must be exactly 24 characters long or 0.
+	// When set AES encryption is enabled.
+	AesKey string `koanf:"aes_key"`
 }
 
 type DPKafka struct {

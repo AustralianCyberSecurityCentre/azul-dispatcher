@@ -12,8 +12,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/events"
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/events"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/settings"
 	ssdeep "github.com/dutchcoders/gossdeep"
 	"github.com/glaslos/tlsh"
 )
