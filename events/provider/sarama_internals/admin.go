@@ -28,7 +28,6 @@ func ListTopics(brokers []string) ([]string, error) {
 		bedSet.Logger.Warn().Err(err).Msg("Couldn't list kafka topics due to an error.")
 		return []string{}, err
 	}
-
 	topicNames := make([]string, len(topicMap))
 	i := 0
 	for k := range topicMap {

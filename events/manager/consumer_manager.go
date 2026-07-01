@@ -218,13 +218,13 @@ func (m *ConsumerManager) removeEventReader(p *consumer.ConsumeParams) error {
 	oldReader.Stop()
 	for _, sub := range oldReader.subscriptions {
 		// delete ConsumerGroups on KafkaServer
-		err = m.prov.ResetConsumer(sub.group)
+		err = m.prov.DeleteConsumer(sub.group)
 		if err != nil {
-			bedSet.Logger.Error().Str("consumer", pluginKey).Msg("Failed to reset consumer group offsets")
+			bedSet.Logger.Error().Str("consumer", pluginKey).Msg("Failed to delete consumer group")
 		}
 	}
 	delete(m.eventReaders, pluginKey)
-	bedSet.Logger.Warn().Str("consumer", pluginKey).Msg("Closing consumer due to reset request.")
+	bedSet.Logger.Warn().Str("consumer", pluginKey).Msg("Closing consumer due to deletion request.")
 
 	return err
 }

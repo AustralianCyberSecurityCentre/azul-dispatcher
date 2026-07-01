@@ -64,7 +64,7 @@ func (kp *SaramaKafkaProvider) CreateConsumer(consumerName, group, offset, patte
 	return &conn, nil
 }
 
-func (kp *SaramaKafkaProvider) ResetConsumer(group string) error {
+func (kp *SaramaKafkaProvider) DeleteConsumer(group string) error {
 	// Prefix added to allow two dispatchers with different prefixes to not collide even on the same kafka.
 	groupWithPrefix := fmt.Sprintf("%s-%s", st.Events.Kafka.TopicPrefix, group)
 
@@ -74,9 +74,9 @@ func (kp *SaramaKafkaProvider) ResetConsumer(group string) error {
 		return err
 	}
 
-	err = admin.ResetConsumerOffsets(groupWithPrefix)
+	err = admin.DeleteConsumerGroup(groupWithPrefix)
 	if err != nil {
-		bedSet.Logger.Err(err).Msg("Could not reset consumer offset")
+		bedSet.Logger.Err(err).Msg("Could not delete consumer group")
 	}
 
 	return err
@@ -374,7 +374,7 @@ func (sa *SaramaKafkaAdmin) DescribeTopicConfig(topics []st.GenericKafkaTopicSpe
 
 }
 
-func (sa *SaramaKafkaAdmin) ResetConsumerOffsets(group string) error {
+func (sa *SaramaKafkaAdmin) DeleteConsumerGroup(group string) error {
 	bedSet.Logger.Info().Str("group", group).Msg("Deleting consumer group to reset offsets")
 
 	// Delete the consumer group entirely, which clears all offset metadata

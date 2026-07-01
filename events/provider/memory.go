@@ -40,7 +40,7 @@ func (prov *MemoryProvider) CreateAdmin() (AdminInterface, error) {
 	return &c, nil
 }
 
-func (prov *MemoryProvider) ResetConsumer(group string) error {
+func (prov *MemoryProvider) DeleteConsumer(group string) error {
 	return nil
 }
 
@@ -254,7 +254,7 @@ func (p *MemoryAdmin) DeleteTopics(topicNames []string) error {
 	return nil
 }
 
-func (p *MemoryAdmin) ResetConsumerOffsets(group string) error {
+func (p *MemoryAdmin) DeleteConsumerGroup(group string) error {
 	return nil
 }
 
