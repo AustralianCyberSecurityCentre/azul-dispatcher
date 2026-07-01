@@ -60,7 +60,7 @@ func MarshalEqual(t *testing.T, in1, in2 any) {
 
 // Skip through all events on the connection
 // unfortunately can be quite slow depending on how much data is in the topics
-func SkipAllEvents(t *testing.T, c *client.Client, processing bool, expedite, live, historic bool) {
+func SkipAllEvents(t *testing.T, c *client.Client, processing bool, expedite, live, historic, debug bool) {
 	maxSecondsToWait := 5
 	bedSet.Logger.Debug().Msg("Skipping binary events")
 	ok := false
@@ -69,7 +69,7 @@ func SkipAllEvents(t *testing.T, c *client.Client, processing bool, expedite, li
 		for i := 1; i <= maxSecondsToWait; i++ {
 			_, info, err := c.GetBinaryEvents(&client.FetchEventsStruct{
 				Count: 1000, Deadline: 1, IsTask: processing,
-				RequireExpedite: expedite, RequireLive: live, RequireHistoric: historic,
+				RequireExpedite: expedite, RequireLive: live, RequireHistoric: historic, Debug: debug,
 			})
 			require.Nil(t, err)
 			if int(info.Fetched) > 0 {

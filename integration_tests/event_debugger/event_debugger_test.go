@@ -73,8 +73,7 @@ func (s *EventDebuggerTestSuite) TearDownSuite() {
 // post and get source binary event
 func (s *EventDebuggerTestSuite) TestFetchEventsWithDebugFlag() {
 	t := s.T()
-	// TODO: how do I skip all events for the debug consumer as well?
-	common_int.SkipAllEvents(t, s.conn, false, false, true, true)
+	common_int.SkipAllEvents(t, s.conn, false, false, true, true, true)
 
 	// publish a new binary sourced event
 	bse := testdata.GenEventBinary(&testdata.BC{})
@@ -90,11 +89,49 @@ func (s *EventDebuggerTestSuite) TestFetchEventsWithDebugFlag() {
 		Count: 1000, Deadline: 1, RequireLive: true, RequireHistoric: true, IsTask: false, Debug: true,
 	})
 	require.Nil(t, err)
-	require.NotEqual(t, 2, info.Fetched) // expect event + historical event
+	require.Equal(t, 2, info.Fetched) // expect event + historical event
 
 	// check published event against what we sent
 	bse.Dequeued = ""
 	bse.KafkaKey = data.Events[0].KafkaKey
 	common_int.MarshalEqual(t, bse, &data.Events[0])
 	require.Equal(t, data.Events[0].Source.Security, "RESTRICTED")
+}
+
+// test that the reset flag returns the same events as the previous fetch
+func (s *EventDebuggerTestSuite) TestFetchEventsWithResetFlag() {
+	t := s.T()
+
+	// publish a new binary sourced event
+	bse := testdata.GenEventBinary(&testdata.BC{})
+	bulk := events.BulkBinaryEvent{Events: []*events.BinaryEvent{bse}}
+	_, err := s.conn.PostEvents(&bulk, &client.PublishEventsOptions{Sync: true})
+	require.Nil(t, err)
+
+	err = bse.UpdateTrackingFields()
+	require.Nil(t, err)
+
+	// fetch the published event from dispatcher
+	data, info, err := s.conn.GetBinaryEvents(&client.FetchEventsStruct{
+		Count: 1000, Deadline: 1, RequireLive: true, RequireHistoric: true, IsTask: false, Debug: true, Reset: true,
+	})
+	require.Nil(t, err)
+
+	reset_data, reset_info, err := s.conn.GetBinaryEvents(&client.FetchEventsStruct{
+		Count: 1000, Deadline: 1, RequireLive: true, RequireHistoric: true, IsTask: false, Debug: true, Reset: true,
+	})
+	require.Nil(t, err)
+	require.Equal(t, info.Fetched, reset_info.Fetched)
+
+	// ensure that all kafka keys are the same for the reset events (events may not return in same order)
+	for _, e := range data.Events {
+		found := false
+		for _, re := range reset_data.Events {
+			if e.KafkaKey == re.KafkaKey {
+				found = true
+				break
+			}
+		}
+		require.True(t, found, "kafka key not found in reset events: %s", e.KafkaKey)
+	}	
 }

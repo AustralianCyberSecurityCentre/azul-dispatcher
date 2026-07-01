@@ -79,7 +79,7 @@ func (s *RestapiIntTestSuite) TearDownSuite() {
 // post and get source binary event
 func (s *RestapiIntTestSuite) TestPublishFetchEvent() {
 	t := s.T()
-	common_int.SkipAllEvents(t, s.conn1, false, false, true, true)
+	common_int.SkipAllEvents(t, s.conn1, false, false, true, true, false)
 
 	// publish a new binary sourced event
 	bse := testdata.GenEventBinary(&testdata.BC{})
@@ -108,9 +108,9 @@ func (s *RestapiIntTestSuite) TestPublishFetchEvent() {
 func (s *RestapiIntTestSuite) TestStatusEventWithBinaryEvent() {
 	t := s.T()
 	// Skip events for ignoring and not ignoring historic events (different consumers).
-	common_int.SkipAllEvents(t, s.conn1, false, false, false, true)
-	common_int.SkipAllEvents(t, s.conn1, false, false, true, true)
-	common_int.SkipAllEvents(t, s.conn1, false, false, true, false)
+	common_int.SkipAllEvents(t, s.conn1, false, false, false, true, false)
+	common_int.SkipAllEvents(t, s.conn1, false, false, true, true, false)
+	common_int.SkipAllEvents(t, s.conn1, false, false, true, false, false)
 
 	// publish a binary produced status with sub events
 	sendEventStatus := testdata.GenEventStatus("1")
