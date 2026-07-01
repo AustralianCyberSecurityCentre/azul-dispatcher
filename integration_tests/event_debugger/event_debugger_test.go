@@ -10,11 +10,11 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/client"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
-	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/restapi"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/tracking"
 	common_int "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/integration_tests"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"
+	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/restapi"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/testdata"
 	"github.com/stretchr/testify/require"
@@ -26,7 +26,7 @@ type EventDebuggerTestSuite struct {
 
 	server  *httptest.Server
 	dp      *restapi.Dispatcher
-	conn   *client.Client
+	conn    *client.Client
 	tracker *tracking.TaskTracker
 	kvstore *kvprovider.KVMulti
 
@@ -133,5 +133,5 @@ func (s *EventDebuggerTestSuite) TestFetchEventsWithResetFlag() {
 			}
 		}
 		require.True(t, found, "kafka key not found in reset events: %s", e.KafkaKey)
-	}	
+	}
 }

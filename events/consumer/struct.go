@@ -12,12 +12,10 @@ type ConsumeParams struct {
 	// type of events to return
 	Model      events.Model `json:"model"`
 	AvroFormat bool         `json:"avro"` // returned events should be in avro format
-	// Whether we are using Consumer in a debugging context. Used to uniqued identify EventReaders.
+	// Whether we are using Consumer in a debugging context. Used to uniquely identify an EventReader's ConsumerGroups.
 	Debug bool `json:"debug"`
-	// Whether or not to reset the EventReader about to be used for consumption.
+	// Whether or not to reset the ConsumerGroups associated with the EventReader about to be used for consumption.
 	Reset bool `json:"reset"`
-	// Number of seconds after which the Kafka server will delete ConsumerGroups associated with this EventReader
-	ExpirySec int `json:"expiry_sec"`
 	// each name+version of a plugin is a separate subscription
 	Name    string `json:"name"`
 	Version string `json:"version"`
