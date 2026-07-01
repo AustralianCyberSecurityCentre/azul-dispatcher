@@ -19,7 +19,7 @@ const (
 	AesStateEnabled  = AesEnabledEnum("enabled")
 	AesStateDisabled = AesEnabledEnum("disabled")
 	// Allows
-	AesStateReadOnly = AesEnabledEnum("readOnly")
+	AesStateReadOnly = AesEnabledEnum("readonly")
 )
 
 var Settings *DPSettings
