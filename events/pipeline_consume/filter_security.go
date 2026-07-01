@@ -6,9 +6,9 @@ import (
 	"os/exec"
 	"strings"
 
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/settings"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/settings"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v11/gosrc/msginflight"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/msginflight"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 )
 
