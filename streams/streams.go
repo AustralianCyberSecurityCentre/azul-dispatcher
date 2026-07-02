@@ -6,6 +6,7 @@ package streams
 
 import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/models"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
@@ -34,6 +35,7 @@ func NewStreams() *Streams {
 	case "s3":
 		// external s3 api
 		if len(st.Streams.S3.AccessKey) == 0 && len(st.Streams.S3.SecretKey) == 0 {
+			bedSet.Logger.Info().Msg("Storage is using S3 store with IAM access.")
 			// Use credentials from service accounts by default
 			fstore, err = store.NewS3StoreIAM(
 				st.Streams.S3.Endpoint,
@@ -51,6 +53,7 @@ func NewStreams() *Streams {
 				panic(err.Error())
 			}
 		} else {
+			bedSet.Logger.Info().Msg("Storage is using S3 store with access key access.")
 			// Use a hardcoded access/secret key combo
 			fstore, err = store.NewS3Store(
 				st.Streams.S3.Endpoint,
@@ -71,12 +74,14 @@ func NewStreams() *Streams {
 			}
 		}
 	case "azure":
+		bedSet.Logger.Info().Msg("Storage is using Azure store.")
 		fstore, err = store.NewAzureStore(st.Streams.Azure.Endpoint, st.Streams.Azure.Container, st.Streams.Azure.StorageAccount, st.Streams.Azure.AccessKey, prom.StreamsOperationDuration)
 		if err != nil {
 			panic(err.Error())
 		}
 	case "local":
 		// local file store
+		bedSet.Logger.Info().Msg("Storage is using local store.")
 		fstore, err = store.NewLocalStore(st.Streams.Local.Path)
 		if err != nil {
 			panic(err.Error())
@@ -87,6 +92,7 @@ func NewStreams() *Streams {
 	if st.Streams.Cache.SizeBytes > 1048576 {
 		// wrap the previous store with an in-memory cache
 		// defined in MB
+		bedSet.Logger.Info().Msgf("Storage Cache is in use with cache size %d", st.Streams.Cache.SizeBytes)
 		fstore, err = store.NewDataCache(
 			int(st.Streams.Cache.SizeBytes/1048576),
 			int(st.Streams.Cache.TTLSeconds),
@@ -103,6 +109,18 @@ func NewStreams() *Streams {
 	// If false, this is transparent barring checks to see if files had previously been written with XORing
 	// and parsing those
 	fstore = store.NewXORStore(fstore, st.Streams.XOREncoding)
+
+	if st.Streams.AesEnabled == st.AesStateReadOnly {
+		// Enable AES where no encryption is being done but previously AES encrypted files can be read.
+		bedSet.Logger.Info().Msg("AES encrypted files are being read but no new encryption is being done.")
+		fstore = store.NewAESCtrStore(fstore, st.Streams.AesKey, false)
+	} else if st.Streams.AesEnabled == st.AesStateEnabled {
+		// Enabled and AES encrypting files.
+		bedSet.Logger.Info().Msg("AES Encryption of storage files enabled.")
+		fstore = store.NewAESCtrStore(fstore, st.Streams.AesKey, true)
+	} else {
+		bedSet.Logger.Info().Msg("No AES encryption enabled.")
+	}
 
 	identifier, err := identify.NewIdentifier()
 	if err != nil {
