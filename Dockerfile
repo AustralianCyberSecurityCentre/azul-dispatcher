@@ -2,7 +2,7 @@
 # and a workspace (GOPATH) configured at /go.
 ARG REGISTRY="docker.io/library"
 ARG BASE_IMAGE=golang
-ARG BASE_TAG=1.26-trixie@sha256:bbf22ddccb3205344f2755ea8fa4fe39f7a8b2b77b9f7b764ec2aad31406f6fc
+ARG BASE_TAG=1.26-trixie@sha256:68b7145ec43d1820b9a56704554b53d1520aa2a15cb5233e374188a31b2a1bce
 # Note if this is bumped for faster builds ensure the build agent has the same version of yara.
 ARG YARA_X_VERSION_TAG="1.17.0"
 
