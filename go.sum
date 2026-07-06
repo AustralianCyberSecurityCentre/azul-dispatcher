@@ -1,7 +1,5 @@
 dario.cat/mergo v1.0.2 h1:85+piFYR1tMbRrLcDwR18y4UKJ3aH1Tbzi24VRW1TK8=
 dario.cat/mergo v1.0.2/go.mod h1:E/hbnu0NxMFBjpMIE34DRGLWqDy0g5FuKDhCb31ngxA=
-github.com/AustralianCyberSecurityCentre/azul-bedrock/v11 v11.0.126 h1:oV7QynzMy2lYq3cgWoE6qoTd3uKPN3B4eHpHb1XIXaE=
-github.com/AustralianCyberSecurityCentre/azul-bedrock/v11 v11.0.126/go.mod h1:F51ex8pRwGFGA0/YVe5bZ3Vo5vGkJ1BuRwh/YepSvqI=
 github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.22 h1:KSNSlkUhfw0fXpdwPSOJ8Fh7PJBwk8mi7WIfaRKypgY=
 github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.22/go.mod h1:MKvZe68umIv+jAwPwgtjscCxGoY/qQBJC0Se6stCtkk=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.22.0 h1:aokoqcHvaGjiM3VpjKDfMMnF/8epJ+Q1HLJ7CudztqE=

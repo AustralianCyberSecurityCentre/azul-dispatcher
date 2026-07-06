@@ -28,7 +28,6 @@ require (
 
 require (
 	dario.cat/mergo v1.0.2
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v11 v11.0.126
 	github.com/IBM/sarama v1.50.3
 	github.com/deathowl/go-metrics-prometheus v0.0.0-20221009205350-f2a1482ba35b
 	github.com/gin-contrib/pprof v1.5.4
