@@ -5,7 +5,7 @@ go 1.26.0
 toolchain go1.26.1
 
 require (
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v11 v11.0.126
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.22
 	github.com/allegro/bigcache/v3 v3.1.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
@@ -15,7 +15,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/minio/minio-go/v7 v7.2.0 // indirect
 	github.com/prometheus/client_golang v1.23.2
-	github.com/redis/go-redis/v9 v9.20.1
+	github.com/redis/go-redis/v9 v9.21.0
 	github.com/rs/zerolog v1.35.1
 	github.com/stretchr/testify v1.11.1
 	github.com/tidwall/gjson v1.19.0
@@ -24,11 +24,12 @@ require (
 )
 
 // Uncomment and set correct version to get import of a dev version of bedrock you have
-// replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v11 v11.0.126 => ../azul-bedrock
+// replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v11.0.98 => ../azul-bedrock
 
 require (
 	dario.cat/mergo v1.0.2
-	github.com/IBM/sarama v1.50.2
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v11 v11.0.126
+	github.com/IBM/sarama v1.50.3
 	github.com/deathowl/go-metrics-prometheus v0.0.0-20221009205350-f2a1482ba35b
 	github.com/gin-contrib/pprof v1.5.4
 	github.com/gin-gonic/gin v1.12.0
@@ -117,12 +118,12 @@ require (
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.25.0 // indirect
-	golang.org/x/crypto v0.52.0 // indirect
+	golang.org/x/crypto v0.53.0 // indirect
 	golang.org/x/exp v0.0.0-20260611194520-c48552f49976 // indirect
-	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/sync v0.21.0 // indirect
-	golang.org/x/sys v0.45.0 // indirect
-	golang.org/x/text v0.37.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/text v0.38.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/ini.v1 v1.67.2 // indirect
 )
