@@ -5,7 +5,7 @@ go 1.26.0
 toolchain go1.26.1
 
 require (
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.22
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.24
 	github.com/allegro/bigcache/v3 v3.1.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
@@ -13,7 +13,7 @@ require (
 	github.com/eko/gocache/store/bigcache/v4 v4.1.2 // Version 4.2.x has a bug that breaks cache hits. refer to https://github.com/eko/gocache/issues/225
 	github.com/glaslos/tlsh v0.4.0
 	github.com/golang/mock v1.6.0
-	github.com/minio/minio-go/v7 v7.2.0 // indirect
+	github.com/minio/minio-go/v7 v7.2.1 // indirect
 	github.com/prometheus/client_golang v1.23.2
 	github.com/redis/go-redis/v9 v9.21.0
 	github.com/rs/zerolog v1.35.1
@@ -46,7 +46,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.7.0 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.7.2 // indirect
-	github.com/VirusTotal/yara-x/go v1.17.0 // indirect
+	github.com/VirusTotal/yara-x/go v1.19.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.15.0 // indirect
