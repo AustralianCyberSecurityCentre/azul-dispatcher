@@ -14,7 +14,7 @@ DP__STREAMS__API_ALLOW_DELETE=TRUE \
 DP__EVENTS__REDIS__ENDPOINT=localhost:6379 \
 DP__EVENTS__REDIS__USERNAME=default \
 DP__EVENTS__REDIS__PASSWORD=password \
-go test ./integration_tests/event_debugger -v -count=1 -tags=integration -run=$1 -p 1 -failfast
+go test ./... -count=1 -tags=integration -run=$1 -p 1 -failfast
 
 # The following runs integration tests on Azure Blob, ensure to set the <set-value> env's
 #DISPATCHER_INIT_KAFKA_RETRIES=1 \
