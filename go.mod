@@ -5,7 +5,7 @@ go 1.26.0
 toolchain go1.26.1
 
 require (
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.24
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.27
 	github.com/allegro/bigcache/v3 v3.1.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
@@ -42,9 +42,9 @@ require (
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.22.0 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.1 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.14.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.7.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.8.0 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.7.2 // indirect
 	github.com/VirusTotal/yara-x/go v1.19.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
