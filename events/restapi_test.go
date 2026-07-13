@@ -185,9 +185,8 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-
-		DenyEvents:    []events.BinaryAction{events.ActionMapped, events.ActionEnriched},
-		DenyEventsMap: map[events.BinaryAction]bool{events.ActionMapped: true, events.ActionEnriched: true},
+		DenyEvents:      []events.BinaryAction{events.ActionMapped, events.ActionEnriched},
+		DenyEventsMap:   map[events.BinaryAction]bool{events.ActionMapped: true, events.ActionEnriched: true},
 	})
 	require.Equal(t, testFilters(t, params, evs), []int{1, 2, 3, 4})
 
