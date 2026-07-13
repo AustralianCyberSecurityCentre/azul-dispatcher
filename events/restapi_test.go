@@ -144,14 +144,14 @@ func TestParseParams(t *testing.T) {
 	require.Nil(t, err)
 	log.Printf("%v", params)
 	require.Equal(t, params, &consumer.ConsumeParams{
-		Model:           "binary",
-		Name:            "test",
-		Version:         "5",
-		RequireExpedite: true,
-		RequireLive:     true,
-		Count:           1,
-		Deadline:        5,
-		IsTask:          false,
+		Model:            "binary",
+		Name:             "test",
+		Version:          "5",
+		RequireExpedite:  true,
+		RequireLive:      true,
+		Count:            1,
+		Deadline:         5,
+		IsTask:           false,
 		RequireEvents:    []events.BinaryAction{events.ActionExtracted, events.ActionAugmented},
 		RequireEventsMap: map[events.BinaryAction]bool{events.ActionExtracted: true, events.ActionAugmented: true},
 	})
@@ -160,14 +160,14 @@ func TestParseParams(t *testing.T) {
 	params, err = testDoParseParams("name=test&version=5&r-source=testing&r-historic=true&r-action=sourced")
 	require.Nil(t, err)
 	require.Equal(t, params, &consumer.ConsumeParams{
-		Model:           "binary",
-		Name:            "test",
-		Version:         "5",
-		RequireSources:  []string{"testing"},
-		RequireHistoric: true,
-		Count:           1,
-		Deadline:        5,
-		IsTask:          false,
+		Model:             "binary",
+		Name:              "test",
+		Version:           "5",
+		RequireSources:    []string{"testing"},
+		RequireHistoric:   true,
+		Count:             1,
+		Deadline:          5,
+		IsTask:            false,
 		RequireEvents:     []events.BinaryAction{events.ActionSourced},
 		RequireEventsMap:  map[events.BinaryAction]bool{events.ActionSourced: true},
 		RequireSourcesMap: map[string]bool{"testing": true},
@@ -202,8 +202,8 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-		DenyEvents:    []events.BinaryAction{events.ActionEnriched},
-		DenyEventsMap: map[events.BinaryAction]bool{events.ActionEnriched: true},
+		DenyEvents:      []events.BinaryAction{events.ActionEnriched},
+		DenyEventsMap:   map[events.BinaryAction]bool{events.ActionEnriched: true},
 	})
 
 	params, err = testDoParseParams("name=test&version=5&r-content=true&r-expedite=true&r-live=true")
@@ -217,8 +217,8 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-		RequireContent: true,
-		RequireEvents:  []events.BinaryAction{events.ActionSourced, events.ActionExtracted},
+		RequireContent:  true,
+		RequireEvents:   []events.BinaryAction{events.ActionSourced, events.ActionExtracted},
 		RequireEventsMap: map[events.BinaryAction]bool{
 			events.ActionSourced:   true,
 			events.ActionExtracted: true,
@@ -285,7 +285,7 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-		RequireStreams: map[events.DatastreamLabel]map[string]bool{"*": {"executable/windows/pe32": true, "executable/windows/dll32": true}},
+		RequireStreams:  map[events.DatastreamLabel]map[string]bool{"*": {"executable/windows/pe32": true, "executable/windows/dll32": true}},
 	})
 	require.Equal(
 		t,
@@ -310,7 +310,7 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-		RequireStreams: map[events.DatastreamLabel]map[string]bool{"content": {}, "pcap": {"network/tcpdump": true}},
+		RequireStreams:  map[events.DatastreamLabel]map[string]bool{"content": {}, "pcap": {"network/tcpdump": true}},
 	})
 	require.Equal(
 		t,
