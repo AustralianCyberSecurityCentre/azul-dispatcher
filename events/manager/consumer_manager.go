@@ -200,7 +200,7 @@ func (m *ConsumerManager) CheckAndDeleteOldConsumers() {
 	}
 }
 
-// Remove an EventReader and all associate ConsumerGroups
+// Remove an EventReader and all associated ConsumerGroups
 func (m *ConsumerManager) removeEventReader(p *consumer.ConsumeParams) error {
 	var err error
 	pluginKey := p.GenerateKafkaPluginKey()
