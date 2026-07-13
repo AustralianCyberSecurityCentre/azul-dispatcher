@@ -152,7 +152,6 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-
 		RequireEvents:    []events.BinaryAction{events.ActionExtracted, events.ActionAugmented},
 		RequireEventsMap: map[events.BinaryAction]bool{events.ActionExtracted: true, events.ActionAugmented: true},
 	})
@@ -169,7 +168,6 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-
 		RequireEvents:     []events.BinaryAction{events.ActionSourced},
 		RequireEventsMap:  map[events.BinaryAction]bool{events.ActionSourced: true},
 		RequireSourcesMap: map[string]bool{"testing": true},
@@ -204,7 +202,6 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-
 		DenyEvents:    []events.BinaryAction{events.ActionEnriched},
 		DenyEventsMap: map[events.BinaryAction]bool{events.ActionEnriched: true},
 	})
@@ -220,7 +217,6 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-
 		RequireContent: true,
 		RequireEvents:  []events.BinaryAction{events.ActionSourced, events.ActionExtracted},
 		RequireEventsMap: map[events.BinaryAction]bool{
@@ -252,8 +248,7 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-
-		DenySelf: true,
+		DenySelf:        true,
 	})
 	require.Equal(
 		t,
@@ -290,7 +285,6 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-
 		RequireStreams: map[events.DatastreamLabel]map[string]bool{"*": {"executable/windows/pe32": true, "executable/windows/dll32": true}},
 	})
 	require.Equal(
@@ -316,7 +310,6 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-
 		RequireStreams: map[events.DatastreamLabel]map[string]bool{"content": {}, "pcap": {"network/tcpdump": true}},
 	})
 	require.Equal(
@@ -343,7 +336,6 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-
 		RequireStreams: map[events.DatastreamLabel]map[string]bool{
 			"content": {"executable/windows/pe32": true, "executable/windows/dll32": true},
 		},
@@ -366,7 +358,6 @@ func TestParseParams(t *testing.T) {
 		Count:           1,
 		Deadline:        5,
 		IsTask:          false,
-
 		RequireStreams: map[events.DatastreamLabel]map[string]bool{
 			"content": {"executable/": true},
 		},

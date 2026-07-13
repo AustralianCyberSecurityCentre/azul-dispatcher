@@ -377,6 +377,7 @@ func (sa *SaramaKafkaAdmin) DeleteConsumerGroup(group string) error {
 
 	var err error
 	var resp *sarama.DeleteGroupsResponse
+	// Retry in case there are still active consumers we are waiting to drop the group or there was random Kafka failure during internal sync.
 	for range 5 {
 		resp, err = sa.broker.DeleteGroups(&deleteGroupsRequest)
 		if err == nil && resp.GroupErrorCodes[group] == sarama.ErrNoError {

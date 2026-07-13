@@ -208,7 +208,7 @@ func parseParams(c *gin.Context) (*consumer.ConsumeParams, error) {
 		return nil, fmtBadParam(getevents.DenySelf, err)
 	}
 
-	// TODO: group name, reset time (in minutes?), explicit group reset + any other filter options
+	// FUTURE: Possibly add reset time for group to automatically delete itself / other filtering options for returned events
 	p.Reset, err = strconv.ParseBool(getWithDefault(qv, getevents.Reset, "false"))
 	if err != nil {
 		return nil, fmtBadParam(getevents.Reset, err)
