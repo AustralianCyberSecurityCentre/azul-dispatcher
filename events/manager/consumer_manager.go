@@ -200,7 +200,7 @@ func (m *ConsumerManager) CheckAndDeleteOldConsumers() {
 	}
 }
 
-// Reset the offsets of all ConsumerGroup's associated with an eventReader
+// Remove an EventReader and all associate ConsumerGroups
 func (m *ConsumerManager) removeEventReader(p *consumer.ConsumeParams) error {
 	var err error
 	pluginKey := p.GenerateKafkaPluginKey()
@@ -237,6 +237,13 @@ func (m *ConsumerManager) DeleteAllPluginEventReaders() {
 		// If the eventreader has IsTask true it's a plugin and should be removed.
 		if eventReader.FetchEventsParams.IsTask {
 			eventReader.Stop()
+			for _, sub := range eventReader.subscriptions {
+				// delete ConsumerGroups on KafkaServer
+				err := m.prov.DeleteConsumer(sub.group)
+				if err != nil {
+					bedSet.Logger.Error().Str("consumer", eventReader.pluginKey).Msg("Failed to delete consumer group")
+				}
+			}
 		} else {
 			survivingReaders[name] = eventReader
 		}
