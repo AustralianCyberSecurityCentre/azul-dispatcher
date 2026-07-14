@@ -40,6 +40,10 @@ func (prov *MemoryProvider) CreateAdmin() (AdminInterface, error) {
 	return &c, nil
 }
 
+func (prov *MemoryProvider) DeleteConsumer(group string) error {
+	return nil
+}
+
 type MemoryConsumer struct {
 	Mem      *in_memory.InMemory
 	group    string
@@ -247,6 +251,10 @@ func (p *MemoryAdmin) DeleteTopics(topicNames []string) error {
 			delete(p.Mem.Consumers[cg], topic)
 		}
 	}
+	return nil
+}
+
+func (p *MemoryAdmin) DeleteConsumerGroup(group string) error {
 	return nil
 }
 

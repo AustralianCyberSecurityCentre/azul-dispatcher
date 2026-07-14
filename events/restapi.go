@@ -208,6 +208,17 @@ func parseParams(c *gin.Context) (*consumer.ConsumeParams, error) {
 		return nil, fmtBadParam(getevents.DenySelf, err)
 	}
 
+	// FUTURE: Possibly add reset time for group to automatically delete itself / other filtering options for returned events
+	p.Reset, err = strconv.ParseBool(getWithDefault(qv, getevents.Reset, "false"))
+	if err != nil {
+		return nil, fmtBadParam(getevents.Reset, err)
+	}
+
+	p.Debug, err = strconv.ParseBool(getWithDefault(qv, getevents.Debug, "false"))
+	if err != nil {
+		return nil, fmtBadParam(getevents.Debug, err)
+	}
+
 	// list of label:ft1,ft2,ft3
 	dataTypes := qv[getevents.RequireStreams]
 	if len(dataTypes) > 0 {

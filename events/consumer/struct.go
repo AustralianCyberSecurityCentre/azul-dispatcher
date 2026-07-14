@@ -12,6 +12,10 @@ type ConsumeParams struct {
 	// type of events to return
 	Model      events.Model `json:"model"`
 	AvroFormat bool         `json:"avro"` // returned events should be in avro format
+	// Whether we are using Consumer in a debugging context. Used to uniquely identify an EventReader's ConsumerGroups.
+	Debug bool `json:"debug"`
+	// Whether or not to reset the ConsumerGroups associated with the EventReader about to be used for consumption.
+	Reset bool `json:"reset"`
 	// each name+version of a plugin is a separate subscription
 	Name    string `json:"name"`
 	Version string `json:"version"`
@@ -80,6 +84,9 @@ func (p *ConsumeParams) GenerateKafkaPluginKey() string {
 	}
 	if p.RequireHistoric {
 		flow += "H"
+	}
+	if p.Debug {
+		flow += "D"
 	}
 	if len(flow) > 0 {
 		pluginKey += "-" + flow

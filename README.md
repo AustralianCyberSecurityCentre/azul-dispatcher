@@ -12,7 +12,7 @@ It is responsible for:
 
 ## API Description
 
-These endpoints are currently under development.
+These endpoints are currently under development. 
 
 | Method | Endpoint                              | Description                                                  | Response                      |
 | ------ | ------------------------------------- | ------------------------------------------------------------ | ----------------------------- |
@@ -40,6 +40,8 @@ parameters that alter behaviour.
 | timeout            | Seconds to wait to try collecting events up to count                                         |
 | requires-data      | require events to have underlying binary data                                                |
 | filter             | Apply gjson filter to retrieved events. Discouraged due to difficulty getting these correct. |
+| debug              | Create unique groups to iterate through events without affecting other groups' state's.      |
+| reset              | Reset the offsets for all consumer groups associated with the other parameters in the query. |
 | f-max-content-size | only keep events that have 'content' stream below this size (must be 0 or greater than min)  |
 | f-min-content-size | only keep events that have 'content' stream above this size (must be 0 or less than max)     |
 | f-allow-event-type | allow only specified event types                                                             |

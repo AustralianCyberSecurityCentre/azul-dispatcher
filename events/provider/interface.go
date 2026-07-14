@@ -22,6 +22,7 @@ func NewConsumerOptions(pollWait time.Duration) CreateConsumerOptions {
 
 type ProviderInterface interface {
 	CreateConsumer(consumerName, group, offset, pattern string, additionalOptions CreateConsumerOptions) (ConsumerInterface, error)
+	DeleteConsumer(group string) error
 	CreateProducer() (ProducerInterface, error)
 	CreateAdmin() (AdminInterface, error)
 }
@@ -49,5 +50,6 @@ type AdminInterface interface {
 	UpdateTopicsConfig(topics []st.GenericKafkaTopicSpecification)
 	DescribeTopicConfig(topics []st.GenericKafkaTopicSpecification) []*sarama.ResourceResponse
 	DeleteTopics(topicNames []string) error
+	DeleteConsumerGroup(group string) error
 	Close()
 }

@@ -100,6 +100,14 @@ func (m *ConsumerManager) fetchEvents(messagePipeline *pipeline.ConsumePipeline,
 		return []*msginflight.MsgInFlight{}, &models.EventResponseInfo{Ready: false, Paused: true}, nil
 	}
 
+	// If reset == true, we delete the associated EventReader and let it be re-constructed when getEventReader calls newEventReader
+	if p.Reset {
+		err = m.removeEventReader(p)
+		if err != nil {
+			return []*msginflight.MsgInFlight{}, nil, err
+		}
+	}
+
 	// Prevent the deletion of consumers until all event collection stops.
 	m.consumersDeleteLock.RLock()
 	defer m.consumersDeleteLock.RUnlock()
@@ -192,6 +200,35 @@ func (m *ConsumerManager) CheckAndDeleteOldConsumers() {
 	}
 }
 
+// Remove an EventReader and all associated ConsumerGroups
+func (m *ConsumerManager) removeEventReader(p *consumer.ConsumeParams) error {
+	var err error
+	pluginKey := p.GenerateKafkaPluginKey()
+
+	oldReader, ok := m.eventReaders[pluginKey]
+	if !ok {
+		bedSet.Logger.Warn().Str("consumer", pluginKey).Msg("Consumer not found, unable to delete.")
+		return err
+	}
+
+	// Delete our local event reader and reset ConsumerGroup offsets on the remote
+	m.consumersDeleteLock.Lock()
+	defer m.consumersDeleteLock.Unlock()
+
+	oldReader.Stop()
+	for _, sub := range oldReader.subscriptions {
+		// delete ConsumerGroups on KafkaServer
+		err = m.prov.DeleteConsumer(sub.group)
+		if err != nil {
+			bedSet.Logger.Error().Str("consumer", pluginKey).Msg("Failed to delete consumer group")
+		}
+	}
+	delete(m.eventReaders, pluginKey)
+	bedSet.Logger.Warn().Str("consumer", pluginKey).Msg("Closing consumer due to deletion request.")
+
+	return err
+}
+
 func (m *ConsumerManager) DeleteAllPluginEventReaders() {
 	m.consumersDeleteLock.Lock()
 	defer m.consumersDeleteLock.Unlock()
@@ -200,6 +237,13 @@ func (m *ConsumerManager) DeleteAllPluginEventReaders() {
 		// If the eventreader has IsTask true it's a plugin and should be removed.
 		if eventReader.FetchEventsParams.IsTask {
 			eventReader.Stop()
+			for _, sub := range eventReader.subscriptions {
+				// delete ConsumerGroups on KafkaServer
+				err := m.prov.DeleteConsumer(sub.group)
+				if err != nil {
+					bedSet.Logger.Error().Str("consumer", eventReader.pluginKey).Msg("Failed to delete consumer group")
+				}
+			}
 		} else {
 			survivingReaders[name] = eventReader
 		}
