@@ -9,7 +9,7 @@ require (
 	github.com/allegro/bigcache/v3 v3.1.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
-	github.com/eko/gocache/lib/v4 v4.2.3
+	github.com/eko/gocache/lib/v4 v4.2.4
 	github.com/eko/gocache/store/bigcache/v4 v4.1.2 // Version 4.2.x has a bug that breaks cache hits. refer to https://github.com/eko/gocache/issues/225
 	github.com/glaslos/tlsh v0.4.0
 	github.com/golang/mock v1.6.0
@@ -28,7 +28,7 @@ require (
 
 require (
 	dario.cat/mergo v1.0.2
-	github.com/IBM/sarama v1.60.0
+	github.com/IBM/sarama v1.60.1
 	github.com/deathowl/go-metrics-prometheus v0.0.0-20221009205350-f2a1482ba35b
 	github.com/gin-contrib/pprof v1.5.4
 	github.com/gin-gonic/gin v1.12.0
