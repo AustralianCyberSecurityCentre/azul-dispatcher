@@ -18,8 +18,8 @@ github.com/AzureAD/microsoft-authentication-extensions-for-go/cache v0.1.1 h1:WJ
 github.com/AzureAD/microsoft-authentication-extensions-for-go/cache v0.1.1/go.mod h1:tCcJZ0uHAmvjsVYzEFivsRTN00oz5BEsRgQHu5JZ9WE=
 github.com/AzureAD/microsoft-authentication-library-for-go v1.7.2 h1:RHK7bS+HQMslb1sZpAokUt+zTVmue0hKSs2C791hhzU=
 github.com/AzureAD/microsoft-authentication-library-for-go v1.7.2/go.mod h1:HKpQxkWaGLJ+D/5H8QRpyQXA1eKjxkFlOMwck5+33Jk=
-github.com/IBM/sarama v1.60.0 h1:ID/bpW3NePqZaFmXvloQ5h/EFJ9qs2GwHkhS6IyAYHw=
-github.com/IBM/sarama v1.60.0/go.mod h1:zRuXO3TY28cqFymE7Ysko5BxWRo8/VRPzRNKL6Eo2/k=
+github.com/IBM/sarama v1.60.1 h1:2IjpLPCL16CvaJcpxUT5+zE6tpeY5HdhREZOES80kGE=
+github.com/IBM/sarama v1.60.1/go.mod h1:ugg061kdM8zE4mgCeCUwDMd9NRd7QIRMoiA4a/Z8VH8=
 github.com/VirusTotal/yara-x/go v1.19.0 h1:Jdqa4J7X0f3Sjyc0Tt3S8/Ge6GyilxIFbe8iMl37/Tg=
 github.com/VirusTotal/yara-x/go v1.19.0/go.mod h1:KRt+q3iJ3vbPTaD91JIDzEBqvDEwzyvjaz9+9cajkls=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
@@ -56,8 +56,8 @@ github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4 h1:N4c1osbiXr
 github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4/go.mod h1:cv8kb+xco1bEylSXQuXvYHCxIqezKcoTcfIlPaJG/Ck=
 github.com/eapache/go-resiliency v1.7.0 h1:n3NRTnBn5N0Cbi/IeOHuQn9s2UwVUH7Ga0ZWcP+9JTA=
 github.com/eapache/go-resiliency v1.7.0/go.mod h1:5yPzW0MIvSe0JDsv0v+DvcjEv2FyD6iZYSs1ZI+iQho=
-github.com/eko/gocache/lib/v4 v4.2.3 h1:s78TFqEGAH3SbzP4N40D755JYT/aaGFKEPrsUtC1chU=
-github.com/eko/gocache/lib/v4 v4.2.3/go.mod h1:Zus8mwmaPu1VYOzfomb+Dvx2wV7fT5jDRbHYtQM6MEY=
+github.com/eko/gocache/lib/v4 v4.2.4 h1:BRKeSVesCA+ujcdS72GhAwMmJcYnp46DRu7w9ZL8Gp8=
+github.com/eko/gocache/lib/v4 v4.2.4/go.mod h1:Zus8mwmaPu1VYOzfomb+Dvx2wV7fT5jDRbHYtQM6MEY=
 github.com/eko/gocache/store/bigcache/v4 v4.1.2 h1:8uMDpgxTG7BvyLHBFqL3Ao809bVrXfrWqo7v6ALiwTw=
 github.com/eko/gocache/store/bigcache/v4 v4.1.2/go.mod h1:Lut5Sk/yI835w02tmwx4ecezYQo445L5sdICsk1zgho=
 github.com/fatih/structs v1.1.0 h1:Q7juDM0QtcnhCpeyLGQKyg4TOIghuNXrkL32pHAUMxo=
