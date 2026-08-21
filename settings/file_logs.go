@@ -34,7 +34,7 @@ func makeFileLogger(filename string) chan []byte {
 			combined := append(line, []byte("\n")...)
 			_, err = log.Write(combined)
 			if err != nil {
-				zlog.Warn().Int("bytes", len(combined)).Str("file", filename).Msg("could not write restapi log line to file")
+				zlog.Warn().Err(err).Int("bytes", len(combined)).Str("file", filename).Msg("could not write restapi log line to file")
 			}
 		}
 	}()

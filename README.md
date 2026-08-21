@@ -141,13 +141,13 @@ A docker compose configuration is provided for running all dependencies.
 
 `docker compose up`
 
-Dispatcher must be started with awareness of Kafka and Minio
+Dispatcher must be started with awareness of Kafka and Seaweed
 
 ```bash
 DISPATCHER_KAFKA_ENDPOINT=localhost:9092 \
 DISPATCHER_STORE_S3_ENDPOINT=localhost:9000 \
-DISPATCHER_STORE_S3_ACCESS_KEY=minio-root-user \
-DISPATCHER_STORE_S3_SECRET_KEY=minio-root-password \
+DISPATCHER_STORE_S3_ACCESS_KEY=seaweedfs-admin \
+DISPATCHER_STORE_S3_SECRET_KEY=seaweedfs-secretkey \
 DISPATCHER_STORE_S3_SECURE=false \
 ./bin/dispatcher
 ```
@@ -189,7 +189,8 @@ To run all available unit tests:
 `go test ./...`
 
 A bare bones integration test exists via `./test_integration.sh`.
-Kafka and minio must be available, as provided by `docker-compose.yaml`.
+Kafka and seaweedfs must be available, as provided by `docker-compose.yaml`.
+(seaweed password can be found in docker-compose-s3-config.json)
 
 There is a known issue where the integration test will fail on the first run,
 and succeed on subsequent runs. I believe this to be a bug somewhere in dispatcher that
@@ -200,7 +201,7 @@ In the future, this integration test would be best as a golang test.
 
 #### Integration
 
-You need to be running the docker-compose.yaml in the background as kafka and minio are needed.
+You need to be running the docker-compose.yaml in the background as kafka and seaweedfs are needed.
 Make sure they are both running properly.
 
 To run the integration tests use the script `test_integration.sh` in the root of the project.
@@ -227,7 +228,7 @@ NOTE - to increase the speed of yara-x builds there is a script called pull-in-p
 ## Run
 
 A docker compose file is provided which will start dispatcher and all required dependencies.
-Uploaded binaries are stored in `./minio_data`.
+Uploaded binaries are stored in `./seaweed_data`.
 
 `docker compose -f docker-compose-all.yaml up`
 
