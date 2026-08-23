@@ -50,6 +50,7 @@ type ReplayPluginCompletion struct {
 	itemTTL       time.Duration
 	produceParams pipeline.ProduceParams
 	maxEventSize  int // maximum bytes for an event to be cached
+	noActiveCache bool
 }
 
 // returns a new result cache object with the specified store configuration.
@@ -84,6 +85,7 @@ func NewReplayPluginCompletion(p pipeline.ProducerInterface, s fstore.FileStorag
 		itemTTL:       ttl,
 		produceParams: pipeline.ProduceParams{UserAgent: "replay_plugin_completion"},
 		maxEventSize:  maxEventSize,
+		noActiveCache: config == nil,
 	}, nil
 }
 
@@ -91,6 +93,10 @@ func (p *ReplayPluginCompletion) GetName() string { return "ReplayPluginCompleti
 
 // conditionally adds a completed status event into the result cache.
 func (p *ReplayPluginCompletion) ProduceMod(inFlight *msginflight.MsgInFlight, meta *pipeline.ProduceParams) (*msginflight.MsgInFlight, []*msginflight.MsgInFlight) {
+	// If there is no cache active don't do anything.
+	if p.noActiveCache {
+		return inFlight, nil
+	}
 	status, ok := inFlight.GetStatus()
 	if !ok {
 		return inFlight, nil
@@ -113,6 +119,11 @@ func (p *ReplayPluginCompletion) ProduceMod(inFlight *msginflight.MsgInFlight, m
 
 // publish a cached result if available, otherwise return the original event
 func (p *ReplayPluginCompletion) ConsumeMod(message *msginflight.MsgInFlight, meta *consumer.ConsumeParams) (string, *msginflight.MsgInFlight) {
+	// If there is no cache active don't do anything.
+	if p.noActiveCache {
+		return "", message
+	}
+
 	binary, ok := message.GetBinary()
 	// not binary or cache bypass
 	if !ok || binary.Flags.BypassCache {
@@ -187,6 +198,10 @@ func (c *ReplayPluginCompletion) fetch(ev *events.BinaryEvent, authorName, autho
 	k := key(ev.Entity.Sha256, authorName, authorVersion)
 	val, err := c.manager.Get(ctx, k)
 	if err != nil {
+		// Cache isn't configured so cache can't hit.
+		if strings.Contains(err.Error(), "no cache configured in chain") {
+			return nil, nil
+		}
 		// cache miss
 		if strings.Contains(err.Error(), "not found") {
 			return nil, nil
