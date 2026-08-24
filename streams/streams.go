@@ -89,21 +89,6 @@ func NewStreams() *Streams {
 	default:
 		panic("No STORE_BACKEND configured.")
 	}
-	if st.Streams.Cache.SizeBytes > 1048576 {
-		// wrap the previous store with an in-memory cache
-		// defined in MB
-		bedSet.Logger.Info().Msgf("Storage Cache is in use with cache size %d", st.Streams.Cache.SizeBytes)
-		fstore, err = store.NewDataCache(
-			int(st.Streams.Cache.SizeBytes/1048576),
-			int(st.Streams.Cache.TTLSeconds),
-			int(st.Streams.Cache.Shards),
-			fstore,
-			store.StoreCacheMetricCollectors{CacheLookup: prom.CacheLookups, CacheHits: prom.CacheHits, PromStreamsOperationDuration: prom.StreamsOperationDuration},
-		)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
 
 	// Conditionally enable storing files with a XOR cipher to avoid AV detections
 	// If false, this is transparent barring checks to see if files had previously been written with XORing
@@ -120,6 +105,26 @@ func NewStreams() *Streams {
 		fstore = store.NewAESCtrStore(fstore, st.Streams.AesKey, true)
 	} else {
 		bedSet.Logger.Info().Msg("No AES encryption enabled.")
+	}
+
+	// NOTE Cache needs to be after XOR + AES to ensure that it still gets hits when AES/XOR are enabled.
+	// This is because the cache calculates the SHA256 of the content it stores during a Fetch cache.
+	// If the files is XOR/AES encrypted when cached the SHA256 won't match and the cache will never hit.
+	// Being after XOR/AES means that the cache sees the raw file.
+	if st.Streams.Cache.SizeBytes > 1048576 {
+		// wrap the previous store with an in-memory cache
+		// defined in MB
+		bedSet.Logger.Info().Msgf("Storage Cache is in use with cache size %d", st.Streams.Cache.SizeBytes)
+		fstore, err = store.NewDataCache(
+			int(st.Streams.Cache.SizeBytes/1048576),
+			int(st.Streams.Cache.TTLSeconds),
+			int(st.Streams.Cache.Shards),
+			fstore,
+			store.StoreCacheMetricCollectors{CacheLookup: prom.CacheLookups, CacheHits: prom.CacheHits, PromStreamsOperationDuration: prom.StreamsOperationDuration},
+		)
+		if err != nil {
+			panic(err.Error())
+		}
 	}
 
 	identifier, err := identify.NewIdentifier()

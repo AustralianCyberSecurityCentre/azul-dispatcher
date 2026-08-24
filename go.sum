@@ -1,7 +1,7 @@
 dario.cat/mergo v1.0.2 h1:85+piFYR1tMbRrLcDwR18y4UKJ3aH1Tbzi24VRW1TK8=
 dario.cat/mergo v1.0.2/go.mod h1:E/hbnu0NxMFBjpMIE34DRGLWqDy0g5FuKDhCb31ngxA=
-github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.97 h1:0WwtaKBFDchMEfCeQ28o/EN+LH/LPbhPSqp4NW2TWcw=
-github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.97/go.mod h1:wq4fK5d2r+C5+gX2zBi2CSho8YU7COloN9UiCdJXdB0=
+github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.99 h1:N5osfu9dJOLALaN92WCjDXZrY66WDj3sGNfdoeU39yk=
+github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.99/go.mod h1:wq4fK5d2r+C5+gX2zBi2CSho8YU7COloN9UiCdJXdB0=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.0 h1:4gRPBpN1f6xt88yi4WR26m7XaD9OlWtVT6bWPdGUIok=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.0/go.mod h1:G7QVLxw1j1JVyrO1MA95S8m8HStaaleDZYTcfGgjB2o=
 github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.14.0 h1:CU4+EJeJi3TKYWEcYuSdWsjzw0nVsK/H0MSQOiPcymU=
@@ -18,8 +18,8 @@ github.com/AzureAD/microsoft-authentication-extensions-for-go/cache v0.1.1 h1:WJ
 github.com/AzureAD/microsoft-authentication-extensions-for-go/cache v0.1.1/go.mod h1:tCcJZ0uHAmvjsVYzEFivsRTN00oz5BEsRgQHu5JZ9WE=
 github.com/AzureAD/microsoft-authentication-library-for-go v1.9.0 h1:MDT4FxAPve5FnYn6vOL1r7RCRDG+l9cI7a5LlCuHsqA=
 github.com/AzureAD/microsoft-authentication-library-for-go v1.9.0/go.mod h1:Y33QHnf0FfdVewFFISOGe20mkZbxX4H839o955/PoeI=
-github.com/IBM/sarama v1.60.1 h1:2IjpLPCL16CvaJcpxUT5+zE6tpeY5HdhREZOES80kGE=
-github.com/IBM/sarama v1.60.1/go.mod h1:ugg061kdM8zE4mgCeCUwDMd9NRd7QIRMoiA4a/Z8VH8=
+github.com/IBM/sarama v1.60.2 h1:T/HyMhOJMyH/BgkBLCiuTDH8EJAEf32eDbNldlKOWIg=
+github.com/IBM/sarama v1.60.2/go.mod h1:fZRPG+DZm8DM9WpmslgMiVErD46mmYAYBiFWC8XKkes=
 github.com/VirusTotal/yara-x/go v1.19.0 h1:Jdqa4J7X0f3Sjyc0Tt3S8/Ge6GyilxIFbe8iMl37/Tg=
 github.com/VirusTotal/yara-x/go v1.19.0/go.mod h1:KRt+q3iJ3vbPTaD91JIDzEBqvDEwzyvjaz9+9cajkls=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=

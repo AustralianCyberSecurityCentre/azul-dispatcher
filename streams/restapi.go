@@ -67,14 +67,26 @@ func (s *Streams) GetData(c *gin.Context) {
 	source := c.Params.ByName("source")
 	label := c.Params.ByName("label")
 	hash := c.Params.ByName("hash")
-	content, err := s.Store.Fetch(source, label, hash, store.WithOffsetAndSize(ra.start, ra.length))
 
+	// Retry getting data, unless it's just not found.
+	var content store.DataSlice
 	var notFoundError *store.NotFoundError
-	if errors.As(err, &notFoundError) {
-		// Check in store without source and label prefix
-		source = ""
-		label = ""
+
+	for range st.Streams.RetryCountFileAction {
 		content, err = s.Store.Fetch(source, label, hash, store.WithOffsetAndSize(ra.start, ra.length))
+
+		if errors.As(err, &notFoundError) {
+			// Check in store without source and label prefix
+			source = ""
+			label = ""
+			content, err = s.Store.Fetch(source, label, hash, store.WithOffsetAndSize(ra.start, ra.length))
+		}
+		if err == nil {
+			break
+		} else if errors.As(err, &notFoundError) {
+			break
+		}
+		time.Sleep(time.Duration(rand.Intn(st.Streams.RetryAvgSleepMsFileAction)) * time.Millisecond)
 	}
 
 	if err != nil {
@@ -120,7 +132,16 @@ HasData returns 200 if the requested hash exists in the store, 404 if not.
 func (s *Streams) HasData(c *gin.Context) {
 	prom.DataExists.Inc()
 	// Check in store with source and label prefix
-	exist, err := s.Store.Exists(c.Params.ByName("source"), c.Params.ByName("label"), c.Params.ByName("hash"))
+	var exist bool
+	var err error
+	// Retry request to store if it errors out.
+	for range st.Streams.RetryCountFileAction {
+		exist, err = s.Store.Exists(c.Params.ByName("source"), c.Params.ByName("label"), c.Params.ByName("hash"))
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Duration(rand.Intn(st.Streams.RetryAvgSleepMsFileAction)) * time.Millisecond)
+	}
 	if err != nil {
 		bedSet.Logger.Error().Err(err).Msgf("checking if hasData 500 error for file %s/%s/%s", c.Params.ByName("source"), c.Params.ByName("label"), c.Params.ByName("hash"))
 		c.Writer.WriteHeader(500)
@@ -234,13 +255,20 @@ func (s *Streams) PostStream(c *gin.Context) {
 
 	// put binary into s3
 	attempt := 0
-	for attempt < 3 {
+	for attempt < st.Streams.RetryCountFileAction {
 		_, err = file.Seek(0, 0)
 		if err != nil {
 			attempt += 1
-			bedSet.Logger.Warn().Err(err).Msgf("Retrying upload of file %s/%s/%s - due to error when seeking", c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256)
+			bedSet.Logger.Warn().Err(err).Msgf("Retrying upload of file %s/%s/%s - due to error when seeking: %v", c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256, err)
 			// Randomly sleep for up to 5seconds to deconflict with the colliding upload.
-			time.Sleep(time.Duration(rand.Intn(5000)) * time.Millisecond)
+			time.Sleep(time.Duration(rand.Intn(st.Streams.RetryAvgSleepMsFileAction)) * time.Millisecond)
+			file.Close()
+			file, err = os.Open(file.Name())
+			if err != nil {
+				bedSet.Logger.Warn().Err(err).Msgf("Error when attempting to re-open seek error for file during retry of upload for file %s/%s/%s: %v", c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256, err)
+				continue
+			}
+			defer file.Close()
 			continue
 		}
 		err = s.Store.Put(c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256, file, int64(fileSize))
@@ -249,7 +277,7 @@ func (s *Streams) PostStream(c *gin.Context) {
 			attempt += 1
 			bedSet.Logger.Warn().Err(err).Msgf("Retrying upload of file %s/%s/%s", c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256)
 			// Randomly sleep for up to 5seconds to deconflict with the colliding upload.
-			time.Sleep(time.Duration(rand.Intn(5000)) * time.Millisecond)
+			time.Sleep(time.Duration(rand.Intn(st.Streams.RetryAvgSleepMsFileAction)) * time.Millisecond)
 			continue
 		}
 		break
