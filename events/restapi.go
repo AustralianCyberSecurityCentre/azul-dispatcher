@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	wgSync "sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -351,15 +352,21 @@ func (ev *Events) PostEvent(c *gin.Context) {
 	includeOkInResp := qv.Get(postevents.IncludeOk) == "true" || qv.Get(postevents.IncludeOk) == "1"
 	avroFormat := qv.Get(postevents.AvroFormat) == "true" || qv.Get(postevents.AvroFormat) == "1"
 	isPausePluginProcessing := qv.Get(postevents.PausePlugins) == "true" || qv.Get(postevents.PausePlugins) == "1"
+	// Setup dummy wait group for background pause processing to be attached to.
+	// Ensure it is waited for before exiting or a race condition on the context cancel will occur.
+	var pauseWaitGroup *wgSync.WaitGroup
+	var dummyWg wgSync.WaitGroup
+	pauseWaitGroup = &dummyWg
 	if isPausePluginProcessing {
 		// Trigger plugin pausing in a background task to prevent this task slowing down producing events.
-		_ = pauser.BackgroundPauseProcessing(c.Request.Context(), ev.kvstore)
+		pauseWaitGroup = pauser.BackgroundPauseProcessing(c.Request.Context(), ev.kvstore)
 	}
 	// ensure posting with a valid model type
 	model := events.Model(qv.Get(postevents.Model))
 	if !events.IsValidModel(model) {
 		err := fmt.Errorf("not a registered model type: %s", model)
 		restapi_handlers.JSONError(c, 400, "not a registered model type", err)
+		pauseWaitGroup.Wait()
 		return
 	}
 
@@ -377,11 +384,13 @@ func (ev *Events) PostEvent(c *gin.Context) {
 	_, err := buf.ReadFrom(c.Request.Body)
 	if err != nil {
 		restapi_handlers.JSONError(c, 500, "Couldn't read request body", err)
+		pauseWaitGroup.Wait()
 		return
 	}
 	b := buf.Bytes()
 	if len(b) == 0 {
 		restapi_handlers.JSONError(c, 400, "Empty Request", errors.New("no events were provided to be published"))
+		pauseWaitGroup.Wait()
 		return
 	}
 
@@ -392,6 +401,7 @@ func (ev *Events) PostEvent(c *gin.Context) {
 	to_publish, response, produceActionInfo, err := ev.producer.TransformEvents(b, &produceParams)
 	if err != nil {
 		restapi_handlers.JSONError(c, 422, "PostEvent TransformEvents invalid events", err)
+		pauseWaitGroup.Wait()
 		return
 	}
 	promTimeAfterTransform := time.Now().UnixNano()
@@ -407,6 +417,7 @@ func (ev *Events) PostEvent(c *gin.Context) {
 				status = 400
 			}
 			restapi_handlers.JSONError(c, status, "failed ProduceAnyEvents", err)
+			pauseWaitGroup.Wait()
 			return
 		}
 	} else {
@@ -446,6 +457,7 @@ func (ev *Events) PostEvent(c *gin.Context) {
 			errorEnum,
 			errorParams,
 		)
+		pauseWaitGroup.Wait()
 		return
 	}
 
@@ -465,6 +477,7 @@ func (ev *Events) PostEvent(c *gin.Context) {
 	out, err := json.Marshal(response)
 	if err != nil {
 		restapi_handlers.JSONError(c, 500, "Marshalling Failed", err)
+		pauseWaitGroup.Wait()
 		return
 	}
 
@@ -476,6 +489,7 @@ func (ev *Events) PostEvent(c *gin.Context) {
 
 	promTimeAfterProduce := time.Now().UnixNano()
 	prom.EventsProduceStagesDuration.WithLabelValues("produce").Observe(float64(promTimeAfterProduce-promTimeAfterTransform) / 1e9)
+	pauseWaitGroup.Wait()
 }
 
 // PostEventSimulate will simulate consumer filtering for all plugins..
