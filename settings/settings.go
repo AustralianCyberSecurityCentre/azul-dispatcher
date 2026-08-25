@@ -91,6 +91,9 @@ type DPStreams struct {
 
 	// simple settings
 	APIAllowDelete bool `koanf:"api_allow_delete"`
+	// Number of retries for uploading and downloading files from the file store.
+	RetryCountFileAction      int `koanf:"retry_count_file_action"`
+	RetryAvgSleepMsFileAction int `koanf:"retry_average_sleep_ms_file_action"`
 
 	// Store files with a fixed XOR pattern to avoid AV detections
 	XOREncoding bool `koanf:"xor_encoding"`
@@ -213,8 +216,10 @@ var defaults DPSettings = DPSettings{
 	ListenAddr: ":8111",
 	LogPath:    "/tmp/logs/dispatcher/",
 	Streams: DPStreams{
-		APIAllowDelete: false,
-		Backend:        "s3",
+		APIAllowDelete:            false,
+		RetryCountFileAction:      5,
+		RetryAvgSleepMsFileAction: 5000,
+		Backend:                   "s3",
 		S3: DPStreamsS3{
 			Bucket: "azul",
 		},
