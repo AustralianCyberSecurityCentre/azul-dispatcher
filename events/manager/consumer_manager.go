@@ -17,7 +17,7 @@ import (
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 )
 
-var lastDeleteRequestTime time.Time
+var LastDeleteRequestTime time.Time
 var deleteAllPluginsLock sync.Mutex
 
 // ConsumerManager represents all Kafka interaction objects and supporting properties
@@ -74,12 +74,12 @@ func (m *ConsumerManager) getLastPauseTimeAndDeletePluginConsumers(p *consumer.C
 	}
 
 	// Plugin processing is paused, now clear plugin consumers if there are still any remaining.
-	if time.Since(lastDeleteRequestTime) > pauser.TIME_BETWEEN_REDIS_UPDATES {
+	if time.Since(LastDeleteRequestTime) > pauser.TIME_BETWEEN_REDIS_UPDATES {
 		deleteAllPluginsLock.Lock()
 		defer deleteAllPluginsLock.Unlock()
 		// If condition still met after acquiring lock
-		if time.Since(lastDeleteRequestTime) > pauser.TIME_BETWEEN_REDIS_UPDATES {
-			lastDeleteRequestTime = time.Now()
+		if time.Since(LastDeleteRequestTime) > pauser.TIME_BETWEEN_REDIS_UPDATES {
+			LastDeleteRequestTime = time.Now()
 			m.DeleteAllPluginEventReaders()
 		}
 	}

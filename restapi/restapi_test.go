@@ -16,6 +16,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/models"
 	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/manager"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pauser"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
@@ -99,6 +100,9 @@ sources:
 
 	s.tracker, err = tracking.NewTaskTracker(kvprov.TrackPluginExecution, testdata.GetGlobalTestContext())
 	require.Nil(s.T(), err)
+
+	// Reset Last Deletion request time so subsequent tests will still trigger deletions
+	manager.LastDeleteRequestTime = time.Time{}
 }
 
 func (s *RestapiTestSuite) TearDownTest() {
@@ -544,6 +548,11 @@ func (s *RestapiTestSuite) TestPluginPausesEvents() {
 	require.Nil(t, err)
 	require.False(t, isPaused)
 
+	// FLAKEY test handling
+	// If the tests are randomly breaking here it could mean consumer groups aren't being cleared properly.
+	// This occurs if manager.LastDeleteRequestTime isn't being reset.
+	// Because on subsequent runs of this test if LastDeleteRequestTime is set consumer groups aren't cleared.
+	// This means offsets aren't reset properly so this consume request will get events when it shouldn't
 	_, info, err = s.conn1.GetBinaryEvents(&client.FetchEventsStruct{
 		Count: 1000, Deadline: 1, IsTask: true, RequireLive: true, RequireHistoric: true,
 	})

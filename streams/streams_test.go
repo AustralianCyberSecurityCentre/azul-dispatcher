@@ -70,9 +70,9 @@ func TestInitLocalStore(t *testing.T) {
 		t.Fatalf("Default backend should be wrapped with a XORStore, but it is a %T", apiStreams.Store)
 	}
 
-	_, ok = value.Backend.(*store.StoreFilesystem)
+	_, ok = value.Backend.(*store.DirectorySplitterStore)
 	if !ok {
-		t.Fatalf("Default store should be a LocalStore, but it is a %T", value.Backend)
+		t.Fatalf("Default store should be a SplitterStore, but it is a %T", value.Backend)
 	}
 }
 

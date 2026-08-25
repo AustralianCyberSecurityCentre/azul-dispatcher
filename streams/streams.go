@@ -89,6 +89,9 @@ func NewStreams() *Streams {
 	default:
 		panic("No STORE_BACKEND configured.")
 	}
+	// Add splitter store immediately to store because it should be the first wrapper.
+	// The order is important to ensuring the abstraction between layers still works.
+	fstore = store.NewDirectorySplitterStore(fstore)
 
 	// Conditionally enable storing files with a XOR cipher to avoid AV detections
 	// If false, this is transparent barring checks to see if files had previously been written with XORing
