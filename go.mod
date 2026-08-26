@@ -5,7 +5,7 @@ go 1.26.0
 toolchain go1.26.1
 
 require (
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.103
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.105
 	github.com/allegro/bigcache/v3 v3.2.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
