@@ -193,7 +193,15 @@ func (s *Streams) PostStream(c *gin.Context) {
 		return
 	}
 	defer file.Close()
-	defer os.Remove(file.Name())
+	fileSha256 := ""
+	// Delete the file and log an error if it fails.
+	defer func(innerFile *os.File, calculatedSha256 *string) {
+		innerErr := os.Remove(innerFile.Name())
+		if innerErr != nil {
+			sha256Val := *calculatedSha256
+			bedSet.Logger.Warn().Msgf("Failed to cleanup the temporary file associated with a Stream upload. Sha256 '%s' with file name '%s'", sha256Val, file.Name())
+		}
+	}(file, &fileSha256)
 	var fileSize uint64
 	// 10kB buffering
 	maxBytesBufferBytes := 10240
@@ -234,6 +242,8 @@ func (s *Streams) PostStream(c *gin.Context) {
 		restapi_handlers.JSONError(c, 500, "hasher error", err)
 		return
 	}
+	// Used for warning logging if the file fails to delete.
+	fileSha256 = metadata.Sha256
 
 	if fileSize == 0 {
 		restapi_handlers.JSONError(c, 400, "no content in request body", nil)
@@ -268,7 +278,6 @@ func (s *Streams) PostStream(c *gin.Context) {
 				bedSet.Logger.Warn().Err(err).Msgf("Error when attempting to re-open seek error for file during retry of upload for file %s/%s/%s: %v", c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256, err)
 				continue
 			}
-			defer file.Close()
 			continue
 		}
 		err = s.Store.Put(c.Params.ByName("source"), c.Params.ByName("label"), metadata.Sha256, file, int64(fileSize))
