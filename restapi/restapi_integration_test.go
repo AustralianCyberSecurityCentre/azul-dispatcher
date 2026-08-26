@@ -12,6 +12,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/client"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/models"
+	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/manager"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pauser"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/topics"
@@ -67,6 +68,9 @@ sources:
 	s.server = httptest.NewServer(s.dp.Router)
 	s.conn1 = testdata.GetConnection(s.server.URL, "events-qa01")
 	s.conn2 = testdata.GetConnection(s.server.URL, "ingest-events-qa01")
+
+	// Reset Last Deletion request time so subsequent tests will still trigger deletions
+	manager.LastDeleteRequestTime = time.Time{}
 }
 
 func (s *RestapiIntTestSuite) TearDownSuite() {

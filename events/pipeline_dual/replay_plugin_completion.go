@@ -2,6 +2,7 @@ package pipeline_dual
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
@@ -231,11 +232,16 @@ func (c *ReplayPluginCompletion) dupeDataSources(message *events.BinaryEvent, ca
 		bedSet.Logger.Debug().Msg("Skipping artifact copy as sources are the same")
 		return nil
 	}
+	var notFoundError *fstore.NotFoundError
 	for _, r := range cached.Entity.Results {
 		for _, data := range r.Entity.Datastreams {
 			// perform an FileStorage artifact copy to the new source for the entity id
 			err := c.store.Copy(cached.Entity.Input.Source.Name, data.Label.Str(), data.Sha256, message.Source.Name, data.Label.Str(), data.Sha256)
 			if err != nil {
+				// Ignore not found errors
+				if errors.As(err, &notFoundError) {
+					continue
+				}
 				return err
 			}
 		}
