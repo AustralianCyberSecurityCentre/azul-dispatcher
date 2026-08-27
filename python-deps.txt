@@ -1,1 +1,2 @@
 azul-security
+pyinstaller

@@ -3,8 +3,50 @@
 ARG REGISTRY="docker.io/library"
 ARG BASE_IMAGE=golang
 ARG BASE_TAG=1.26-trixie@sha256:b389f1219965d8ba67776b81d17308ab25fa763be3855e5fe63ebcb10e15f3a1
+
+ARG PYTHON_REGISTRY="docker.io/library"
+ARG PYTHON_BUILD_IMAGE='python'
+ARG PYTHON_BUILD_TAG='3.12-trixie@sha256:3b524c305ebbec824b8b8f65b72d0f82527eae50c32998160f0a9fca5337f594'
+
 # Note if this is bumped for faster builds ensure the build agent has the same version of yara.
-ARG YARA_X_VERSION_TAG="1.17.0"
+ARG YARA_X_VERSION_TAG="1.20.0"
+
+FROM $PYTHON_REGISTRY/$PYTHON_BUILD_IMAGE:$PYTHON_BUILD_TAG AS pybuilder
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PIP_DISABLE_PIP_VERSION_CHECK=yes
+ARG PIP_CERT
+ARG PIP_CLIENT_CERT
+ARG PIP_TRUSTED_HOST
+ARG PIP_INDEX_URL
+ARG PIP_EXTRA_INDEX_URL
+ARG GIT_BRANCH_NAME
+# expected to be public registry (e.g pypi.org)
+ARG UV_DEFAULT_INDEX
+# expected to be private registry
+ARG UV_INDEX_URL
+ARG UV_INSECURE_HOST
+# Ensure uv installs to the correct directory
+ENV UV_PROJECT_ENVIRONMENT=/usr/local
+
+# copy all files not in .dockerignore
+COPY ./python-deps.txt /tmp/src/python-deps.txt
+RUN pip install uv
+
+# build and install package
+WORKDIR /tmp/src
+
+# Install azul-security and it's dependencies + pyinstaller
+RUN uv pip install --system -r python-deps.txt --extra-index-url $UV_INDEX_URL --exclude-newer "7 days" --exclude-newer-package=azul-security=false --exclude-newer-package=azul-bedrock=false
+# Check for dev version of azul-security
+RUN if [ "$GIT_BRANCH_NAME" = "refs/heads/dev" ]; then \
+    uv pip freeze | grep 'azul-.*==' | cut -d "=" -f 1 | xargs -I {} uv pip install --extra-index-url=$UV_INDEX_URL --system --upgrade --no-deps --prerelease allow '{}>=0.0.0-dev'; \
+    else \
+    uv pip freeze | grep 'azul-.*==' | cut -d "=" -f 1 | xargs -I {} uv pip install --extra-index-url=$UV_INDEX_URL --system --upgrade --no-deps '{}>=0.0.0'; \
+    fi
+# Create the azul-security executable in a dist directory.
+RUN pyinstaller --onedir $( find /usr/local -type f -path "*/azul_security/cli_commands.py") --exclude-module uvloop  --name azul-security
+# Delete un-needed babel files
+RUN find dist/azul-security/_internal/babel/locale-data -type f ! -name 'root.dat' ! -name 'en.dat' ! -name 'en_US.dat' -delete
 
 FROM $REGISTRY/$BASE_IMAGE:$BASE_TAG AS builder
 ENV DEBIAN_FRONTEND=noninteractive
@@ -41,7 +83,7 @@ RUN git config --global url."git@github.com:AustralianCyberSecurityCentre/".inst
 
 # Install yara-x for identify - needed for golang bedrock
 # Install Rust and yara-x
-ENV RUST_VERSION=1.96.0
+ENV RUST_VERSION=1.98.0
 # Attempts to limit cargo RAM usage during builds.
 ENV RUSTFLAGS="-C link-arg=-fuse-ld=lld"
 ARG YARA_X_VERSION_TAG
@@ -88,20 +130,9 @@ RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
         rm -rf yara-x; \
     fi
 
-# bypass externally managed restriction in distributed python
-RUN rm /usr/lib/python3.13/EXTERNALLY-MANAGED
-
-RUN pip install uv
-COPY python-deps.txt ./python-deps.txt
-RUN uv pip install --system -r python-deps.txt --extra-index-url $UV_INDEX_URL --exclude-newer "7 days" --exclude-newer-package=azul-security=false --exclude-newer-package=azul-bedrock=false
-RUN rm python-deps.txt
-
-# Upgrade to dev azul dependencies or upgrade non-dev azul dependencies depending on branch.
-RUN if [ "$GIT_BRANCH_NAME" = "refs/heads/dev" ]; then \
-    uv pip freeze | grep 'azul-.*==' | cut -d "=" -f 1 | xargs -I {} uv pip install --extra-index-url=$UV_INDEX_URL --system --upgrade --no-deps --prerelease allow '{}>=0.0.0-dev'; \
-    else \
-    uv pip freeze | grep 'azul-.*==' | cut -d "=" -f 1 | xargs -I {} uv pip install --extra-index-url=$UV_INDEX_URL --system --upgrade --no-deps '{}>=0.0.0'; \
-    fi
+# Install azul-security binary.
+COPY --from=pybuilder /tmp/src/dist/azul-security/azul-security /usr/local/bin/azul-security
+COPY --from=pybuilder /tmp/src/dist/azul-security/_internal /usr/local/bin/_internal
 
 # default libmagic is updated slowly for debian distros and
 # contains a number of bugs for office and archive file types
@@ -132,20 +163,6 @@ RUN cd /src && go build -v -a -tags static_all -o /go/bin/dispatcher main.go
 ##
 FROM $REGISTRY/$BASE_IMAGE:$BASE_TAG
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PIP_DISABLE_PIP_VERSION_CHECK=yes
-ARG PIP_CERT
-ARG PIP_CLIENT_CERT
-ARG PIP_TRUSTED_HOST
-ARG PIP_INDEX_URL
-ARG PIP_EXTRA_INDEX_URL
-ARG GIT_BRANCH_NAME
-# expected to be public registry (e.g pypi.org)
-ARG UV_DEFAULT_INDEX
-# expected to be private registry
-ARG UV_INDEX_URL
-ARG UV_INSECURE_HOST
-# Ensure uv installs to the correct directory
-ENV UV_PROJECT_ENVIRONMENT=/usr/local
 # required for yara to find .so libraries
 ENV LD_LIBRARY_PATH="/usr/local/lib:/usr/local/lib/x86_64-linux-gnu/"
 
@@ -155,21 +172,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     $(grep -vE "^\s*(#|$)" /tmp/src/debian.txt | tr "\n" " ") && \
     rm -rf /tmp/src/debian.txt /var/lib/apt/lists/*
-
-# bypass externally managed restriction in distributed python
-RUN rm /usr/lib/python3.13/EXTERNALLY-MANAGED
-
-RUN pip install uv
-COPY python-deps.txt ./python-deps.txt
-RUN uv pip install --system -r python-deps.txt --extra-index-url $UV_INDEX_URL --exclude-newer "7 days" --exclude-newer-package=azul-security=false --exclude-newer-package=azul-bedrock=false
-RUN rm python-deps.txt
-
-# Upgrade to dev azul dependencies or upgrade non-dev azul dependencies depending on branch.
-RUN if [ "$GIT_BRANCH_NAME" = "refs/heads/dev" ]; then \
-    uv pip freeze | grep 'azul-.*==' | cut -d "=" -f 1 | xargs -I {} uv pip install --extra-index-url=$UV_INDEX_URL --system --upgrade --no-deps --prerelease allow '{}>=0.0.0-dev'; \
-    else \
-    uv pip freeze | grep 'azul-.*==' | cut -d "=" -f 1 | xargs -I {} uv pip install --extra-index-url=$UV_INDEX_URL --system --upgrade --no-deps '{}>=0.0.0'; \
-    fi
 
 ARG YARA_X_VERSION_TAG
 ENV YARA_X_VERSION_TAG=${YARA_X_VERSION_TAG}
@@ -181,6 +183,10 @@ COPY --from=builder /usr/local/lib/pkgconfig /usr/local/lib/pkgconfig
 
 # Need to include the includes as well.
 COPY --from=builder /usr/local/include/ /usr/local/include/
+
+# Install azul-security binary.
+COPY --from=pybuilder /tmp/src/dist/azul-security/azul-security /usr/local/bin/azul-security
+COPY --from=pybuilder /tmp/src/dist/azul-security/_internal /usr/local/bin/_internal
 
 # # default libmagic for debian can get out of date 
 # contains a number of bugs for office and archive file types
