@@ -8,6 +8,8 @@ github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.103 h1:BDYCVWYHq
 github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.103/go.mod h1:wq4fK5d2r+C5+gX2zBi2CSho8YU7COloN9UiCdJXdB0=
 github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.105 h1:3GTQuS+oWuurMV0uMtkAfIXuDoyuadK90FSJTDjDSuA=
 github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.105/go.mod h1:wq4fK5d2r+C5+gX2zBi2CSho8YU7COloN9UiCdJXdB0=
+github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.107 h1:XPDGXqCdikDDrSgPya8JS5WxeFclaC/43QplRa64ktQ=
+github.com/AustralianCyberSecurityCentre/azul-bedrock/v12 v12.0.107/go.mod h1:wq4fK5d2r+C5+gX2zBi2CSho8YU7COloN9UiCdJXdB0=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.0 h1:4gRPBpN1f6xt88yi4WR26m7XaD9OlWtVT6bWPdGUIok=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.0/go.mod h1:G7QVLxw1j1JVyrO1MA95S8m8HStaaleDZYTcfGgjB2o=
 github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.14.0 h1:CU4+EJeJi3TKYWEcYuSdWsjzw0nVsK/H0MSQOiPcymU=
@@ -28,6 +30,8 @@ github.com/IBM/sarama v1.60.2 h1:T/HyMhOJMyH/BgkBLCiuTDH8EJAEf32eDbNldlKOWIg=
 github.com/IBM/sarama v1.60.2/go.mod h1:fZRPG+DZm8DM9WpmslgMiVErD46mmYAYBiFWC8XKkes=
 github.com/VirusTotal/yara-x/go v1.19.0 h1:Jdqa4J7X0f3Sjyc0Tt3S8/Ge6GyilxIFbe8iMl37/Tg=
 github.com/VirusTotal/yara-x/go v1.19.0/go.mod h1:KRt+q3iJ3vbPTaD91JIDzEBqvDEwzyvjaz9+9cajkls=
+github.com/VirusTotal/yara-x/go v1.20.0 h1:pfemcgfP1cF9IN9w9jODZSGhzpndZjAxLsYp0WDZucA=
+github.com/VirusTotal/yara-x/go v1.20.0/go.mod h1:VAytYJjaDJ6MTSty/n+uXT2W/QejPHRQECB0rgDGJN4=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
 github.com/allegro/bigcache/v3 v3.2.0 h1:B45F9x3iaoBlhzIA+0jqxlThTUoyg+mOk7HUKSbJOL8=
@@ -44,6 +48,8 @@ github.com/bytedance/gopkg v0.1.4 h1:oZnQwnX82KAIWb7033bEwtxvTqXcYMxDBaQxo5JJHWM
 github.com/bytedance/gopkg v0.1.4/go.mod h1:v1zWfPm21Fb+OsyXN2VAHdL6TBb2L88anLQgdyje6R4=
 github.com/bytedance/sonic v1.15.2 h1:90H+rcF/FwLXwfB1cudOLq/je83n683Utf4Cbp0xHCo=
 github.com/bytedance/sonic v1.15.2/go.mod h1:mT2NbXunuaEbnZ+mRIX/vYqKISmgEuHFDI4UzmKx2SA=
+github.com/bytedance/sonic v1.15.3 h1:P3akjLPBtV/i6bHC6LbcLjY3KuoOvfiqF8wFHeP5IhY=
+github.com/bytedance/sonic v1.15.3/go.mod h1:8e51yTPdY8M6t+vvGL1c2Y1xL9i+frEeIAQAEl75NUc=
 github.com/bytedance/sonic/loader v0.5.2 h1:0QtP1gevc1OZ6/H8Lb9BRZiCXd1Ftjd3OKuj1T1lBIo=
 github.com/bytedance/sonic/loader v0.5.2/go.mod h1:AR4NYCk5DdzZizZ5djGqQ92eEhCCcdf5x77udYiSJRo=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
