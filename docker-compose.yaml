@@ -48,7 +48,7 @@ services:
 
 
   redis:
-    image: redis:8.8-alpine@sha256:96cb544fa0af5aa898d160cffb7dae70c3df117190fc123831c64712cda425ff
+    image: redis:8.10-alpine@sha256:becdda6c7f4b3fb42e42fd7f120bbf5c54c4caaaf16f26da24e4563d2c1f0576
     restart: always
     ports:
       - "6379:6379"
