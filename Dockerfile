@@ -1,17 +1,19 @@
 # Start from a Debian image with the latest version of Go installed
 # and a workspace (GOPATH) configured at /go.
-ARG REGISTRY="docker.io/library"
-ARG BASE_IMAGE=golang
-ARG BASE_TAG=1.26-trixie@sha256:b389f1219965d8ba67776b81d17308ab25fa763be3855e5fe63ebcb10e15f3a1
+ARG REGISTRY="dhi.io"
+ARG BUILD_IMAGE='golang'
+ARG BUILD_TAG='1.26-debian13-dev'
+ARG BASE_IMAGE=static
+ARG BASE_TAG=20250419
 
-ARG PYTHON_REGISTRY="docker.io/library"
+# TODO - either make this the same as docker (preferred) or add it to the pipelines.
 ARG PYTHON_BUILD_IMAGE='python'
-ARG PYTHON_BUILD_TAG='3.12-trixie@sha256:3b524c305ebbec824b8b8f65b72d0f82527eae50c32998160f0a9fca5337f594'
+ARG PYTHON_BUILD_TAG='3.12-debian-dev'
 
 # Note if this is bumped for faster builds ensure the build agent has the same version of yara.
 ARG YARA_X_VERSION_TAG="1.20.0"
 
-FROM $PYTHON_REGISTRY/$PYTHON_BUILD_IMAGE:$PYTHON_BUILD_TAG AS pybuilder
+FROM $REGISTRY/$PYTHON_BUILD_IMAGE:$PYTHON_BUILD_TAG AS pybuilder
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PIP_DISABLE_PIP_VERSION_CHECK=yes
 ARG PIP_CERT
@@ -25,8 +27,6 @@ ARG UV_DEFAULT_INDEX
 # expected to be private registry
 ARG UV_INDEX_URL
 ARG UV_INSECURE_HOST
-# Ensure uv installs to the correct directory
-ENV UV_PROJECT_ENVIRONMENT=/usr/local
 
 # copy all files not in .dockerignore
 COPY ./python-deps.txt /tmp/src/python-deps.txt
@@ -34,7 +34,10 @@ RUN pip install uv
 
 # build and install package
 WORKDIR /tmp/src
-
+# Install dependencies required by pyinstaller.
+RUN apt-get update && \
+    apt install binutils -y && \
+    rm -rf /tmp/src/debian.txt /var/lib/apt/lists/*
 # Install azul-security and it's dependencies + pyinstaller
 RUN uv pip install --system -r python-deps.txt --extra-index-url $UV_INDEX_URL --exclude-newer "7 days" --exclude-newer-package=azul-security=false --exclude-newer-package=azul-bedrock=false
 # Check for dev version of azul-security
@@ -44,26 +47,12 @@ RUN if [ "$GIT_BRANCH_NAME" = "refs/heads/dev" ]; then \
     uv pip freeze | grep 'azul-.*==' | cut -d "=" -f 1 | xargs -I {} uv pip install --extra-index-url=$UV_INDEX_URL --system --upgrade --no-deps '{}>=0.0.0'; \
     fi
 # Create the azul-security executable in a dist directory.
-RUN pyinstaller --onedir $( find /usr/local -type f -path "*/azul_security/cli_commands.py") --exclude-module uvloop  --name azul-security
+RUN pyinstaller --onedir $( find /usr/ -type f -path "*/azul_security/cli_commands.py") --exclude-module uvloop  --name azul-security
 # Delete un-needed babel files
 RUN find dist/azul-security/_internal/babel/locale-data -type f ! -name 'root.dat' ! -name 'en.dat' ! -name 'en_US.dat' -delete
 
-FROM $REGISTRY/$BASE_IMAGE:$BASE_TAG AS builder
+FROM $REGISTRY/$BUILD_IMAGE:$BUILD_TAG AS builder
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PIP_DISABLE_PIP_VERSION_CHECK=yes
-ARG PIP_CERT
-ARG PIP_CLIENT_CERT
-ARG PIP_TRUSTED_HOST
-ARG PIP_INDEX_URL
-ARG PIP_EXTRA_INDEX_URL
-ARG GIT_BRANCH_NAME
-# expected to be public registry (e.g pypi.org)
-ARG UV_DEFAULT_INDEX
-# expected to be private registry
-ARG UV_INDEX_URL
-ARG UV_INSECURE_HOST
-# Ensure uv installs to the correct directory
-ENV UV_PROJECT_ENVIRONMENT=/usr/local
 # important not to disable cgo here as kafka requires it
 ENV GOOS=linux GOARCH=amd64 GO111MODULE=on GOPATH=/tmp/go
 # flags necessary for gossdeep
@@ -92,47 +81,47 @@ ENV YARA_X_VERSION_TAG=${YARA_X_VERSION_TAG}
 COPY . /src
 
 RUN if [ -f "/src/prebuilt/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
-        mkdir -p /usr/local/lib/pkgconfig/ && \
-        cp -r /src/prebuilt/pkgconfig/* /usr/local/lib/pkgconfig/ && \
-        cp -r /src/prebuilt/include/* /usr/local/include/ && \
-        cp /src/prebuilt/libyara_x_capi.so.$YARA_X_VERSION_TAG /usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG && \
-        cd /usr/local/lib/ && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so.1; \
+    mkdir -p /usr/lib/pkgconfig/ && \
+    cp -r /src/prebuilt/pkgconfig/* /usr/lib/pkgconfig/ && \
+    cp -r /src/prebuilt/include/* /usr/include/ && \
+    cp /src/prebuilt/libyara_x_capi.so.$YARA_X_VERSION_TAG /usr/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG && \
+    cd /usr/lib/ && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so.1; \
     fi
 
 # Only run if libyara isn't already present.
 # if [[ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]]; then
 
 # Download Rust tarball + signature
-RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
-        gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys 85AB96E6FA1BE5FE && \
-        curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz && \
-        curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc && \
-        gpg --verify rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc; \
+RUN if [ ! -f "/usr/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
+    gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys 85AB96E6FA1BE5FE && \
+    curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz && \
+    curl -O https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc && \
+    gpg --verify rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz.asc; \
     fi
 
 # perform rust install
-RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
-        tar xzf rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz && \
-        rust-${RUST_VERSION}-x86_64-unknown-linux-gnu/install.sh \
-            --prefix=/usr/local \
-            --without=rust-docs && \
-        rm -rf rust-${RUST_VERSION}-*; \
+RUN if [ ! -f "/usr/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
+    tar xzf rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz && \
+    rust-${RUST_VERSION}-x86_64-unknown-linux-gnu/install.sh \
+    --prefix=/usr \
+    --without=rust-docs && \
+    rm -rf rust-${RUST_VERSION}-*; \
     fi
 
 # perform yara-x install
-RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
-     cargo install cargo-c; \
+RUN if [ ! -f "/usr/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
+    cargo install cargo-c; \
     fi
-RUN if [ ! -f "/usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
-        git clone -b v$YARA_X_VERSION_TAG https://github.com/VirusTotal/yara-x.git; \
-        cd yara-x; \
-        cargo cinstall -p yara-x-capi --release --libdir /usr/local/lib/; \
-        rm -rf yara-x; \
+RUN if [ ! -f "/usr/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG" ]; then \
+    git clone -b v$YARA_X_VERSION_TAG https://github.com/VirusTotal/yara-x.git; \
+    cd yara-x; \
+    cargo cinstall -p yara-x-capi --release --libdir /usr/lib/; \
+    rm -rf yara-x; \
     fi
 
 # Install azul-security binary.
-COPY --from=pybuilder /tmp/src/dist/azul-security/azul-security /usr/local/bin/azul-security
-COPY --from=pybuilder /tmp/src/dist/azul-security/_internal /usr/local/bin/_internal
+COPY --from=pybuilder /tmp/src/dist/azul-security/azul-security /usr/bin/azul-security
+COPY --from=pybuilder /tmp/src/dist/azul-security/_internal /usr/bin/_internal
 
 # default libmagic is updated slowly for debian distros and
 # contains a number of bugs for office and archive file types
@@ -162,61 +151,37 @@ RUN cd /src && go build -v -a -tags static_all -o /go/bin/dispatcher main.go
 # Main Image
 ##
 FROM $REGISTRY/$BASE_IMAGE:$BASE_TAG
-ENV DEBIAN_FRONTEND=noninteractive
 # required for yara to find .so libraries
-ENV LD_LIBRARY_PATH="/usr/local/lib:/usr/local/lib/x86_64-linux-gnu/"
-
-COPY debian.txt /tmp/src/
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends \
-    $(grep -vE "^\s*(#|$)" /tmp/src/debian.txt | tr "\n" " ") && \
-    rm -rf /tmp/src/debian.txt /var/lib/apt/lists/*
-
+ENV LD_LIBRARY_PATH="/usr/lib:/usr/lib/x86_64-linux-gnu/:/usr/local/lib/"
 ARG YARA_X_VERSION_TAG
 ENV YARA_X_VERSION_TAG=${YARA_X_VERSION_TAG}
 # Copy the yara and file install from the build agent
-COPY --from=builder /usr/local/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG /usr/local/lib/
-# Create the symlinks to libyara_x_capi.1.16.0 (or whatever version it's up to until version 2 and then this will need an update)
-RUN cd /usr/local/lib/ && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so && ln -s ./libyara_x_capi.so.$YARA_X_VERSION_TAG libyara_x_capi.so.1
-COPY --from=builder /usr/local/lib/pkgconfig /usr/local/lib/pkgconfig
+COPY --from=builder /usr/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG /usr/lib/
+# Copy the symlinks from the built image.
+COPY --from=builder /usr/lib/libyara_x_capi.so /usr/lib/
+COPY --from=builder /usr/lib/libyara_x_capi.so.1 /usr/lib/
+# Get pkgconfig from builder for libyara as well.
+COPY --from=builder /usr/lib/pkgconfig /usr/lib/pkgconfig
 
 # Need to include the includes as well.
-COPY --from=builder /usr/local/include/ /usr/local/include/
+COPY --from=builder /usr/include/ /usr/include/
 
 # Install azul-security binary.
-COPY --from=pybuilder /tmp/src/dist/azul-security/azul-security /usr/local/bin/azul-security
-COPY --from=pybuilder /tmp/src/dist/azul-security/_internal /usr/local/bin/_internal
+COPY --from=pybuilder /tmp/src/dist/azul-security/azul-security /usr/bin/azul-security
+COPY --from=pybuilder /tmp/src/dist/azul-security/_internal /usr/bin/_internal
 
-# # default libmagic for debian can get out of date 
-# contains a number of bugs for office and archive file types
-# Install updated libmagic
-COPY --from=builder /go/file /go/file
-RUN cd /go/file && \
-    make install && \
-    ldconfig -v && \
-    cd /go && \
-    rm /go/file -rf && \
-    file --version
+# Copy all of libmagic libraries in (file). (Note custom installed version installed in /usr/local/ not /usr/)
+COPY --from=builder /usr/local/bin/file /usr/local/bin/file
+COPY --from=builder /usr/local/lib/libmagic.la /usr/local/lib/libmagic.la
+COPY --from=builder /usr/local/lib/libmagic.so /usr/local/lib/libmagic.so
+COPY --from=builder /usr/local/lib/libmagic.so.1 /usr/local/lib/libmagic.so.1
+COPY --from=builder /usr/local/lib/libmagic.so.1.0.0 /usr/local/lib/libmagic.so.1.0.0
+# Need all of user share for file to work
+COPY --from=builder /usr/local/share/ /usr/local/share/
 
 COPY --from=builder /go/bin/dispatcher /go/bin/
-ARG UID=21000
-ARG GID=21000
-RUN groupadd -g $GID azul && useradd --create-home --shell /bin/bash -u $UID -g $GID azul
-USER azul
-
-# Verify that yara-x was copied over successfully and works in user context
-RUN cat <<'EOF' > test.c
-#include <yara_x.h>
-int main() {
-    YRX_RULES* rules;
-    yrx_compile("rule dummy { condition: true }", &rules);
-    yrx_rules_destroy(rules);
-}
-EOF
-RUN gcc `pkg-config --cflags yara_x_capi` test.c `pkg-config --libs yara_x_capi`
-RUN rm test.c
-RUN file --version
+# ARG UID=65532
+# ARG GID=65532
 
 EXPOSE 8111
 ENTRYPOINT ["/go/bin/dispatcher"]
