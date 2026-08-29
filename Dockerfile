@@ -6,7 +6,7 @@ ARG BASE_TAG=1.26-trixie@sha256:e6e8ff4b72b128bb673613645c5ac415e4f537b2390e77a8
 
 ARG PYTHON_REGISTRY="docker.io/library"
 ARG PYTHON_BUILD_IMAGE='python'
-ARG PYTHON_BUILD_TAG='3.12-trixie@sha256:3b524c305ebbec824b8b8f65b72d0f82527eae50c32998160f0a9fca5337f594'
+ARG PYTHON_BUILD_TAG='3.12-trixie@sha256:0c2998a13d94a4afaaaf4613890a9cc9eabc65992d4d24931e3b35fa9c5ab0a5'
 
 # Note if this is bumped for faster builds ensure the build agent has the same version of yara.
 ARG YARA_X_VERSION_TAG="1.20.0"
