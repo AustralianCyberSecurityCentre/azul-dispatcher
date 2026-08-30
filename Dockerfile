@@ -178,7 +178,7 @@ COPY --from=builder /usr/local/lib/libmagic.so.1.0.0 /usr/local/lib/libmagic.so.
 # Need all of user share for file to work
 COPY --from=builder /usr/local/share/ /usr/local/share/
 
-COPY --from=builder /go/bin/dispatcher /go/bin/
+COPY --from=builder /go/bin/dispatcher /go/bin/dispatcher
 # ARG UID=65532
 # ARG GID=65532
 
