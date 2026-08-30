@@ -145,20 +145,27 @@ RUN if [ "$BEDROCK_REPLACE" != "" ] ; then \
 RUN --mount=type=secret,id=testSecret export $(cat /run/secrets/testSecret) && \
     cd /src && go test ./... -p 1
 RUN cd /src && go build -v -a -tags static_all -o /go/bin/dispatcher main.go
+RUN /go/bin/dispatcher
+# This can be used to check what linker/loader is being used by dispatcher.
+# It needs to be in the final image and if it isn't the image will fail with a " no such file or directory" error
+# when attempting to startup dispatcher even though the file is present.
+# RUN apt install binutils -y
+# RUN readelf -l /go/bin/dispatcher | grep interpreter
+
 
 ##
 # Main Image
 ##
 FROM $REGISTRY/$BASE_IMAGE:$BASE_TAG
+# Create directory /tmp/fcache
+WORKDIR /tmp/fcache
+WORKDIR /
 # required for yara to find .so libraries
-ENV LD_LIBRARY_PATH="/usr/lib:/usr/lib/x86_64-linux-gnu/:/usr/local/lib/"
+ENV LD_LIBRARY_PATH="/usr/lib:/usr/lib/x86_64-linux-gnu/:/usr/local/lib/x86_64-linux-gnu/:/usr/local/lib/"
 ARG YARA_X_VERSION_TAG
 ENV YARA_X_VERSION_TAG=${YARA_X_VERSION_TAG}
 # Copy the yara and file install from the build agent
-COPY --from=builder /usr/lib/libyara_x_capi.so.$YARA_X_VERSION_TAG /usr/lib/
-# Copy the symlinks from the built image.
-COPY --from=builder /usr/lib/libyara_x_capi.so /usr/lib/
-COPY --from=builder /usr/lib/libyara_x_capi.so.1 /usr/lib/
+COPY --from=builder /usr/lib/libyara_x_capi.so* /usr/lib/
 # Get pkgconfig from builder for libyara as well.
 COPY --from=builder /usr/lib/pkgconfig /usr/lib/pkgconfig
 
@@ -172,16 +179,18 @@ COPY --from=pybuilder /tmp/src/dist/azul-security/_internal /usr/bin/_internal
 # Copy all of libmagic libraries in (file). (Note custom installed version installed in /usr/local/ not /usr/)
 COPY --from=builder /usr/local/bin/file /usr/local/bin/file
 COPY --from=builder /usr/local/lib/libmagic.la /usr/local/lib/libmagic.la
-COPY --from=builder /usr/local/lib/libmagic.so /usr/local/lib/libmagic.so
-COPY --from=builder /usr/local/lib/libmagic.so.1 /usr/local/lib/libmagic.so.1
-COPY --from=builder /usr/local/lib/libmagic.so.1.0.0 /usr/local/lib/libmagic.so.1.0.0
+COPY --from=builder /usr/local/lib/libmagic.so* /usr/local/lib/
+COPY --from=builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
 # Need all of user share for file to work
 COPY --from=builder /usr/local/share/ /usr/local/share/
 
-COPY --from=builder /go/bin/dispatcher /go/bin/dispatcher
+# Copy linker/loader from builder (required for)
+COPY --from=builder /lib64/ld-linux-x86-64.so.2 /lib64/ld-linux-x86-64.so.2
+# Copy dispatcher binary.
+COPY --from=builder /go/bin/dispatcher /bin/dispatcher
 # ARG UID=65532
 # ARG GID=65532
 
 EXPOSE 8111
-ENTRYPOINT ["/go/bin/dispatcher"]
+ENTRYPOINT ["/bin/dispatcher"]
 CMD ["serve"]
