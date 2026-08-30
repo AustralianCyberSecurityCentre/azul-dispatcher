@@ -6,7 +6,6 @@ ARG BUILD_TAG='1.26-debian13-dev'
 ARG BASE_IMAGE=static
 ARG BASE_TAG=20250419
 
-# TODO - either make this the same as docker (preferred) or add it to the pipelines.
 ARG PYTHON_BUILD_IMAGE='python'
 ARG PYTHON_BUILD_TAG='3.12-debian-dev'
 
