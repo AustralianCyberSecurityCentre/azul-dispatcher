@@ -182,7 +182,6 @@ COPY --from=builder /usr/lib/libmagic.so* /usr/lib/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libfuzzy* /usr/lib/x86_64-linux-gnu/libfuzzy*
 # Need all of user share for file to work
 COPY --from=builder /usr/share/misc/magic.mgc /usr/share/misc/magic.mgc
-COPY --from=builder /usr/share/magic.mgc /usr/share/magic.mgc
 
 # Copy linker/loader from builder (required for)
 COPY --from=builder /lib64/ld-linux-x86-64.so.2 /lib64/ld-linux-x86-64.so.2
