@@ -130,14 +130,10 @@ ARG FILE_TAG=FILE5_47
 RUN git clone --branch $FILE_TAG $FILE_GIT /go/file && \
     cd /go/file/ && \
     autoreconf -f -i && \
-    ./configure --disable-silent-rules && \
+    ./configure --disable-silent-rules --prefix=/usr && \
     make -j4 && \
     make install && \
     ldconfig -v && file --version
-
-# /usr/local/share/magic.mgc is the magic database from the custom compiled file magic we want to keep.
-# Make the symbolic link to /usr/share/magic/mgc to make sure it's the one found by libmagic.
-RUN ln -sf /usr/local/share/misc/magic.mgc /usr/share/magic.mgc
 
 # if BEDROCK_REPLACE, bedrock is in a different place
 # you must include a version such as thing@latest
@@ -179,17 +175,18 @@ COPY --from=builder /usr/include/ /usr/include/
 COPY --from=pybuilder /tmp/src/dist/azul-security/azul-security /usr/bin/azul-security
 COPY --from=pybuilder /tmp/src/dist/azul-security/_internal /usr/bin/_internal
 
-# Copy all of libmagic libraries in (file). (Note custom installed version installed in /usr/local/ not /usr/)
-COPY --from=builder /usr/local/bin/file /usr/local/bin/file
-COPY --from=builder /usr/local/lib/libmagic.la /usr/local/lib/libmagic.la
-COPY --from=builder /usr/local/lib/libmagic.so* /usr/local/lib/
-COPY --from=builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
+# Copy all of libmagic libraries in (file).
+COPY --from=builder /usr/bin/file /usr/bin/file
+COPY --from=builder /usr/lib/libmagic.la /usr/lib/libmagic.la
+COPY --from=builder /usr/lib/libmagic.so* /usr/lib/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libfuzzy* /usr/lib/x86_64-linux-gnu/libfuzzy*
 # Need all of user share for file to work
-COPY --from=builder /usr/local/share/misc/magic.mgc /usr/local/share/misc/magic.mgc
+COPY --from=builder /usr/share/misc/magic.mgc /usr/share/misc/magic.mgc
 COPY --from=builder /usr/share/magic.mgc /usr/share/magic.mgc
 
 # Copy linker/loader from builder (required for)
 COPY --from=builder /lib64/ld-linux-x86-64.so.2 /lib64/ld-linux-x86-64.so.2
+
 # Copy dispatcher binary.
 COPY --from=builder /go/bin/dispatcher /bin/dispatcher
 # ARG UID=65532
