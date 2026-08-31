@@ -180,7 +180,8 @@ COPY --from=pybuilder /tmp/src/dist/azul-security/_internal /usr/bin/_internal
 COPY --from=builder /usr/bin/file /usr/bin/file
 COPY --from=builder /usr/lib/libmagic.la /usr/lib/libmagic.la
 COPY --from=builder /usr/lib/libmagic.so* /usr/lib/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libfuzzy* /usr/lib/x86_64-linux-gnu/libfuzzy*
+COPY --from=builder /usr/lib/libmagic.so* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
 # Need all of user share for file to work
 COPY --from=builder /usr/share/misc/magic.mgc /usr/share/misc/magic.mgc
 
