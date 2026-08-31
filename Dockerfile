@@ -135,7 +135,9 @@ RUN git clone --branch $FILE_TAG $FILE_GIT /go/file && \
     make install && \
     ldconfig -v && file --version
 
-RUN ln -s /usr/local/share/magic.mgc /usr/share/magic.mgc
+# /usr/local/share/magic.mgc is the magic database from the custom compiled file magic we want to keep.
+# Make the symbolic link to /usr/share/magic/mgc to make sure it's the one found by libmagic.
+RUN ln -sf /usr/local/share/misc/magic.mgc /usr/share/magic.mgc
 
 # if BEDROCK_REPLACE, bedrock is in a different place
 # you must include a version such as thing@latest
@@ -183,7 +185,7 @@ COPY --from=builder /usr/local/lib/libmagic.la /usr/local/lib/libmagic.la
 COPY --from=builder /usr/local/lib/libmagic.so* /usr/local/lib/
 COPY --from=builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
 # Need all of user share for file to work
-COPY --from=builder /usr/local/share/magic.mgc /usr/local/share/magic.mgc
+COPY --from=builder /usr/local/share/misc/magic.mgc /usr/local/share/misc/magic.mgc
 COPY --from=builder /usr/share/magic.mgc /usr/share/magic.mgc
 
 # Copy linker/loader from builder (required for)
