@@ -127,6 +127,7 @@ COPY --from=pybuilder /tmp/src/dist/azul-security/_internal /usr/bin/_internal
 # Install updated libmagic
 ARG FILE_GIT=https://github.com/file/file
 ARG FILE_TAG=FILE5_47
+# Install file with --prefix=/usr to ensure it overrides the built-in magic.
 RUN git clone --branch $FILE_TAG $FILE_GIT /go/file && \
     cd /go/file/ && \
     autoreconf -f -i && \
