@@ -135,6 +135,8 @@ RUN git clone --branch $FILE_TAG $FILE_GIT /go/file && \
     make install && \
     ldconfig -v && file --version
 
+RUN ln -s /usr/local/share/magic.mgc /usr/share/magic.mgc
+
 # if BEDROCK_REPLACE, bedrock is in a different place
 # you must include a version such as thing@latest
 ARG BEDROCK_REPLACE=""
@@ -181,8 +183,8 @@ COPY --from=builder /usr/local/lib/libmagic.la /usr/local/lib/libmagic.la
 COPY --from=builder /usr/local/lib/libmagic.so* /usr/local/lib/
 COPY --from=builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
 # Need all of user share for file to work
-COPY --from=builder /usr/local/share/ /usr/local/share/
-COPY --from=builder /usr/share/ /usr/share/
+COPY --from=builder /usr/local/share/magic.mgc /usr/local/share/magic.mgc
+COPY --from=builder /usr/local/share/magic.mgc /usr/share/magic.mgc
 
 # Copy linker/loader from builder (required for)
 COPY --from=builder /lib64/ld-linux-x86-64.so.2 /lib64/ld-linux-x86-64.so.2
