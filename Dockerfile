@@ -145,13 +145,12 @@ RUN if [ "$BEDROCK_REPLACE" != "" ] ; then \
 RUN --mount=type=secret,id=testSecret export $(cat /run/secrets/testSecret) && \
     cd /src && go test ./... -p 1
 RUN cd /src && go build -v -a -tags static_all -o /go/bin/dispatcher main.go
-RUN /go/bin/dispatcher
+
 # This can be used to check what linker/loader is being used by dispatcher.
 # It needs to be in the final image and if it isn't the image will fail with a " no such file or directory" error
 # when attempting to startup dispatcher even though the file is present.
 # RUN apt install binutils -y
 # RUN readelf -l /go/bin/dispatcher | grep interpreter
-
 
 ##
 # Main Image
@@ -183,6 +182,7 @@ COPY --from=builder /usr/local/lib/libmagic.so* /usr/local/lib/
 COPY --from=builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
 # Need all of user share for file to work
 COPY --from=builder /usr/local/share/ /usr/local/share/
+COPY --from=builder /usr/share/ /usr/share/
 
 # Copy linker/loader from builder (required for)
 COPY --from=builder /lib64/ld-linux-x86-64.so.2 /lib64/ld-linux-x86-64.so.2
