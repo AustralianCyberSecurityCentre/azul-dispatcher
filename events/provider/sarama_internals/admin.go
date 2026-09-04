@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"time"
 
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/settings"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/settings"
 	"github.com/IBM/sarama"
 	"github.com/rcrowley/go-metrics"
 )

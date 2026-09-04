@@ -5,9 +5,9 @@ It acts as the HTTP storage abstraction for the system.
 package streams
 
 import (
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/models"
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/settings"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/store"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/models"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/store"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/prom"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/streams/identify"
