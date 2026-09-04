@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-viper/mapstructure/v2"
 
-	bedsettings "github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/settings"
+	bedsettings "github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/settings"
 )
 
 type AesEnabledEnum string

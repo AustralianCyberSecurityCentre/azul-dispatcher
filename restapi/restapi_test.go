@@ -12,10 +12,10 @@ import (
 
 	"github.com/goccy/go-json"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/client"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/events"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/models"
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/settings"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/client"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/events"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/models"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/manager"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pauser"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
