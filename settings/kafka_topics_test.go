@@ -3,7 +3,7 @@ package settings
 import (
 	"testing"
 
-	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/settings"
+	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/settings"
 	"github.com/stretchr/testify/require"
 )
 
