@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/client"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/events"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/models"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/client"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/events"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/manager"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pauser"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"

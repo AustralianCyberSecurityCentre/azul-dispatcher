@@ -3,8 +3,8 @@ package pipeline
 import (
 	"testing"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/events"
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v12/gosrc/msginflight"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/events"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/msginflight"
 	testdata "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/testdata"
 	"github.com/stretchr/testify/require"
 )
