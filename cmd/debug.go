@@ -30,7 +30,7 @@ var debugCmd = &cobra.Command{
 		}
 		offset := "latest"
 		if historicBool {
-			offset = "historic"
+			offset = "earliest"
 		}
 
 		consumerGroupName, err := cmd.Flags().GetString("consumer-group")
@@ -53,7 +53,7 @@ var debugCmd = &cobra.Command{
 			bedSet.Logger.Fatal().Err(err).Msg("could not initialise sarama provider")
 		}
 
-		consumer, err := qprov.CreateConsumer(consumerName, consumerGroupName, offset, topicPattern, provider.NewConsumerOptions(10*time.Second))
+		consumer, err := qprov.CreateConsumer(consumerName, consumerGroupName, offset, topicPattern, provider.NewConsumerOptions(30*time.Second))
 		if err != nil {
 			bedSet.Logger.Fatal().Err(err).Msg("could not initialise kafka client")
 		}
@@ -76,8 +76,16 @@ var debugCmd = &cobra.Command{
 			bedSet.Logger.Fatal().Err(err).Msg("Could not get any messages from avro format")
 		}
 
+		var resultingEvents []*events.BinaryEvent
+		for _, m := range msgs {
+			event, ok := m.GetBinary()
+			if ok {
+				resultingEvents = append(resultingEvents, event)
+			}
+		}
+
 		bedSet.Logger.Info().Msg("Messages:")
-		bedSet.Logger.Info().Msgf("%+v", msgs)
+		bedSet.Logger.Info().Msgf("%+v", resultingEvents)
 
 		bedSet.Logger.Info().Msg("Failed Messages:")
 		bedSet.Logger.Info().Msgf("%+v", failedConversions)
