@@ -240,6 +240,7 @@ func chooseTopic(msg *msginflight.MsgInFlight) (string, error) {
 		if binary.Flags.Expedite {
 			// expedite events go to a fixed topic
 			topic = topics.ExpediteTopic
+			bedSet.Logger.Warn().Msgf("Choosing expedite topic for publishing %s", binary.Entity.Sha256)
 		} else if binary.Flags.Retry {
 			// retry events go to a fixed topic
 			topic = topics.RetryTopic
