@@ -34,6 +34,15 @@ func TestChooseTopic(t *testing.T) {
 	require.Nil(t, err)
 	require.Equal(t, topic, "azul.test01.testing.binary.sourced")
 
+	// test binary event expedited
+	ev = testdata.GenEventBinary(&testdata.BC{})
+	ev.Flags.Expedite = true
+	inFlight, err = msginflight.NewMsgInFlightFromEvent(ev)
+	require.Nil(t, err)
+	topic, err = chooseTopic(inFlight)
+	require.Nil(t, err)
+	require.Equal(t, topic, "azul.test01.system.expedite")
+
 	// test nil flags
 	ev.Flags = events.BinaryFlags{}
 	inFlight, err = msginflight.NewMsgInFlightFromEvent(ev)

@@ -393,6 +393,7 @@ func (ev *Events) PostEvent(c *gin.Context) {
 		pauseWaitGroup.Wait()
 		return
 	}
+	bedSet.Logger.Warn().Msgf("Processing message: %s", b)
 
 	// are we going to block for message confirmation/receipt?
 	promTimeAfterBuffer := time.Now().UnixNano()

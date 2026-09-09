@@ -82,22 +82,34 @@ var debugCmd = &cobra.Command{
 			if ok {
 				bedSet.Logger.Info().Msgf("%+v", *event)
 			} else {
-				bedSet.Logger.Warn().Msg("could not print event as GetBinary failled!")
+				bedSet.Logger.Warn().Msg("could not print event as GetBinary failed!")
 			}
 		}
-
 		bedSet.Logger.Info().Msg("Messages B:")
 		for _, m := range msgs {
-			event, ok := m.GetBinary()
-			if ok {
-				bedSet.Logger.Info().Msgf("%#v", *event)
+			rawJson, err := m.MarshalJSON()
+			if err == nil {
+				bedSet.Logger.Info().Msgf("%v", rawJson)
 			} else {
-				bedSet.Logger.Warn().Msg("could not print event as GetBinary failled!")
+				bedSet.Logger.Warn().Msgf("could not print event with error %v!", err)
 			}
 		}
 
 		bedSet.Logger.Info().Msg("Failed Messages:")
 		bedSet.Logger.Info().Msgf("%+v", failedConversions)
+
+		aClient, err := qprov.CreateAdmin()
+		if err != nil {
+			bedSet.Logger.Fatal().Err(err).Msg("could not initialise admin kafka client")
+		}
+		topics, err := aClient.GetMetadata(nil, true, 5000)
+		if err != nil {
+			bedSet.Logger.Fatal().Err(err).Msg("could not list topic metadata")
+		}
+		bedSet.Logger.Info().Msg("All topics:")
+		for _, t := range topics {
+			bedSet.Logger.Info().Msgf("%v", t.Name)
+		}
 
 	},
 }
