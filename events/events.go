@@ -122,6 +122,8 @@ func NewEvents(prov provider.ProviderInterface, kvstore *kvprovider.KVMulti, s s
 	activeConsumerPipe := pipeline.NewConsumePipeline([]pipeline.ConsumeAction{
 		// Filters out messages that are too old for the source
 		pipeAgeoff,
+		// Filter out expedited messages if the expedite message has a specific plugin filter applied.
+		&pipeline_consume.FilterExpeditePlugins{},
 		// Filters out messages that have a source path greater than the max depth.
 		&pipeline_consume.FilterTooDeep{MaxDepth: filterMaxDepth},
 		// Filter if this message has a security classification that exceeds what is allowed
