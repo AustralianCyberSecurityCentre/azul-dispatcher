@@ -236,6 +236,7 @@ func chooseTopic(msg *msginflight.MsgInFlight) (string, error) {
 		// catch all to simplify management of topics for custom entity types
 		topic = topics.GetSystemTopic(msg.Base.Model)
 	} else {
+		bedSet.Logger.Warn().Msgf("Passing in entity %s with expedite flag %v and event %+v", binary.Entity.Sha256, binary.Flags.Expedite, binary)
 		// handling binary docs is more complicated
 		if binary.Flags.Expedite {
 			// expedite events go to a fixed topic
