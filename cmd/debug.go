@@ -8,6 +8,7 @@ import (
 	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider"
+	sarama_internals "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/provider/sarama_internals"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/spf13/cobra"
 )
@@ -52,11 +53,23 @@ var debugCmd = &cobra.Command{
 			bedSet.Logger.Fatal().Err(err).Msg("could not initialise sarama provider")
 		}
 
-		consumer, err := qprov.CreateConsumer(consumerName, consumerGroupName, offset, topicPattern, provider.NewConsumerOptions(30*time.Second))
+		consumer, err := qprov.CreateConsumer(consumerName, consumerGroupName, offset, topicPattern, provider.NewConsumerOptions(10*time.Second))
 		if err != nil {
 			bedSet.Logger.Fatal().Err(err).Msg("could not initialise kafka client")
 		}
-		message := consumer.Poll()
+
+		// Poll multiple times for kafka events
+		var message *sarama_internals.Message
+		for range 3 {
+			message = consumer.Poll()
+			if message != (*sarama_internals.Message)(nil) {
+				break
+			}
+		}
+		if message == (*sarama_internals.Message)(nil) {
+			bedSet.Logger.Info().Msg("Consumer could not find any events!")
+			return
+		}
 
 		msgs, failedConversions, err := pipeline.AvroToMsgInFlights(message.Value, events.ModelBinary)
 		if err != nil {

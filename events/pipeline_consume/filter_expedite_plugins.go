@@ -17,10 +17,11 @@ func (p *FilterExpeditePlugins) ConsumeMod(message *msginflight.MsgInFlight, met
 	if !ok {
 		return "", message
 	}
+	bedSet.Logger.Warn().Msgf("Expedite plugin consuming for plugin, %s", meta.Name)
 	// Only apply filter on expedite events.
 	if binary.Flags.Expedite {
-		bedSet.Logger.Warn().Msgf("EXPEDITE FLAG SEEN FOR PLUGIN WITH NAME, %s", meta.Name)
-		bedSet.Logger.Warn().Msgf("SETTINTGS ARE %+v", binary.Source.Settings)
+		bedSet.Logger.Error().Msgf("EXPEDITE FLAG SEEN FOR PLUGIN WITH NAME, %s", meta.Name)
+		bedSet.Logger.Error().Msgf("SETTINTGS ARE %+v", binary.Source.Settings)
 		// If the plugin name setting is present only the target plugin should run.
 		targetPluginName, ok := binary.Source.Settings[events.SETTINGS_EXPEDITE_PLUGIN_KEY]
 		if ok {
