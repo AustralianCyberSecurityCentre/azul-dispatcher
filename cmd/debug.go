@@ -76,16 +76,25 @@ var debugCmd = &cobra.Command{
 			bedSet.Logger.Fatal().Err(err).Msg("Could not get any messages from avro format")
 		}
 
-		var resultingEvents []*events.BinaryEvent
+		bedSet.Logger.Info().Msg("Messages:")
 		for _, m := range msgs {
 			event, ok := m.GetBinary()
 			if ok {
-				resultingEvents = append(resultingEvents, event)
+				bedSet.Logger.Info().Msgf("%+v", *event)
+			} else {
+				bedSet.Logger.Warn().Msg("could not print event as GetBinary failled!")
 			}
 		}
 
-		bedSet.Logger.Info().Msg("Messages:")
-		bedSet.Logger.Info().Msgf("%+v", resultingEvents)
+		bedSet.Logger.Info().Msg("Messages B:")
+		for _, m := range msgs {
+			event, ok := m.GetBinary()
+			if ok {
+				bedSet.Logger.Info().Msgf("%#v", *event)
+			} else {
+				bedSet.Logger.Warn().Msg("could not print event as GetBinary failled!")
+			}
+		}
 
 		bedSet.Logger.Info().Msg("Failed Messages:")
 		bedSet.Logger.Info().Msgf("%+v", failedConversions)
@@ -100,3 +109,6 @@ func init() {
 	debugCmd.Flags().String("pattern", ".*", "Regex for matching specific topics")
 	rootCmd.AddCommand(debugCmd)
 }
+
+// dispatcher debug --pattern azul.dev.testing.binary.sourced --consumer-group abc6 --consumer-name def6
+// dispatcher debug --pattern azul.dev.system.expedite --consumer-group abc7 --consumer-name def7
