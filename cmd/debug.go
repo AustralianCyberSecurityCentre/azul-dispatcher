@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/events"
@@ -47,6 +48,11 @@ var debugCmd = &cobra.Command{
 			bedSet.Logger.Fatal().Err(err).Msg("couldn't load topic pattern flag.")
 		}
 
+		eventsToCollect, err := cmd.Flags().GetInt("count")
+		if err != nil {
+			bedSet.Logger.Fatal().Err(err).Msg("couldn't load eventsToCollect flag.")
+		}
+
 		// Main work
 		qprov, err := provider.NewSaramaProvider(st.Events.Kafka.Endpoint, ctx)
 		if err != nil {
@@ -60,44 +66,66 @@ var debugCmd = &cobra.Command{
 
 		// Poll multiple times for kafka events
 		var message *sarama_internals.Message
-		for range 3 {
-			message = consumer.Poll()
-			if message != (*sarama_internals.Message)(nil) {
+
+		fmt.Print("Messages:")
+		// Continually print messages until the count is reached
+		for range eventsToCollect {
+			// Retry finding a message up to 3 times before giving up.
+			for range 3 {
+				message = consumer.Poll()
+				if message != (*sarama_internals.Message)(nil) {
+					break
+				}
+			}
+			if message == (*sarama_internals.Message)(nil) {
+				fmt.Print("Consumer could not find any events!")
 				break
 			}
-		}
-		if message == (*sarama_internals.Message)(nil) {
-			bedSet.Logger.Info().Msg("Consumer could not find any events!")
-			return
+			msgs, failedConversions, err := pipeline.AvroToMsgInFlights(message.Value, events.ModelBinary)
+			if err != nil {
+				bedSet.Logger.Fatal().Err(err).Msg("Could not get any messages from avro format")
+			}
+			if failedConversions.TotalFailures > 0 {
+				fmt.Print("Failed Messages:")
+				fmt.Printf("%+v", failedConversions)
+			}
+
+			for _, m := range msgs {
+				event, ok := m.GetBinary()
+				if ok {
+					fmt.Printf("%+v", *event)
+				} else {
+					bedSet.Logger.Warn().Msg("could not print event as GetBinary failed!")
+				}
+			}
+			fmt.Print("B:")
+			for _, m := range msgs {
+				rawJson, err := m.MarshalJSON()
+				if err == nil {
+					fmt.Printf("%s", rawJson)
+				} else {
+					bedSet.Logger.Warn().Msgf("could not print event with error %v!", err)
+				}
+			}
 		}
 
-		msgs, failedConversions, err := pipeline.AvroToMsgInFlights(message.Value, events.ModelBinary)
+	},
+}
+
+// debugCmd represents the serve command
+var listTopicsCmd = &cobra.Command{
+	Use:   "list-topics",
+	Short: "List Kafka topics",
+	Long:  `List kafka topics`,
+	Args:  cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		ctx, cancelFunc := context.WithCancel(context.Background())
+		defer cancelFunc()
+		// Main work
+		qprov, err := provider.NewSaramaProvider(st.Events.Kafka.Endpoint, ctx)
 		if err != nil {
-			bedSet.Logger.Fatal().Err(err).Msg("Could not get any messages from avro format")
+			bedSet.Logger.Fatal().Err(err).Msg("could not initialise sarama provider")
 		}
-
-		bedSet.Logger.Info().Msg("Messages:")
-		for _, m := range msgs {
-			event, ok := m.GetBinary()
-			if ok {
-				bedSet.Logger.Info().Msgf("%+v", *event)
-			} else {
-				bedSet.Logger.Warn().Msg("could not print event as GetBinary failed!")
-			}
-		}
-		bedSet.Logger.Info().Msg("Messages B:")
-		for _, m := range msgs {
-			rawJson, err := m.MarshalJSON()
-			if err == nil {
-				bedSet.Logger.Info().Msgf("%v", rawJson)
-			} else {
-				bedSet.Logger.Warn().Msgf("could not print event with error %v!", err)
-			}
-		}
-
-		bedSet.Logger.Info().Msg("Failed Messages:")
-		bedSet.Logger.Info().Msgf("%+v", failedConversions)
-
 		aClient, err := qprov.CreateAdmin()
 		if err != nil {
 			bedSet.Logger.Fatal().Err(err).Msg("could not initialise admin kafka client")
@@ -106,11 +134,10 @@ var debugCmd = &cobra.Command{
 		if err != nil {
 			bedSet.Logger.Fatal().Err(err).Msg("could not list topic metadata")
 		}
-		bedSet.Logger.Info().Msg("All topics:")
+		fmt.Print("All topics:")
 		for _, t := range topics {
-			bedSet.Logger.Info().Msgf("%v", t.Name)
+			fmt.Printf("%v", t.Name)
 		}
-
 	},
 }
 
@@ -119,8 +146,7 @@ func init() {
 	debugCmd.Flags().String("consumer-group", "test-group-1", "Name of the consumer group to use for tracking kafka groups")
 	debugCmd.Flags().String("consumer-name", "test-consumer-1", "Name of the consumer to use for talking to kafka groups.")
 	debugCmd.Flags().String("pattern", ".*", "Regex for matching specific topics")
+	debugCmd.Flags().Int("count", 1, "Number of events to consume.")
 	rootCmd.AddCommand(debugCmd)
+	rootCmd.AddCommand(listTopicsCmd)
 }
-
-// dispatcher debug --pattern azul.dev.testing.binary.sourced --consumer-group abc6 --consumer-name def6
-// dispatcher debug --pattern azul.dev.system.expedite --consumer-group abc7 --consumer-name def7
