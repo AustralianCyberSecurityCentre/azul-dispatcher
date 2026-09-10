@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/events"
@@ -135,8 +136,19 @@ var listTopicsCmd = &cobra.Command{
 			bedSet.Logger.Fatal().Err(err).Msg("could not list topic metadata")
 		}
 		fmt.Println("All topics:")
+
+		disableFilter, err := cmd.Flags().GetBool("disable-filter")
+		if err != nil {
+			bedSet.Logger.Fatal().Err(err).Msg("couldn't load disable-filter flag.")
+		}
+
 		for _, t := range topics {
-			fmt.Printf("%v\n", t.Name)
+			if disableFilter {
+				fmt.Printf("%v\n", t.Name)
+			} else if strings.HasPrefix(t.Name, st.Events.Kafka.TopicPrefix) {
+				fmt.Printf("%v\n", t.Name)
+			}
+
 		}
 	},
 }
@@ -148,5 +160,6 @@ func init() {
 	debugCmd.Flags().String("pattern", ".*", "Regex for matching specific topics")
 	debugCmd.Flags().Int("count", 1, "Number of events to consume.")
 	rootCmd.AddCommand(debugCmd)
+	listTopicsCmd.Flags().Bool("disable-filter", false, "Disable the dispatcher topicPrefix filtering.")
 	rootCmd.AddCommand(listTopicsCmd)
 }
