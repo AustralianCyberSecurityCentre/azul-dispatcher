@@ -67,7 +67,7 @@ var debugCmd = &cobra.Command{
 		// Poll multiple times for kafka events
 		var message *sarama_internals.Message
 
-		fmt.Print("Messages:")
+		fmt.Println("Messages:")
 		// Continually print messages until the count is reached
 		for range eventsToCollect {
 			// Retry finding a message up to 3 times before giving up.
@@ -78,7 +78,7 @@ var debugCmd = &cobra.Command{
 				}
 			}
 			if message == (*sarama_internals.Message)(nil) {
-				fmt.Print("Consumer could not find any events!")
+				fmt.Println("Consumer could not find any events!")
 				break
 			}
 			msgs, failedConversions, err := pipeline.AvroToMsgInFlights(message.Value, events.ModelBinary)
@@ -86,23 +86,23 @@ var debugCmd = &cobra.Command{
 				bedSet.Logger.Fatal().Err(err).Msg("Could not get any messages from avro format")
 			}
 			if failedConversions.TotalFailures > 0 {
-				fmt.Print("Failed Messages:")
-				fmt.Printf("%+v", failedConversions)
+				fmt.Println("Failed Messages:")
+				fmt.Printf("%+v\n", failedConversions)
 			}
 
 			for _, m := range msgs {
 				event, ok := m.GetBinary()
 				if ok {
-					fmt.Printf("%+v", *event)
+					fmt.Printf("%+v\n", *event)
 				} else {
 					bedSet.Logger.Warn().Msg("could not print event as GetBinary failed!")
 				}
 			}
-			fmt.Print("B:")
+			fmt.Println("B:")
 			for _, m := range msgs {
 				rawJson, err := m.MarshalJSON()
 				if err == nil {
-					fmt.Printf("%s", rawJson)
+					fmt.Printf("%s\n", rawJson)
 				} else {
 					bedSet.Logger.Warn().Msgf("could not print event with error %v!", err)
 				}
@@ -134,9 +134,9 @@ var listTopicsCmd = &cobra.Command{
 		if err != nil {
 			bedSet.Logger.Fatal().Err(err).Msg("could not list topic metadata")
 		}
-		fmt.Print("All topics:")
+		fmt.Println("All topics:")
 		for _, t := range topics {
-			fmt.Printf("%v", t.Name)
+			fmt.Printf("%v\n", t.Name)
 		}
 	},
 }
