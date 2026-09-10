@@ -90,16 +90,15 @@ var debugCmd = &cobra.Command{
 				fmt.Println("Failed Messages:")
 				fmt.Printf("%+v\n", failedConversions)
 			}
-
-			for _, m := range msgs {
-				event, ok := m.GetBinary()
-				if ok {
-					fmt.Printf("%+v\n", *event)
-				} else {
-					bedSet.Logger.Warn().Msg("could not print event as GetBinary failed!")
-				}
-			}
-			fmt.Println("B:")
+			// Non json print method
+			// for _, m := range msgs {
+			// 	event, ok := m.GetBinary()
+			// 	if ok {
+			// 		fmt.Printf("%+v\n", *event)
+			// 	} else {
+			// 		bedSet.Logger.Warn().Msg("could not print event as GetBinary failed!")
+			// 	}
+			// }
 			for _, m := range msgs {
 				rawJson, err := m.MarshalJSON()
 				if err == nil {
