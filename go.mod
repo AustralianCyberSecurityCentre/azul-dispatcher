@@ -5,12 +5,12 @@ go 1.26.0
 toolchain go1.26.1
 
 require (
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.19 
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.19
 	github.com/allegro/bigcache/v3 v3.2.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
 	github.com/eko/gocache/lib/v4 v4.2.4
-	github.com/eko/gocache/store/bigcache/v4 v4.2.4
+	github.com/eko/gocache/store/bigcache/v4 v4.2.7
 	github.com/glaslos/tlsh v0.4.0
 	github.com/golang/mock v1.6.0
 	github.com/minio/minio-go/v7 v7.3.0 // indirect
