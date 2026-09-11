@@ -58,8 +58,8 @@ github.com/eapache/go-resiliency v1.7.0 h1:n3NRTnBn5N0Cbi/IeOHuQn9s2UwVUH7Ga0ZWc
 github.com/eapache/go-resiliency v1.7.0/go.mod h1:5yPzW0MIvSe0JDsv0v+DvcjEv2FyD6iZYSs1ZI+iQho=
 github.com/eko/gocache/lib/v4 v4.2.4 h1:BRKeSVesCA+ujcdS72GhAwMmJcYnp46DRu7w9ZL8Gp8=
 github.com/eko/gocache/lib/v4 v4.2.4/go.mod h1:Zus8mwmaPu1VYOzfomb+Dvx2wV7fT5jDRbHYtQM6MEY=
-github.com/eko/gocache/store/bigcache/v4 v4.2.4 h1:Ak2qZYh7ioRoSts6xUObdnbNhKIZQxrVGO1kb21U8Ak=
-github.com/eko/gocache/store/bigcache/v4 v4.2.4/go.mod h1:ty85W3DT2S5ZO3VG30UkwMQ1FmH8p6O0Y6FrQz7alUo=
+github.com/eko/gocache/store/bigcache/v4 v4.2.7 h1:PHwBpgaFvFHk9bAIVIIb93vqOrbgMwzoqXk/El0nsIg=
+github.com/eko/gocache/store/bigcache/v4 v4.2.7/go.mod h1:PbERbVnjnIyayM+jdL4bkjYlEScZYUIAv7JbQjqTrxA=
 github.com/fatih/structs v1.1.0 h1:Q7juDM0QtcnhCpeyLGQKyg4TOIghuNXrkL32pHAUMxo=
 github.com/fatih/structs v1.1.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga6PJ7M=
 github.com/gabriel-vasile/mimetype v1.4.15 h1:05iP/CYtZ/w455R/KZM6rZ5ieAdh99UPtd+d3YzLmaI=
