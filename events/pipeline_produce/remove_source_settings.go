@@ -3,14 +3,12 @@ package pipeline_produce
 import (
 	"strconv"
 
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/events"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/msginflight"
 	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/settings"
 
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
 )
-
-// Must match the key provided in metastore
-const SUBMIT_SETTINGS_DEPTH_REMOVAL_KEY = "remove_at_depth"
 
 // SourceSettingRemoval removes a sources setting at a specific depth depending on the model type.
 type SourceSettingRemoval struct {
@@ -27,7 +25,7 @@ func (p *SourceSettingRemoval) ProduceMod(inFlight *msginflight.MsgInFlight, met
 		return inFlight, nil
 	}
 
-	removalDepthValue, keyPresent := binaryEvent.Source.Settings[SUBMIT_SETTINGS_DEPTH_REMOVAL_KEY]
+	removalDepthValue, keyPresent := binaryEvent.Source.Settings[events.SETTINGS_DEPTH_REMOVAL_KEY]
 	if !keyPresent {
 		return inFlight, nil
 	}
