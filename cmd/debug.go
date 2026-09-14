@@ -54,6 +54,30 @@ var debugCmd = &cobra.Command{
 			bedSet.Logger.Fatal().Err(err).Msg("couldn't load eventsToCollect flag.")
 		}
 
+		modelTypeString, err := cmd.Flags().GetString("model")
+		if err != nil {
+			bedSet.Logger.Fatal().Err(err).Msg("couldn't load model flag.")
+		}
+		var model events.Model
+		switch modelTypeString {
+		case "delete":
+			model = events.ModelDelete
+		case "download":
+			model = events.ModelDownload
+		case "insert":
+			model = events.ModelInsert
+		case "plugin":
+			model = events.ModelPlugin
+		case "status":
+			model = events.ModelStatus
+		case "retrohunt":
+			model = events.ModelRetrohunt
+		case "binary":
+			fallthrough
+		default:
+			model = events.ModelBinary
+		}
+
 		// Main work
 		qprov, err := provider.NewSaramaProvider(st.Events.Kafka.Endpoint, ctx)
 		if err != nil {
@@ -82,7 +106,7 @@ var debugCmd = &cobra.Command{
 				fmt.Println("Consumer could not find any events!")
 				break
 			}
-			msgs, failedConversions, err := pipeline.AvroToMsgInFlights(message.Value, events.ModelBinary)
+			msgs, failedConversions, err := pipeline.AvroToMsgInFlights(message.Value, model)
 			if err != nil {
 				bedSet.Logger.Fatal().Err(err).Msg("Could not get any messages from avro format")
 			}
@@ -90,15 +114,6 @@ var debugCmd = &cobra.Command{
 				fmt.Println("Failed Messages:")
 				fmt.Printf("%+v\n", failedConversions)
 			}
-			// Non json print method
-			// for _, m := range msgs {
-			// 	event, ok := m.GetBinary()
-			// 	if ok {
-			// 		fmt.Printf("%+v\n", *event)
-			// 	} else {
-			// 		bedSet.Logger.Warn().Msg("could not print event as GetBinary failed!")
-			// 	}
-			// }
 			for _, m := range msgs {
 				rawJson, err := m.MarshalJSON()
 				if err == nil {
@@ -144,10 +159,9 @@ var listTopicsCmd = &cobra.Command{
 		for _, t := range topics {
 			if disableFilter {
 				fmt.Printf("%v\n", t.Name)
-			} else if strings.HasPrefix(t.Name, st.Events.Kafka.TopicPrefix) {
+			} else if strings.HasPrefix(t.Name, "azul."+st.Events.Kafka.TopicPrefix) {
 				fmt.Printf("%v\n", t.Name)
 			}
-
 		}
 	},
 }
@@ -158,6 +172,8 @@ func init() {
 	debugCmd.Flags().String("consumer-name", "test-consumer-1", "Name of the consumer to use for talking to kafka groups.")
 	debugCmd.Flags().String("pattern", ".*", "Regex for matching specific topics")
 	debugCmd.Flags().Int("count", 1, "Number of events to consume.")
+	debugCmd.Flags().String("model", "binary", "Model type, valid values are binary (default), delete, download, insert, plugin, status, retrohunt")
+
 	rootCmd.AddCommand(debugCmd)
 	listTopicsCmd.Flags().Bool("disable-filter", false, "Disable the dispatcher topicPrefix filtering.")
 	rootCmd.AddCommand(listTopicsCmd)
