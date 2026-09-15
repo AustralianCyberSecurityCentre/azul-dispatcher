@@ -159,7 +159,7 @@ var listTopicsCmd = &cobra.Command{
 		for _, t := range topics {
 			if disableFilter {
 				fmt.Printf("%v\n", t.Name)
-			} else if strings.HasPrefix(t.Name, "azul."+st.Events.Kafka.TopicPrefix) {
+			} else if strings.HasPrefix(t.Name, fmt.Sprintf("azul.%s.", st.Events.Kafka.TopicPrefix)) {
 				fmt.Printf("%v\n", t.Name)
 			}
 		}
