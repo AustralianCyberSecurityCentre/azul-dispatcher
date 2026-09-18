@@ -147,10 +147,11 @@ func TestExpand(t *testing.T) {
 	for _, table := range tables {
 		// create directly without New as don't want to set up/mock kafka
 		inj := &InjectChildEvents{
-			consumer: nil,
-			run:      true,
-			store:    fstore,
-			inserts:  map[string][]*events.InsertEvent{},
+			consumer:   nil,
+			run:        true,
+			store:      fstore,
+			inserts:    map[string][]*events.InsertEvent{},
+			sourceKeys: []string{"virustotal"},
 		}
 		for _, i := range table.insert {
 			inFlight, err := pipeline.NewMsgInFlightFromJson(i, events.ModelInsert)
@@ -207,10 +208,11 @@ func TestChildBinaryCopy(t *testing.T) {
 	for _, table := range tables {
 		// create directly without New as don't want to set up/mock kafka
 		inj := &InjectChildEvents{
-			consumer: nil,
-			run:      true,
-			store:    fstore,
-			inserts:  map[string][]*events.InsertEvent{},
+			consumer:   nil,
+			run:        true,
+			store:      fstore,
+			inserts:    map[string][]*events.InsertEvent{},
+			sourceKeys: []string{"other", "azul", "virustotal"},
 		}
 		for _, i := range table.insert {
 			inFlight, err := pipeline.NewMsgInFlightFromJson(i, events.ModelInsert)
@@ -230,7 +232,7 @@ func TestChildBinaryCopy(t *testing.T) {
 	expected_source := "virustotal"
 	exists, err = fstore.Exists(expected_source, test_label.Str(), test_hash)
 	require.Nil(t, err)
-	require.True(t, exists)
+	require.True(t, exists, "expected stream: %s/%s/%s", expected_source, test_label.Str(), test_hash)
 
 	// clean up test files
 	deleted, err := fstore.Delete(test_source, test_label.Str(), test_hash)
@@ -256,10 +258,11 @@ func TestChildBinaryCopyFailure(t *testing.T) {
 	for _, table := range tables {
 		// create directly without New as don't want to set up/mock kafka
 		inj := &InjectChildEvents{
-			consumer: nil,
-			run:      true,
-			store:    fstore,
-			inserts:  map[string][]*events.InsertEvent{},
+			consumer:   nil,
+			run:        true,
+			store:      fstore,
+			inserts:    map[string][]*events.InsertEvent{},
+			sourceKeys: []string{"virustotal"},
 		}
 		for _, i := range table.insert {
 			inFlight, err := pipeline.NewMsgInFlightFromJson(i, events.ModelInsert)
@@ -309,10 +312,11 @@ func TestChildBinaryCopyNoSource(t *testing.T) {
 	for _, table := range tables {
 		// create directly without New as don't want to set up/mock kafka
 		inj := &InjectChildEvents{
-			consumer: nil,
-			run:      true,
-			store:    fstore,
-			inserts:  map[string][]*events.InsertEvent{},
+			consumer:   nil,
+			run:        true,
+			store:      fstore,
+			inserts:    map[string][]*events.InsertEvent{},
+			sourceKeys: []string{"virustotal"},
 		}
 		for _, i := range table.insert {
 			inFlight, err := pipeline.NewMsgInFlightFromJson(i, events.ModelInsert)
@@ -335,6 +339,12 @@ func TestChildBinaryCopyNoSource(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
+	fstore, err := store.NewEmptyLocalStore(st.Streams.Local.Path)
+	if err != nil {
+		panic(err.Error())
+	}
+	require.Nil(t, err, "Error creating NewEmptyLocalStore")
+
 	tables := []struct {
 		test     string
 		insert   [][]byte
@@ -348,9 +358,11 @@ func TestRemove(t *testing.T) {
 	}
 	for _, table := range tables {
 		inj := &InjectChildEvents{
-			consumer: nil,
-			run:      true,
-			inserts:  map[string][]*events.InsertEvent{},
+			consumer:   nil,
+			run:        true,
+			store:      fstore,
+			inserts:    map[string][]*events.InsertEvent{},
+			sourceKeys: []string{"virustotal"},
 		}
 		for _, i := range table.insert {
 			inFlight, err := pipeline.NewMsgInFlightFromJson(i, events.ModelInsert)

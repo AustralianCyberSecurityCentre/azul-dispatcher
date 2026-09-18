@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/events"
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/msginflight"
 	fstore "github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/store"
 	"github.com/goccy/go-json"
@@ -24,11 +25,12 @@ const consumerGroupInject = "azul-injector"
 
 // InjectChildEvents collects manual insert messages to inject child events as needed.
 type InjectChildEvents struct {
-	consumer provider.ConsumerInterface
-	run      bool
-	mux      sync.RWMutex
-	store    fstore.FileStorage
-	inserts  map[string][]*events.InsertEvent
+	consumer   provider.ConsumerInterface
+	run        bool
+	mux        sync.RWMutex
+	store      fstore.FileStorage
+	inserts    map[string][]*events.InsertEvent
+	sourceKeys []string
 }
 
 // NewInjectChildEvents creates a consumer for tracking and inserting messages.
@@ -37,12 +39,24 @@ func NewInjectChildEvents(prov provider.ProviderInterface, s fstore.FileStorage)
 	if err != nil {
 		return nil, err
 	}
+
+	sourcesConf, err := models.ParseSourcesYaml(st.Events.Sources)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse yaml source for NewInjectChildEvents %v", err)
+	}
+	keys := make([]string, 0, len(sourcesConf.Sources))
+	for k := range sourcesConf.Sources {
+		keys = append(keys, k)
+	}
+
 	c, err := prov.CreateConsumer(consumerGroupInject, group(), "earliest", topics.InsertTopic, provider.NewConsumerOptions(pollWait))
+
 	return &InjectChildEvents{
-		consumer: c,
-		run:      false,
-		store:    s,
-		inserts:  map[string][]*events.InsertEvent{},
+		consumer:   c,
+		run:        false,
+		store:      s,
+		inserts:    map[string][]*events.InsertEvent{},
+		sourceKeys: keys,
 	}, err
 }
 
@@ -118,20 +132,21 @@ func (p *InjectChildEvents) ProduceMod(inFlight *msginflight.MsgInFlight, meta *
 	newFlights := []*msginflight.MsgInFlight{}
 	for _, ins := range insert {
 		child := ins.Entity.ChildHistory.Sha256
-		// extract information for file copy operation
-		childSource := ins.Entity.OriginalSource
-		parentSource := parent.Source.Name
-		for _, data := range ins.Entity.Child.Datastreams {
-			childLabel := data.Label
-			err := p.store.Copy(childSource, childLabel.Str(), child, parentSource, childLabel.Str(), child)
-			if err != nil {
-				pipeline.HandleProducerError(meta.UserAgent, p.GetName(), inFlight, err, "error copying child binary")
-				// Continue on even if the stream is missing. The injection event is still valid but the stream is missing.
-				// This can occur if an injection event has had it's stream age-off (it's source ages off after 2 weeks).
-				// This should only occur if the parent binary is re-uploaded and the injection event aged off with it's original parent.
-				// FUTURE - return nil,nil // If injection events have their own S3 storage that doesn't age off.
-			}
-		}
+		// Previously this copied from original source to the new source, but all datastreams are now copied by default at startup.
+		// parentSource := parent.Source.Name
+		// for _, data := range ins.Entity.Child.Datastreams {
+		// 	childLabel := data.Label
+		// 	childSource, err := p.findStreamSource(childLabel.Str(), data.Sha256)
+		// 	if err == nil {
+		// 		err = p.store.Copy(childSource, childLabel.Str(), data.Sha256, parentSource, childLabel.Str(), child)
+		// 	}
+		// 	if err != nil {
+		// 		pipeline.HandleProducerError(meta.UserAgent, p.GetName(), inFlight, err, "error copying child binary")
+		// 		// Continue on even if the stream is missing. The injection event is still valid but the stream is missing.
+		// 		// This can occur if an injection event has had it's stream age-off (it's source ages off after 2 weeks).
+		// 		// This should only occur if the parent binary is re-uploaded and the injection event aged off with it's original parent.
+		// 	}
+		// }
 		bedSet.Logger.Debug().Str("parent", parent.Entity.Sha256).Str("child", child).Msg("Attaching manual-insert child to parent")
 		msg, err := merge(parent, ins)
 		if err != nil {
@@ -148,6 +163,36 @@ func group() string {
 	return fmt.Sprintf("%s-%d", consumerGroupInject, time.Now().Unix())
 }
 
+func (p *InjectChildEvents) findStreamSource(label, sha256 string) (string, error) {
+	for _, source := range p.sourceKeys {
+		exists, err := p.store.Exists(source, label, sha256)
+		if err != nil {
+			bedSet.Logger.Warn().Msgf("issue performing inject_child copy when checking if stream %s/%s/%s exists %v", source, label, sha256, err)
+		}
+		if exists {
+			return source, nil
+		}
+	}
+	return "", fmt.Errorf("cannot inject the injection event with stream sha256 %s as it has no original stream", sha256)
+}
+
+func (p *InjectChildEvents) copyStreamToAllSources(sourceOld, label, sha256 string) {
+	for _, sourceNew := range p.sourceKeys {
+		if sourceNew == sourceOld {
+			continue
+		}
+		// Don't copy over top if it already exists.
+		exists, err := p.store.Exists(sourceNew, label, sha256)
+		if err == nil && exists {
+			continue
+		}
+		err = p.store.Copy(sourceOld, label, sha256, sourceNew, label, sha256)
+		if err != nil {
+			bedSet.Logger.Error().Msgf("failed to copy stream from %s/%s/%s to %s/%s/%s within inject_child registration with error %v", sourceOld, label, sha256, sourceNew, label, sha256, err)
+		}
+	}
+}
+
 // Handle processes an incoming insert event.
 // Takes a format of insert and validates the message
 // Then puts the event into a cache.
@@ -155,6 +200,17 @@ func (p *InjectChildEvents) registerInsert(k string, ev *events.InsertEvent) err
 	if ev == nil {
 		p.remove(k)
 		return nil
+	}
+	// Copy the insert stream to all topics to ensure it only age's off if all sources would have aged it off.
+	// This reduces the risk of losing the stream accidentally
+	// It also means the stream doesn't need to be copied at insert time.
+	for _, data := range ev.Entity.Child.Datastreams {
+		validSource, err := p.findStreamSource(string(data.Label), ev.Entity.ChildHistory.Sha256)
+		if err != nil {
+			bedSet.Logger.Error().Msgf("failed to find a source for the stream %s/%s %v", data.Label, data.Sha256, err)
+			continue
+		}
+		p.copyStreamToAllSources(validSource, string(data.Label), ev.Entity.ChildHistory.Sha256)
 	}
 
 	key := ev.Entity.ParentSha256
