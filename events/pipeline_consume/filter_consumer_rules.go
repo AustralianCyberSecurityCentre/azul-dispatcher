@@ -116,7 +116,7 @@ func (f *FilterConsumerRules) ConsumeMod(msg *msginflight.MsgInFlight, meta *con
 		}
 	}
 	// if multiple stream labels are expected, we must have them all
-	if len(meta.RequireStreams) > 0 && has_expected_label < len(meta.RequireStreams) {
+	if len(meta.RequireStreams) > 1 && has_expected_label < len(meta.RequireStreams) {
 		return REJECT_STREAM, nil
 	}
 
