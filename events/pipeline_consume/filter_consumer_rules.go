@@ -18,6 +18,7 @@ const (
 	REJECT_STREAM_LEGACY     = "reject_stream_legacy"
 	REJECT_FILE_TYPE         = "reject_file_format"
 	REJECT_STREAM            = "reject_stream"
+	REJECT_WILDCARD_STREAM   = "reject_wildcard_stream"
 	REJECT_HAS_NO_CONTENT    = "reject_no_content"
 )
 
@@ -73,11 +74,18 @@ func (f *FilterConsumerRules) ConsumeMod(msg *msginflight.MsgInFlight, meta *con
 		return "", msg
 	}
 
-	has_content := false
-	has_expected_label := 0
+	dataStreamMapping := map[events.DatastreamLabel]events.BinaryEntityDatastream{}
+	hasContent := false
+	foundWildCardType := false
+	wildCardTypeRequirements, checkWildcardType := meta.RequireStreams["*"]
+	if checkWildcardType {
+		// Only check the wildcard requirements if any file types are listed.
+		checkWildcardType = len(wildCardTypeRequirements) > 0
+	}
+
 	for _, data := range binary.Entity.Datastreams {
 		if data.Label == events.DataLabelContent {
-			has_content = true
+			hasContent = true
 			// filter based on data size
 			if meta.RequireUnderContentSize > 0 {
 				if data.Size > uint64(meta.RequireUnderContentSize) {
@@ -90,22 +98,44 @@ func (f *FilterConsumerRules) ConsumeMod(msg *msginflight.MsgInFlight, meta *con
 				}
 			}
 		}
+		dataStreamMapping[data.Label] = data
+		if checkWildcardType && !foundWildCardType {
+			// Check if this stream matches any of the type requirements
+			for permittedTypePrefix := range wildCardTypeRequirements {
+				if strings.HasPrefix(data.FileFormat, permittedTypePrefix) {
+					foundWildCardType = true
+				}
+			}
+		}
+	}
+	// Has a wildcard stream with type requirements but none of the provided streams match the type requirement.
+	if checkWildcardType && !foundWildCardType {
+		return REJECT_WILDCARD_STREAM, nil
+	}
 
-		// filter based on file type
-		if len(meta.RequireStreams) > 0 {
-			fts, ok := meta.RequireStreams[data.Label]
+	// Requires content, but has no content.
+	if (meta.RequireContent || meta.RequireUnderContentSize > 0 || meta.RequireOverContentSize > 0) && !hasContent {
+		return REJECT_HAS_NO_CONTENT, nil
+	}
+
+	// filter based on file type
+	if len(meta.RequireStreams) > 0 {
+		for requireStream, requireStreamTypeAllowedTypesMap := range meta.RequireStreams {
+			// wildcard already handled
+			if requireStream == "*" {
+				continue
+			}
+			relevantStream, ok := dataStreamMapping[requireStream]
 			if !ok {
-				// check if wildcarded
-				fts, ok = meta.RequireStreams["*"]
 				if !ok {
 					return REJECT_STREAM, nil
 				}
 			}
-			has_expected_label += 1
+
 			has_expected_prefix := false
-			if len(fts) > 0 {
-				for k := range fts {
-					if strings.HasPrefix(data.FileFormat, k) {
+			if len(requireStreamTypeAllowedTypesMap) > 0 {
+				for permittedTypePrefix := range requireStreamTypeAllowedTypesMap {
+					if strings.HasPrefix(relevantStream.FileFormat, permittedTypePrefix) {
 						has_expected_prefix = true
 					}
 				}
@@ -114,14 +144,7 @@ func (f *FilterConsumerRules) ConsumeMod(msg *msginflight.MsgInFlight, meta *con
 				}
 			}
 		}
-	}
-	// if multiple stream labels are expected, we must have them all
-	if len(meta.RequireStreams) > 1 && has_expected_label < len(meta.RequireStreams) {
-		return REJECT_STREAM, nil
-	}
 
-	if (meta.RequireContent || meta.RequireUnderContentSize > 0 || meta.RequireOverContentSize > 0) && !has_content {
-		return REJECT_HAS_NO_CONTENT, nil
 	}
 
 	return "", msg
