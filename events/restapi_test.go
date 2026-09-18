@@ -262,6 +262,7 @@ func TestParseParams(t *testing.T) {
 		testdata.GenEventBinary(&testdata.BC{}),
 		testdata.GenEventBinary(&testdata.BC{}),
 		testdata.GenEventBinary(&testdata.BC{}),
+		testdata.GenEventBinary(&testdata.BC{}),
 	}
 	evs[0].Entity.Datastreams[0].FileFormat = "executable/windows/pe32"
 	evs[1].Entity.Datastreams[0].FileFormat = "executable/windows/dll32"
@@ -270,7 +271,12 @@ func TestParseParams(t *testing.T) {
 	evs[4].Entity.Datastreams[0].FileFormat = "text/plain"
 	evs[4].Entity.Datastreams = append(evs[4].Entity.Datastreams, testdata.GenBinaryStream("1"))
 	evs[4].Entity.Datastreams[1].Label = "safe_png"
-	evs[4].Entity.Datastreams[0].FileFormat = "executable/windows/pe32"
+	evs[4].Entity.Datastreams[1].FileFormat = "image/png"
+	evs[5].Entity.Datastreams[0].Label = "content"
+	evs[5].Entity.Datastreams[0].FileFormat = "text/plain"
+	evs[5].Entity.Datastreams = append(evs[4].Entity.Datastreams, testdata.GenBinaryStream("1"))
+	evs[5].Entity.Datastreams[1].Label = events.DataLabelTest // Fake stream that is not on content main but is an executable
+	evs[5].Entity.Datastreams[1].FileFormat = "executable/windows/pe32"
 
 	// data types
 	params, err = testDoParseParams("name=test&version=5&r-streams=*,executable/windows/pe32,executable/windows/dll32&r-expedite=true&r-live=true")
@@ -289,7 +295,7 @@ func TestParseParams(t *testing.T) {
 	require.Equal(
 		t,
 		testFilters(t, params, evs),
-		[]int{0, 1},
+		[]int{0, 1, 5},
 	)
 
 	// one event with exe and network capture
