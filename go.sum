@@ -1,7 +1,7 @@
 dario.cat/mergo v1.0.2 h1:85+piFYR1tMbRrLcDwR18y4UKJ3aH1Tbzi24VRW1TK8=
 dario.cat/mergo v1.0.2/go.mod h1:E/hbnu0NxMFBjpMIE34DRGLWqDy0g5FuKDhCb31ngxA=
-github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.19 h1:zHL+KEfbn4mySJ1k9cABc/aWJpKSP2C7kK5/21qPCfc=
-github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.19/go.mod h1:rpHRkgAD/cDRwdp60sGher39Xgs9sTvFqibSFFXV8i8=
+github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.22 h1:YXDCzTY1E3gNzsy4fXwDoQjWRcvutMJNVgf/tipUGw0=
+github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.22/go.mod h1:rpHRkgAD/cDRwdp60sGher39Xgs9sTvFqibSFFXV8i8=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.1 h1:zvXfGJCWvywnCA814d8ZiVyt+fm9nnTE8xSb99zRyfo=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.1/go.mod h1:iptorS+VYKFL2N6PnebpS91dubG35eAOEERnT4PJbQU=
 github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.14.1 h1:u93s+zU2JD62im61Bm5CZIc1ZrOJaIAWEg0WOrMVkEo=
@@ -56,10 +56,10 @@ github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4 h1:N4c1osbiXr
 github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4/go.mod h1:cv8kb+xco1bEylSXQuXvYHCxIqezKcoTcfIlPaJG/Ck=
 github.com/eapache/go-resiliency v1.7.0 h1:n3NRTnBn5N0Cbi/IeOHuQn9s2UwVUH7Ga0ZWcP+9JTA=
 github.com/eapache/go-resiliency v1.7.0/go.mod h1:5yPzW0MIvSe0JDsv0v+DvcjEv2FyD6iZYSs1ZI+iQho=
-github.com/eko/gocache/lib/v4 v4.2.4 h1:BRKeSVesCA+ujcdS72GhAwMmJcYnp46DRu7w9ZL8Gp8=
-github.com/eko/gocache/lib/v4 v4.2.4/go.mod h1:Zus8mwmaPu1VYOzfomb+Dvx2wV7fT5jDRbHYtQM6MEY=
-github.com/eko/gocache/store/bigcache/v4 v4.2.7 h1:PHwBpgaFvFHk9bAIVIIb93vqOrbgMwzoqXk/El0nsIg=
-github.com/eko/gocache/store/bigcache/v4 v4.2.7/go.mod h1:PbERbVnjnIyayM+jdL4bkjYlEScZYUIAv7JbQjqTrxA=
+github.com/eko/gocache/lib/v4 v4.4.0 h1:oG3bwd+QagAQck8veR9uSbG/B89pet4TSOuHoi8oFEU=
+github.com/eko/gocache/lib/v4 v4.4.0/go.mod h1:Zus8mwmaPu1VYOzfomb+Dvx2wV7fT5jDRbHYtQM6MEY=
+github.com/eko/gocache/store/bigcache/v4 v4.2.10 h1:zoYM9v5kfC6HS4fniT5KREPnkInkTjZlPVZXp+6m76s=
+github.com/eko/gocache/store/bigcache/v4 v4.2.10/go.mod h1:sXpCrVmF5PjutQFreWqEdG06HS13ju/WSJWBYM/sxm0=
 github.com/fatih/structs v1.1.0 h1:Q7juDM0QtcnhCpeyLGQKyg4TOIghuNXrkL32pHAUMxo=
 github.com/fatih/structs v1.1.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga6PJ7M=
 github.com/gabriel-vasile/mimetype v1.4.15 h1:05iP/CYtZ/w455R/KZM6rZ5ieAdh99UPtd+d3YzLmaI=
