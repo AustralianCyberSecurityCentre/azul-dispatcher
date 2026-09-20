@@ -2,12 +2,12 @@
 # and a workspace (GOPATH) configured at /go.
 ARG REGISTRY="dhi.io"
 ARG BUILD_IMAGE='golang'
-ARG BUILD_TAG='1.26-debian13-dev@sha256:03421fce152e88a9fb8179e2f4f59dc52d27aae00c51e1af71cef8b3489272e7'
+ARG BUILD_TAG='1.26-debian13-dev@sha256:16c5a564414233249e0b12bcdc1bf22a0c1affc0f85d5a804c82254b6e528583'
 ARG BASE_IMAGE=static
 ARG BASE_TAG=20250419@sha256:98ef7a853608577e8d66dad1d25ada75d745d782f28d84e9ecfb85dfeb1f9c98
 
 ARG PYTHON_BUILD_IMAGE='python'
-ARG PYTHON_BUILD_TAG='3.12-debian-dev@sha256:2e95ffbd7b232a5b44152958212af3860cd6fc060fefefb0b40aab1cd210a4df'
+ARG PYTHON_BUILD_TAG='3.12-debian-dev@sha256:bd72d0438bfe217f5eaf000bf484083ca70c4ccac187d865e79ecf6d98bc4e69'
 
 # Note if this is bumped for faster builds ensure the build agent has the same version of yara.
 ARG YARA_X_VERSION_TAG="1.20.0"
