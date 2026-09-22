@@ -2,6 +2,7 @@ package pipeline_produce
 
 import (
 	"context"
+	"time"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/models"
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/msginflight"
@@ -12,6 +13,9 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/goccy/go-json"
 )
+
+// Allow ticker time scale to be adjusted for testing.
+var TICKER_UNIT = time.Minute
 
 // Alerter Producer that observers Alert
 type Alerter struct {
@@ -46,19 +50,43 @@ func (alert *Alerter) RecheckRules(ctx context.Context) error {
 	return nil
 }
 
+// Start a periodic reload of the alerters configuration.
+func (alert *Alerter) startPeriodicReload(ctx context.Context) {
+	configReloadFrequency := settings.Settings.Alerter.ConfigReloadFrequencyMin
+	if configReloadFrequency > 0 {
+		go func(ctx context.Context) {
+			recheckTicker := time.NewTicker(TICKER_UNIT * time.Duration(configReloadFrequency))
+			defer recheckTicker.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-recheckTicker.C:
+					err := alert.RecheckRules(ctx)
+					if err != nil {
+						bedSet.Logger.Error().Err(err).Msg("failed to reload alerter config from redis")
+					}
+				}
+			}
+		}(ctx)
+	}
+}
+
 func NewAlerter(ctx context.Context, kvStore *kvprovider.KVMulti) (*Alerter, error) {
 	loadedRules, err := loadAlerterConfigFromKvStore(ctx, kvStore)
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO - periodically reload config from redis.
-	return &Alerter{
+	alert := &Alerter{
 		ctx:                   ctx,
 		kvStore:               kvStore,
 		rules:                 loadedRules,
 		cachedMaxSecurityHits: map[string]bool{},
-	}, nil
+	}
+	if settings.Settings.Alerter.ConfigReloadFrequencyMin > 0 {
+		alert.startPeriodicReload(ctx)
+	}
+	return alert, nil
 }
 
 func (alert *Alerter) GetName() string { return "Alerter" }

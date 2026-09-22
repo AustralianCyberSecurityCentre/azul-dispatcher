@@ -221,6 +221,62 @@ func TestAlerterReloadingRules(t *testing.T) {
 	require.Equal(t, 1, len(alerter.rules.Rules))
 }
 
+func TestAlerterReloadingRulesAutomatically(t *testing.T) {
+	settings.Settings.Alerter.ConfigReloadFrequencyMin = 1
+	TICKER_UNIT = time.Microsecond
+	defer func() {
+		TICKER_UNIT = time.Minute
+	}()
+	loadedRules := models.LoadedRules{
+		Rules: []models.AlertRule{
+			{
+				AlertEndpoint: "endpointA1",
+				EventType:     events.ActionEnriched,
+				PluginName:    "CustomPlugin",
+				PluginVersion: "2025.03.18",
+				SourceName:    "testing",
+				SourceReferenceKeyValues: map[string]string{
+					"user": "test-user",
+				},
+				FeatureNameValues: map[string]string{
+					"index_of_coincidence": "1",
+				},
+			},
+			{
+				AlertEndpoint: "endpointB1",
+				EventType:     events.ActionExtracted,
+				PluginName:    "MimeDecoder",
+			},
+			{
+				FeatureNameValues: map[string]string{
+					"index_of_coincidence": "0.5",
+				},
+			},
+		},
+		RulesCompileTime: time.Now(),
+	}
+
+	alerter, cancelFunc := setupAlerter(t, loadedRules)
+	defer cancelFunc()
+	require.Equal(t, 3, len(alerter.rules.Rules))
+
+	// Load in new rules but don't change compile time
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	defer cancelFunc()
+	ruleBytes, err := json.Marshal(models.LoadedRules{Rules: []models.AlertRule{loadedRules.Rules[1]}, RulesCompileTime: loadedRules.RulesCompileTime})
+	require.Nil(t, err)
+	err = alerter.kvStore.Alerter.Set(ctx, models.ALERTER_CONFIG_KEY, ruleBytes, 0)
+	time.Sleep(time.Millisecond * time.Duration(settings.Settings.Alerter.ConfigReloadFrequencyMin))
+	require.Equal(t, 3, len(alerter.rules.Rules))
+
+	// Load in new rules again but this time change compile time
+	ruleBytes, err = json.Marshal(models.LoadedRules{Rules: []models.AlertRule{loadedRules.Rules[1]}, RulesCompileTime: time.Now().Add(1 * time.Minute)})
+	require.Nil(t, err)
+	err = alerter.kvStore.Alerter.Set(ctx, models.ALERTER_CONFIG_KEY, ruleBytes, 0)
+	time.Sleep(time.Millisecond * time.Duration(settings.Settings.Alerter.ConfigReloadFrequencyMin))
+	require.Equal(t, 1, len(alerter.rules.Rules))
+}
+
 func easySetJsonEnv(t *testing.T, field string, v any) {
 	bytes, err := json.Marshal(v)
 	if err != nil {

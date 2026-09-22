@@ -175,6 +175,8 @@ type DPAlerter struct {
 	Enabled bool `koanf:"enabled"`
 	// Maximum security of event that alert can be generated on.
 	MaxSecurity string `koanf:"max_security"`
+	// Periodically reload the alerter config every x minutes (0 or less means disabled).
+	ConfigReloadFrequencyMin int `koanf:"config_reload_frequency_min"`
 }
 
 type DPEvents struct {
@@ -300,8 +302,9 @@ var defaults DPSettings = DPSettings{
 		OldConsumerGroupDropperCheckFrequencyMinutes: 60,
 	},
 	Alerter: DPAlerter{
-		Enabled:     false,
-		MaxSecurity: "",
+		Enabled:                  false,
+		MaxSecurity:              "",
+		ConfigReloadFrequencyMin: 60,
 	},
 }
 
