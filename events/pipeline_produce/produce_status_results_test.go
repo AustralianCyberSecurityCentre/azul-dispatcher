@@ -11,6 +11,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"
 	testdata "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/testdata"
 	"github.com/goccy/go-json"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
@@ -89,7 +90,7 @@ func TestPSRRemoveStatusResults(t *testing.T) {
 	require.EventuallyWithT(t, func(collect *assert.CollectT) {
 		// confirm not dequeued
 		track, err = tracker.GetRedisTaskStarted(bin.Dequeued)
-		assert.Nil(collect, err)
+		assert.Equal(collect, redis.Nil, err)
 		assert.Nil(collect, track, string(track))
 	}, 2*time.Second, 5*time.Millisecond)
 }

@@ -11,18 +11,23 @@ import (
 
 var ctx = context.Background()
 
-func TestMemoryProvider(t *testing.T) {
-	prov, err := newMemoryProvider()
-	require.Nil(t, err)
-
-	// should be same tests as redis provider as they should function identically
+func baseKvTest(t *testing.T, prov KVInterface) {
+	// clear previous run
 	keys, cursor, err := prov.Scan(ctx, 0, "domain.*", 1000)
+	require.Nil(t, err)
+	for _, k := range keys {
+		_, err := prov.Del(ctx, k)
+		require.Nil(t, err)
+	}
+
+	// should be same tests as memory provider as they should function identically
+	keys, cursor, err = prov.Scan(ctx, 0, "domain.*", 1000)
 	require.Nil(t, err)
 	require.Equal(t, cursor, uint64(0))
 	require.Equal(t, keys, []string{})
 
 	res, err := prov.GetBytes(ctx, "domain.test")
-	require.Nil(t, err)
+	require.Equal(t, err, redis.Nil)
 	require.Nil(t, res)
 
 	err = prov.Set(ctx, "domain.test", []byte("my message"), 0)
@@ -58,12 +63,30 @@ func TestMemoryProvider(t *testing.T) {
 		"domain.test",
 	})
 
-	currentTime := time.Now()
-	err = prov.Set(ctx, "domain.testtime", currentTime, 0)
-	require.Nil(t, err)
+	// Push and Pop operations.
+	notListKey := "notList"
+	listKey := "testList"
 
-	resTime, err = prov.GetTime(ctx, "domain.testtime")
+	// Try and set the key to a value and then attempt to append and pop from the list
+	err = prov.Set(ctx, notListKey, []byte("abcdef"), 0)
 	require.Nil(t, err)
-	// Standardise formatting to remove nano seconds etc.
-	require.Equal(t, currentTime.Format(time.RFC3339), resTime.Format(time.RFC3339))
+	err = prov.PushToQueue(ctx, notListKey, []byte("abcdef"))
+	require.NotNil(t, err)
+	_, err = prov.PopFromQueue(ctx, notListKey)
+	require.NotNil(t, err)
+
+	err = prov.PushToQueue(ctx, listKey, []byte("abcdef"))
+	require.Nil(t, err)
+	listVal, err := prov.PopFromQueue(ctx, listKey)
+	require.Nil(t, err)
+	require.Equal(t, listVal, []byte("abcdef"))
+	listVal, err = prov.PopFromQueue(ctx, listKey)
+	require.Equal(t, err, redis.Nil)
+	require.Equal(t, listVal, []byte(nil))
+}
+
+func TestMemoryProvider(t *testing.T) {
+	prov, err := newMemoryProvider()
+	require.Nil(t, err)
+	baseKvTest(t, prov)
 }

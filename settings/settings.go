@@ -171,6 +171,12 @@ type DPRedis struct {
 	ConnectionTimeoutSeconds int    `Koanf:"connection_timeout_seconds"`
 }
 
+type DPAlerter struct {
+	Enabled bool `koanf:"enabled"`
+	// Maximum security of event that alert can be generated on.
+	MaxSecurity string `koanf:"max_security"`
+}
+
 type DPEvents struct {
 	Reprocess                  DPEventReprocess         `koanf:"reprocess"`
 	Kafka                      DPKafka                  `koanf:"kafka"`
@@ -210,6 +216,7 @@ type DPSettings struct {
 	LogPath string    `koanf:"log_path"`
 	Streams DPStreams `koanf:"streams"`
 	Events  DPEvents  `koanf:"events"`
+	Alerter DPAlerter `koanf:"alerter"`
 }
 
 var defaults DPSettings = DPSettings{
@@ -291,6 +298,10 @@ var defaults DPSettings = DPSettings{
 		LostTasksBulkCreateLimit:                     10,
 		OldConsumerGroupDroppedMinutes:               60 * 24, // One day by default,
 		OldConsumerGroupDropperCheckFrequencyMinutes: 60,
+	},
+	Alerter: DPAlerter{
+		Enabled:     false,
+		MaxSecurity: "",
 	},
 }
 
