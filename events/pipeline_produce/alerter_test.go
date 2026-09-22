@@ -18,8 +18,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func setupAlerter(t *testing.T, rules models.LoadedRules) *Alerter {
-	ctx := context.Background()
+func setupAlerter(t *testing.T, rules models.LoadedRules) (*Alerter, context.CancelFunc) {
+	ctx, cancelFunc := context.WithCancel(context.Background())
 	multiProvider, err := kvprovider.NewMemoryProviders()
 	require.Nil(t, err)
 	ruleBytes, err := json.Marshal(rules)
@@ -28,7 +28,7 @@ func setupAlerter(t *testing.T, rules models.LoadedRules) *Alerter {
 	require.Nil(t, err)
 	alerter, err := NewAlerter(ctx, multiProvider)
 	require.Nil(t, err)
-	return alerter
+	return alerter, cancelFunc
 }
 
 func getInFlightMessage(t *testing.T, path string) *msginflight.MsgInFlight {
@@ -73,7 +73,8 @@ func TestAlerterAddsToRedis(t *testing.T) {
 		RulesCompileTime: time.Now(),
 	}
 	//// ------------------------------------------------------------ First hits (confirm a double hit)
-	alerter := setupAlerter(t, loadedRules)
+	alerter, cancelFunc := setupAlerter(t, loadedRules)
+	defer cancelFunc()
 	msg := getInFlightMessage(t, "simple.json")
 	original, additional := alerter.ProduceMod(msg, &pipeline.ProduceParams{})
 	require.Equal(t, msg, original)
@@ -158,7 +159,8 @@ func TestAlerterNoRaises(t *testing.T) {
 		RulesCompileTime: time.Now(),
 	}
 
-	alerter := setupAlerter(t, loadedRules)
+	alerter, cancelFunc := setupAlerter(t, loadedRules)
+	defer cancelFunc()
 	msg := getInFlightMessage(t, "simple.json")
 	original, additional := alerter.ProduceMod(msg, &pipeline.ProduceParams{})
 	require.Equal(t, msg, original)
@@ -198,11 +200,13 @@ func TestAlerterReloadingRules(t *testing.T) {
 		RulesCompileTime: time.Now(),
 	}
 
-	alerter := setupAlerter(t, loadedRules)
+	alerter, cancelFunc := setupAlerter(t, loadedRules)
+	defer cancelFunc()
 	require.Equal(t, 3, len(alerter.rules.Rules))
 
 	// Load in new rules but don't change compile time
-	ctx := context.Background()
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	defer cancelFunc()
 	ruleBytes, err := json.Marshal(models.LoadedRules{Rules: []models.AlertRule{loadedRules.Rules[1]}, RulesCompileTime: loadedRules.RulesCompileTime})
 	require.Nil(t, err)
 	err = alerter.kvStore.Alerter.Set(ctx, models.ALERTER_CONFIG_KEY, ruleBytes, 0)
@@ -332,7 +336,8 @@ func TestAlerterSecurity(t *testing.T) {
 	var alertHit models.AlertHit
 
 	//// ------------------------------------------------------------ First hits (confirm a double hit)
-	alerter := setupAlerter(t, loadedRules)
+	alerter, cancelFunc := setupAlerter(t, loadedRules)
+	defer cancelFunc()
 	msg := getInFlightMessage(t, "simple.json")
 	original, additional := alerter.ProduceMod(msg, &pipeline.ProduceParams{})
 	require.Equal(t, msg, original)
@@ -378,7 +383,8 @@ func TestAlerterSecurity(t *testing.T) {
 
 	//// ------------------------------------------------------------ Third message again with tighter security can't be found.
 	settings.Settings.Alerter.MaxSecurity = "LOW"
-	alerter = setupAlerter(t, loadedRules)
+	alerter, cancelFunc = setupAlerter(t, loadedRules)
+	defer cancelFunc()
 	msg = getInFlightMessage(t, "custom-enriched-event.json")
 	original, additional = alerter.ProduceMod(msg, &pipeline.ProduceParams{})
 	require.Equal(t, msg, original)
