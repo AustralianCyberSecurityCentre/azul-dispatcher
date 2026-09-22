@@ -7,15 +7,18 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/msginflight"
 	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline"
+	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/pipeline_consume"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"
+	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/goccy/go-json"
 )
 
 // Alerter Producer that observers Alert
 type Alerter struct {
-	ctx     context.Context
-	kvStore *kvprovider.KVMulti
-	rules   *models.LoadedRules
+	ctx                   context.Context
+	kvStore               *kvprovider.KVMulti
+	rules                 *models.LoadedRules
+	cachedMaxSecurityHits map[string]bool
 }
 
 // Load the alerter configuration from the key value store.
@@ -51,9 +54,10 @@ func NewAlerter(ctx context.Context, kvStore *kvprovider.KVMulti) (*Alerter, err
 
 	// TODO - periodically reload config from redis.
 	return &Alerter{
-		ctx:     ctx,
-		kvStore: kvStore,
-		rules:   loadedRules,
+		ctx:                   ctx,
+		kvStore:               kvStore,
+		rules:                 loadedRules,
+		cachedMaxSecurityHits: map[string]bool{},
 	}, nil
 }
 
@@ -65,6 +69,26 @@ func (alert *Alerter) ProduceMod(inFlight *msginflight.MsgInFlight, meta *pipeli
 	if !ok {
 		return inFlight, nil
 	}
+
+	// Ensuring the event passes the security filtering.
+	var err error
+	if len(settings.Settings.Alerter.MaxSecurity) > 0 {
+		isSecurityAllowedToContinue, ok := alert.cachedMaxSecurityHits[binaryEvent.Source.Security]
+		// No cached result so calculate the new result.
+		if !ok {
+			isSecurityAllowedToContinue, err = pipeline_consume.CalculateSecurityResult(settings.Settings.Alerter.MaxSecurity, binaryEvent.Source.Security)
+			if err != nil {
+				bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering for alerter.")
+				return inFlight, nil
+			}
+			alert.cachedMaxSecurityHits[binaryEvent.Source.Security] = isSecurityAllowedToContinue
+		}
+		if !isSecurityAllowedToContinue {
+			return inFlight, nil
+		}
+	}
+
+	// Checking if event hits rules.
 	for _, curRule := range alert.rules.Rules {
 		// Basic matching conditions.
 		if curRule.EventType != "" && binaryEvent.Action != curRule.EventType {
@@ -124,8 +148,6 @@ func (alert *Alerter) ProduceMod(inFlight *msginflight.MsgInFlight, meta *pipeli
 				continue
 			}
 		}
-
-		// TODO - consider security.
 
 		hit := models.AlertHit{
 			Rule:   curRule,

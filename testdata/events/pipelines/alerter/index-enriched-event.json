@@ -12,7 +12,7 @@
         "references": {
             "user": "test-user"
         },
-        "security": "OFFICIAL",
+        "security": "LOW",
         "path": [
             {
                 "author": {

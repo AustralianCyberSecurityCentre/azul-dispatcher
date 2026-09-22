@@ -96,7 +96,7 @@ func NewEvents(prov provider.ProviderInterface, kvstore *kvprovider.KVMulti, s s
 		// Filters out messages that have a source path greater than the max depth.
 		&pipeline_consume.FilterTooDeep{MaxDepth: filterMaxDepth + 1},
 		// Filter if this message has a security classification that exceeds what is allowed
-		&pipeline_consume.FilterSecurity{CachedSecurityResults: map[string]pipeline_consume.CacheHit{}},
+		&pipeline_consume.FilterSecurity{CachedSecurityResults: map[string]pipeline_consume.CachedSecurityHit{}},
 		// Uses a list of json filters provided through an API query to filter out un-desirable messages.
 		&pipeline_consume.FilterConsumerRules{},
 		// Filter out a message if it has already been deleted.
@@ -128,7 +128,7 @@ func NewEvents(prov provider.ProviderInterface, kvstore *kvprovider.KVMulti, s s
 		// Filters out messages that have a source path greater than the max depth.
 		&pipeline_consume.FilterTooDeep{MaxDepth: filterMaxDepth},
 		// Filter if this message has a security classification that exceeds what is allowed
-		&pipeline_consume.FilterSecurity{CachedSecurityResults: map[string]pipeline_consume.CacheHit{}},
+		&pipeline_consume.FilterSecurity{CachedSecurityResults: map[string]pipeline_consume.CachedSecurityHit{}},
 		// Uses a list of json filters provided through an API query to filter out un-desirable messages.
 		&pipeline_consume.FilterConsumerRules{},
 		// Filter out a message if it has already been deleted.
