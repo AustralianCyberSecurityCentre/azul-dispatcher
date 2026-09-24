@@ -93,23 +93,22 @@ func (alert *Alerter) GetName() string { return "Alerter" }
 
 // Check if the current binary event being produced matches any alert rules and if it does raise an alert.
 func (alert *Alerter) ProduceMod(inFlight *msginflight.MsgInFlight, meta *pipeline.ProduceParams) (*msginflight.MsgInFlight, []*msginflight.MsgInFlight) {
-	binaryEvent, ok := inFlight.GetBinary()
+	statusEvent, ok := inFlight.GetStatus()
 	if !ok {
 		return inFlight, nil
 	}
-
 	// Ensuring the event passes the security filtering.
 	var err error
 	if len(settings.Settings.Alerter.MaxSecurity) > 0 {
-		isSecurityAllowedToContinue, ok := alert.cachedMaxSecurityHits[binaryEvent.Source.Security]
+		isSecurityAllowedToContinue, ok := alert.cachedMaxSecurityHits[statusEvent.Entity.Input.Source.Security]
 		// No cached result so calculate the new result.
 		if !ok {
-			isSecurityAllowedToContinue, err = pipeline_consume.CalculateSecurityResult(settings.Settings.Alerter.MaxSecurity, binaryEvent.Source.Security)
+			isSecurityAllowedToContinue, err = pipeline_consume.CalculateSecurityResult(settings.Settings.Alerter.MaxSecurity, statusEvent.Entity.Input.Source.Security)
 			if err != nil {
 				bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering for alerter.")
 				return inFlight, nil
 			}
-			alert.cachedMaxSecurityHits[binaryEvent.Source.Security] = isSecurityAllowedToContinue
+			alert.cachedMaxSecurityHits[statusEvent.Entity.Input.Source.Security] = isSecurityAllowedToContinue
 		}
 		if !isSecurityAllowedToContinue {
 			return inFlight, nil
@@ -119,24 +118,37 @@ func (alert *Alerter) ProduceMod(inFlight *msginflight.MsgInFlight, meta *pipeli
 	// Checking if event hits rules.
 	for _, curRule := range alert.rules.Rules {
 		// Basic matching conditions.
-		if curRule.EventType != "" && binaryEvent.Action != curRule.EventType {
+		if curRule.Status != "" && curRule.Status != statusEvent.Entity.Status {
 			continue
 		}
-		if curRule.PluginName != "" && binaryEvent.Author.Name != curRule.PluginName {
+		if curRule.PluginName != "" && statusEvent.Author.Name != curRule.PluginName {
 			continue
 		}
-		if curRule.PluginVersion != "" && binaryEvent.Author.Version != curRule.PluginVersion {
+		if curRule.PluginVersion != "" && statusEvent.Author.Version != curRule.PluginVersion {
 			continue
 		}
-		if curRule.SourceName != "" && binaryEvent.Source.Name != curRule.SourceName {
+		if curRule.SourceName != "" && statusEvent.Entity.Input.Source.Name != curRule.SourceName {
 			continue
 		}
+		if curRule.EventType != "" {
+			noResultMatches := true
+			for _, curResult := range statusEvent.Entity.Results {
+				if curResult.Action == curRule.EventType {
+					noResultMatches = false
+					break
+				}
+			}
+			if noResultMatches {
+				continue
+			}
+		}
+
 		// Complex map conditions.
 		if len(curRule.SourceReferenceKeyValues) > 0 {
 			// Ensure all expected key value pairs match or the rule isn't a match
 			isNotValidSourceRefs := false
 			for key, value := range curRule.SourceReferenceKeyValues {
-				refValue, ok := binaryEvent.Source.References[key]
+				refValue, ok := statusEvent.Entity.Input.Source.References[key]
 				// Reference key not in event.
 				if !ok {
 					isNotValidSourceRefs = true
@@ -156,30 +168,36 @@ func (alert *Alerter) ProduceMod(inFlight *msginflight.MsgInFlight, meta *pipeli
 		if len(curRule.FeatureNameValues) > 0 {
 			// Ensure all expected Feature names and corresponding values are in the event.
 			isValidFeatureValues := true
-			for featName, expectedFeatVal := range curRule.FeatureNameValues {
-				isValueFound := false
-				for _, curFeat := range binaryEvent.Entity.Features {
-					if curFeat.Name == featName && curFeat.Value == expectedFeatVal {
-						isValueFound = true
+			for _, curResult := range statusEvent.Entity.Results {
+				for featName, expectedFeatVal := range curRule.FeatureNameValues {
+					isValueFound := false
+					for _, curFeat := range curResult.Entity.Features {
+						if curFeat.Name == featName && curFeat.Value == expectedFeatVal {
+							isValueFound = true
+							break
+						}
+					}
+					// Feature and corresponding not find exit with an invalid feature/value state.
+					if !isValueFound {
+						isValidFeatureValues = false
 						break
 					}
+
 				}
-				// Feature and corresponding not find exit with an invalid feature/value state.
-				if !isValueFound {
-					isValidFeatureValues = false
+				if !isValidFeatureValues {
+
 					break
 				}
-
 			}
 			if !isValidFeatureValues {
-				// Rule doesn't match jump to next rule
+				// One of th feature rules don't match, jump to next rule
 				continue
 			}
 		}
 
 		hit := models.AlertHit{
 			Rule:   curRule,
-			Sha256: binaryEvent.Entity.Sha256,
+			Sha256: statusEvent.Entity.Input.Entity.Sha256,
 		}
 		encodedHit, err := json.Marshal(hit)
 		if err != nil {

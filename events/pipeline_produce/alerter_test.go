@@ -18,6 +18,28 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func createStatusFromBinaryEvent(t *testing.T, status events.StatusType, binaryEventPath string) *msginflight.MsgInFlight {
+	// load binary event
+	raw := testdata.GetEventBytes("events/pipelines/alerter/" + binaryEventPath)
+	msgInFlightBinary, err := pipeline.NewMsgInFlightFromJson(raw, events.ModelBinary)
+	require.Nil(t, err)
+	binaryEvent, success := msgInFlightBinary.GetBinary()
+	require.True(t, success)
+
+	// Create status event
+	statusEvent := msginflight.GenEventStatus("statusId1")
+	// Copy fields from binary into the generated source event.
+	statusEvent.Entity.Input.Entity.Sha256 = binaryEvent.Entity.Sha256
+	statusEvent.Entity.Input.Source = binaryEvent.Source
+	statusEvent.Author = binaryEvent.Author
+
+	statusEvent.Entity.Status = status
+	statusEvent.Entity.Results = []events.BinaryEvent{*binaryEvent}
+	inFlightStatus, err := msginflight.NewMsgInFlightFromEvent(statusEvent)
+	require.Nil(t, err)
+	return inFlightStatus
+}
+
 func setupAlerter(t *testing.T, rules models.LoadedRules) (*Alerter, context.CancelFunc) {
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	multiProvider, err := kvprovider.NewMemoryProviders()
@@ -31,18 +53,11 @@ func setupAlerter(t *testing.T, rules models.LoadedRules) (*Alerter, context.Can
 	return alerter, cancelFunc
 }
 
-func getInFlightMessage(t *testing.T, path string) *msginflight.MsgInFlight {
-	raw := testdata.GetEventBytes("events/pipelines/alerter/" + path)
-	orig, err := pipeline.NewMsgInFlightFromJson(raw, events.ModelBinary)
-	require.Nil(t, err)
-	return orig
-}
-
 func TestAlerterAddsToRedis(t *testing.T) {
 	loadedRules := models.LoadedRules{
 		Rules: []models.AlertRule{
 			{
-				AlertEndpoint: "endpointA1",
+				WebhookId:     "endpointA1",
 				EventType:     events.ActionEnriched,
 				PluginName:    "CustomPlugin",
 				PluginVersion: "2025.03.18",
@@ -55,19 +70,24 @@ func TestAlerterAddsToRedis(t *testing.T) {
 				},
 			},
 			{
-				AlertEndpoint: "endpointB1",
-				EventType:     events.ActionExtracted,
-				PluginName:    "MimeDecoder",
+				WebhookId:  "endpointB1",
+				EventType:  events.ActionExtracted,
+				PluginName: "MimeDecoder",
 			},
 			{
-				AlertEndpoint: "endpointC1",
+				WebhookId: "endpointC1",
 				FeatureNameValues: map[string]string{
 					"index_of_coincidence": "0.5",
 				},
 			},
 			{
-				AlertEndpoint: "endpointD1",
-				PluginName:    "MimeDecoder",
+				WebhookId:  "endpointD1",
+				PluginName: "MimeDecoder",
+			},
+			// Case where the expected output is an error exception.
+			{
+				WebhookId: "endpointE1",
+				Status:    events.StatusTypeErrorException,
 			},
 		},
 		RulesCompileTime: time.Now(),
@@ -75,7 +95,7 @@ func TestAlerterAddsToRedis(t *testing.T) {
 	//// ------------------------------------------------------------ First hits (confirm a double hit)
 	alerter, cancelFunc := setupAlerter(t, loadedRules)
 	defer cancelFunc()
-	msg := getInFlightMessage(t, "simple.json")
+	msg := createStatusFromBinaryEvent(t, events.StatusTypeCompleted, "simple.json")
 	original, additional := alerter.ProduceMod(msg, &pipeline.ProduceParams{})
 	require.Equal(t, msg, original)
 	require.Equal(t, len(additional), 0)
@@ -86,21 +106,21 @@ func TestAlerterAddsToRedis(t *testing.T) {
 	err = json.Unmarshal(result, &alertHit)
 	require.Nil(t, err)
 	require.Equal(t, alertHit.Sha256, "ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69")
-	require.Equal(t, alertHit.Rule.AlertEndpoint, "endpointB1")
+	require.Equal(t, alertHit.Rule.WebhookId, "endpointB1")
 
 	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
 	require.Nil(t, err)
 	err = json.Unmarshal(result, &alertHit)
 	require.Nil(t, err)
 	require.Equal(t, alertHit.Sha256, "ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69")
-	require.Equal(t, alertHit.Rule.AlertEndpoint, "endpointD1")
+	require.Equal(t, alertHit.Rule.WebhookId, "endpointD1")
 
 	// Confirm no more events in queue
 	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
 	require.Equal(t, err, redis.Nil)
 
 	//// ------------------------------------------------------------ Second message (confirm a single hit)
-	msg = getInFlightMessage(t, "index-enriched-event.json")
+	msg = createStatusFromBinaryEvent(t, events.StatusTypeCompleted, "index-enriched-event.json")
 	original, additional = alerter.ProduceMod(msg, &pipeline.ProduceParams{})
 	require.Equal(t, msg, original)
 	require.Equal(t, len(additional), 0)
@@ -110,14 +130,14 @@ func TestAlerterAddsToRedis(t *testing.T) {
 	err = json.Unmarshal(result, &alertHit)
 	require.Nil(t, err)
 	require.Equal(t, alertHit.Sha256, "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
-	require.Equal(t, alertHit.Rule.AlertEndpoint, "endpointC1")
+	require.Equal(t, alertHit.Rule.WebhookId, "endpointC1")
 
 	// Confirm Queue is now empty
 	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
 	require.Equal(t, err, redis.Nil)
 
 	//// ------------------------------------------------------------ Third message (confirm a single hit with multiple tight criteria)
-	msg = getInFlightMessage(t, "custom-enriched-event.json")
+	msg = createStatusFromBinaryEvent(t, events.StatusTypeErrorException, "custom-enriched-event.json")
 	original, additional = alerter.ProduceMod(msg, &pipeline.ProduceParams{})
 	require.Equal(t, msg, original)
 	require.Equal(t, len(additional), 0)
@@ -127,7 +147,15 @@ func TestAlerterAddsToRedis(t *testing.T) {
 	err = json.Unmarshal(result, &alertHit)
 	require.Nil(t, err)
 	require.Equal(t, alertHit.Sha256, "ca4233acbcf3217ad8910afdf3ecf0c23650497a24e6cb953f91557d7daaaaaa")
-	require.Equal(t, alertHit.Rule.AlertEndpoint, "endpointA1")
+	require.Equal(t, alertHit.Rule.WebhookId, "endpointA1")
+
+	// Error exception rule hits
+	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
+	require.Nil(t, err)
+	err = json.Unmarshal(result, &alertHit)
+	require.Nil(t, err)
+	require.Equal(t, alertHit.Sha256, "ca4233acbcf3217ad8910afdf3ecf0c23650497a24e6cb953f91557d7daaaaaa")
+	require.Equal(t, alertHit.Rule.WebhookId, "endpointE1")
 
 	// Confirm queue is now empty
 	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
@@ -138,7 +166,7 @@ func TestAlerterNoRaises(t *testing.T) {
 	loadedRules := models.LoadedRules{
 		Rules: []models.AlertRule{
 			{
-				AlertEndpoint: "endpointA1",
+				WebhookId:     "endpointA1",
 				EventType:     events.ActionEnriched,
 				PluginName:    "Custom2",
 				PluginVersion: "2025.03.18",
@@ -151,9 +179,9 @@ func TestAlerterNoRaises(t *testing.T) {
 				},
 			},
 			{
-				AlertEndpoint: "endpointB1",
-				EventType:     events.ActionExtracted,
-				PluginName:    "Custom2",
+				WebhookId:  "endpointB1",
+				EventType:  events.ActionExtracted,
+				PluginName: "Custom2",
 			},
 		},
 		RulesCompileTime: time.Now(),
@@ -161,7 +189,8 @@ func TestAlerterNoRaises(t *testing.T) {
 
 	alerter, cancelFunc := setupAlerter(t, loadedRules)
 	defer cancelFunc()
-	msg := getInFlightMessage(t, "simple.json")
+	msg := createStatusFromBinaryEvent(t, events.StatusTypeCompleted, "simple.json")
+
 	original, additional := alerter.ProduceMod(msg, &pipeline.ProduceParams{})
 	require.Equal(t, msg, original)
 	require.Equal(t, len(additional), 0)
@@ -174,7 +203,7 @@ func TestAlerterReloadingRules(t *testing.T) {
 	loadedRules := models.LoadedRules{
 		Rules: []models.AlertRule{
 			{
-				AlertEndpoint: "endpointA1",
+				WebhookId:     "endpointA1",
 				EventType:     events.ActionEnriched,
 				PluginName:    "CustomPlugin",
 				PluginVersion: "2025.03.18",
@@ -187,9 +216,9 @@ func TestAlerterReloadingRules(t *testing.T) {
 				},
 			},
 			{
-				AlertEndpoint: "endpointB1",
-				EventType:     events.ActionExtracted,
-				PluginName:    "MimeDecoder",
+				WebhookId:  "endpointB1",
+				EventType:  events.ActionExtracted,
+				PluginName: "MimeDecoder",
 			},
 			{
 				FeatureNameValues: map[string]string{
@@ -230,7 +259,7 @@ func TestAlerterReloadingRulesAutomatically(t *testing.T) {
 	loadedRules := models.LoadedRules{
 		Rules: []models.AlertRule{
 			{
-				AlertEndpoint: "endpointA1",
+				WebhookId:     "endpointA1",
 				EventType:     events.ActionEnriched,
 				PluginName:    "CustomPlugin",
 				PluginVersion: "2025.03.18",
@@ -243,9 +272,9 @@ func TestAlerterReloadingRulesAutomatically(t *testing.T) {
 				},
 			},
 			{
-				AlertEndpoint: "endpointB1",
-				EventType:     events.ActionExtracted,
-				PluginName:    "MimeDecoder",
+				WebhookId:  "endpointB1",
+				EventType:  events.ActionExtracted,
+				PluginName: "MimeDecoder",
 			},
 			{
 				FeatureNameValues: map[string]string{
@@ -359,7 +388,7 @@ func TestAlerterSecurity(t *testing.T) {
 	loadedRules := models.LoadedRules{
 		Rules: []models.AlertRule{
 			{
-				AlertEndpoint: "endpointA1",
+				WebhookId:     "endpointA1",
 				EventType:     events.ActionEnriched,
 				PluginName:    "CustomPlugin",
 				PluginVersion: "2025.03.18",
@@ -372,19 +401,19 @@ func TestAlerterSecurity(t *testing.T) {
 				},
 			},
 			{
-				AlertEndpoint: "endpointB1",
-				EventType:     events.ActionExtracted,
-				PluginName:    "MimeDecoder",
+				WebhookId:  "endpointB1",
+				EventType:  events.ActionExtracted,
+				PluginName: "MimeDecoder",
 			},
 			{
-				AlertEndpoint: "endpointC1",
+				WebhookId: "endpointC1",
 				FeatureNameValues: map[string]string{
 					"index_of_coincidence": "0.5",
 				},
 			},
 			{
-				AlertEndpoint: "endpointD1",
-				PluginName:    "MimeDecoder",
+				WebhookId:  "endpointD1",
+				PluginName: "MimeDecoder",
 			},
 		},
 		RulesCompileTime: time.Now(),
@@ -394,7 +423,7 @@ func TestAlerterSecurity(t *testing.T) {
 	//// ------------------------------------------------------------ First hits (confirm a double hit)
 	alerter, cancelFunc := setupAlerter(t, loadedRules)
 	defer cancelFunc()
-	msg := getInFlightMessage(t, "simple.json")
+	msg := createStatusFromBinaryEvent(t, events.StatusTypeCompleted, "simple.json")
 	original, additional := alerter.ProduceMod(msg, &pipeline.ProduceParams{})
 	require.Equal(t, msg, original)
 	require.Equal(t, len(additional), 0)
@@ -404,7 +433,7 @@ func TestAlerterSecurity(t *testing.T) {
 	require.Equal(t, err, redis.Nil)
 
 	//// ------------------------------------------------------------ Second message (confirm a single hit)
-	msg = getInFlightMessage(t, "index-enriched-event.json")
+	msg = createStatusFromBinaryEvent(t, events.StatusTypeCompleted, "index-enriched-event.json")
 	original, additional = alerter.ProduceMod(msg, &pipeline.ProduceParams{})
 	require.Equal(t, msg, original)
 	require.Equal(t, len(additional), 0)
@@ -414,14 +443,14 @@ func TestAlerterSecurity(t *testing.T) {
 	err = json.Unmarshal(result, &alertHit)
 	require.Nil(t, err)
 	require.Equal(t, alertHit.Sha256, "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
-	require.Equal(t, alertHit.Rule.AlertEndpoint, "endpointC1")
+	require.Equal(t, alertHit.Rule.WebhookId, "endpointC1")
 
 	// Confirm Queue is now empty
 	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
 	require.Equal(t, err, redis.Nil)
 
 	//// ------------------------------------------------------------ Third message (confirm a single hit with multiple tight criteria)
-	msg = getInFlightMessage(t, "custom-enriched-event.json")
+	msg = createStatusFromBinaryEvent(t, events.StatusTypeCompleted, "custom-enriched-event.json")
 	original, additional = alerter.ProduceMod(msg, &pipeline.ProduceParams{})
 	require.Equal(t, msg, original)
 	require.Equal(t, len(additional), 0)
@@ -431,7 +460,7 @@ func TestAlerterSecurity(t *testing.T) {
 	err = json.Unmarshal(result, &alertHit)
 	require.Nil(t, err)
 	require.Equal(t, alertHit.Sha256, "ca4233acbcf3217ad8910afdf3ecf0c23650497a24e6cb953f91557d7daaaaaa")
-	require.Equal(t, alertHit.Rule.AlertEndpoint, "endpointA1")
+	require.Equal(t, alertHit.Rule.WebhookId, "endpointA1")
 
 	// Confirm queue is now empty
 	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
@@ -441,7 +470,8 @@ func TestAlerterSecurity(t *testing.T) {
 	settings.Settings.Alerter.MaxSecurity = "LOW"
 	alerter, cancelFunc = setupAlerter(t, loadedRules)
 	defer cancelFunc()
-	msg = getInFlightMessage(t, "custom-enriched-event.json")
+	msg = createStatusFromBinaryEvent(t, events.StatusTypeCompleted, "custom-enriched-event.json")
+
 	original, additional = alerter.ProduceMod(msg, &pipeline.ProduceParams{})
 	require.Equal(t, msg, original)
 	require.Equal(t, len(additional), 0)
