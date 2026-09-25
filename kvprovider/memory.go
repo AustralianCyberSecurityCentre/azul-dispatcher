@@ -31,17 +31,23 @@ func NewMemoryProviders() (*KVMulti, error) {
 	if err != nil {
 		return nil, err
 	}
+	ret.Alerter, err = newMemoryProvider()
+	if err != nil {
+		return nil, err
+	}
 	return &ret, nil
 }
 
 type MemoryProvider struct {
-	Mem map[string]string
-	mu  sync.Mutex
+	Mem     map[string]string
+	ListMem map[string][][]byte
+	mu      sync.Mutex
 }
 
 func newMemoryProvider() (*MemoryProvider, error) {
 	mem := MemoryProvider{
-		Mem: make(map[string]string),
+		Mem:     make(map[string]string),
+		ListMem: make(map[string][][]byte),
 	}
 	return &mem, nil
 }
@@ -57,7 +63,7 @@ func (prov *MemoryProvider) GetBytes(ctx context.Context, key string) ([]byte, e
 	defer prov.mu.Unlock()
 	val, ok := prov.Mem[key]
 	if !ok {
-		return nil, nil
+		return nil, redis.Nil
 	}
 	return []byte(val), nil
 }
@@ -92,12 +98,55 @@ func (prov *MemoryProvider) Set(ctx context.Context, key string, value any, expi
 	return nil
 }
 
+func (prov *MemoryProvider) PushToQueue(ctx context.Context, key string, value []byte) error {
+	prov.mu.Lock()
+	defer prov.mu.Unlock()
+	// Shouldn't have a key stored in memory or the key has been used with the wrong type.
+	_, ok := prov.Mem[key]
+	if ok {
+		return fmt.Errorf("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	val, ok := prov.ListMem[key]
+	if ok {
+		val = append(val, value)
+		prov.ListMem[key] = val
+	} else {
+		prov.ListMem[key] = [][]byte{value}
+	}
+	return nil
+}
+
+func (prov *MemoryProvider) PopFromQueue(ctx context.Context, key string) ([]byte, error) {
+	prov.mu.Lock()
+	defer prov.mu.Unlock()
+	// Shouldn't have a key stored in memory or the key has been used with the wrong type.
+	_, ok := prov.Mem[key]
+	if ok {
+		return nil, fmt.Errorf("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	val, ok := prov.ListMem[key]
+	if ok {
+		if len(val) == 0 {
+			return []byte(nil), redis.Nil
+		}
+		// Pop first element off the list
+		firstElem := val[0]
+		val = val[1:]
+		prov.ListMem[key] = val
+		return firstElem, nil
+	} else {
+		return []byte(nil), redis.Nil
+	}
+}
+
 func (prov *MemoryProvider) Del(ctx context.Context, keys ...string) (int64, error) {
 	prov.mu.Lock()
 	defer prov.mu.Unlock()
 	var deletedKeys int64
 	for _, k := range keys {
 		delete(prov.Mem, k)
+		deletedKeys += 1
+		delete(prov.ListMem, k)
 		deletedKeys += 1
 	}
 	return deletedKeys, nil
@@ -110,6 +159,11 @@ func (prov *MemoryProvider) Scan(ctx context.Context, cursor uint64, match strin
 	filter := strings.ReplaceAll(match, "*", "")
 	keys := []string{}
 	for k := range prov.Mem {
+		if strings.Contains(k, filter) {
+			keys = append(keys, k)
+		}
+	}
+	for k := range prov.ListMem {
 		if strings.Contains(k, filter) {
 			keys = append(keys, k)
 		}

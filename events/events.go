@@ -2,6 +2,7 @@ package events
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -95,7 +96,7 @@ func NewEvents(prov provider.ProviderInterface, kvstore *kvprovider.KVMulti, s s
 		// Filters out messages that have a source path greater than the max depth.
 		&pipeline_consume.FilterTooDeep{MaxDepth: filterMaxDepth + 1},
 		// Filter if this message has a security classification that exceeds what is allowed
-		&pipeline_consume.FilterSecurity{CachedSecurityResults: map[string]pipeline_consume.CacheHit{}},
+		&pipeline_consume.FilterSecurity{CachedSecurityResults: map[string]pipeline_consume.CachedSecurityHit{}},
 		// Uses a list of json filters provided through an API query to filter out un-desirable messages.
 		&pipeline_consume.FilterConsumerRules{},
 		// Filter out a message if it has already been deleted.
@@ -127,7 +128,7 @@ func NewEvents(prov provider.ProviderInterface, kvstore *kvprovider.KVMulti, s s
 		// Filters out messages that have a source path greater than the max depth.
 		&pipeline_consume.FilterTooDeep{MaxDepth: filterMaxDepth},
 		// Filter if this message has a security classification that exceeds what is allowed
-		&pipeline_consume.FilterSecurity{CachedSecurityResults: map[string]pipeline_consume.CacheHit{}},
+		&pipeline_consume.FilterSecurity{CachedSecurityResults: map[string]pipeline_consume.CachedSecurityHit{}},
 		// Uses a list of json filters provided through an API query to filter out un-desirable messages.
 		&pipeline_consume.FilterConsumerRules{},
 		// Filter out a message if it has already been deleted.
@@ -145,6 +146,14 @@ func NewEvents(prov provider.ProviderInterface, kvstore *kvprovider.KVMulti, s s
 	manager := manager.NewConsumerManager(prov, passiveConsumerPipe, activeConsumerPipe, kvstore)
 	manager.StartPeriodicCheckAndDeleteOldConsumers(ctx)
 
+	var alerterPipe *pipeline_produce.Alerter = nil
+	if st.Settings.Alerter.Enabled {
+		alerterPipe, err = pipeline_produce.NewAlerter(ctx, kvstore)
+		if err != nil {
+			panic(fmt.Errorf("could not setup alerter with error %v", err))
+		}
+	}
+
 	producePipe := pipeline.NewProducePipeline([]pipeline.ProduceAction{
 		// Filters out messages that are too old for the source
 		pipeAgeoff,
@@ -160,6 +169,8 @@ func NewEvents(prov provider.ProviderInterface, kvstore *kvprovider.KVMulti, s s
 		filterDeleted,
 		// Remove the settings from the source if the depth of the model exceeds the depth limit.
 		pipeline_produce.NewSourceSettingRemoval(),
+		// Pipeline to use user defined rules to generate alerts when events meeting the criteria are produced.
+		alerterPipe,
 	})
 	producer.SetPipeline(producePipe)
 

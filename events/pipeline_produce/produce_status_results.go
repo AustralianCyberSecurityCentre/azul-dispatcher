@@ -9,7 +9,7 @@ import (
 )
 
 // statuses that represent in progress actions
-var StatusTypesInProgress = map[string]string{
+var StatusTypesInProgress = map[events.StatusType]string{
 	events.StatusTypeHeartbeat: "",
 	events.StatusTypeDequeued:  "",
 }

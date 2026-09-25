@@ -1,0 +1,74 @@
+{
+    "model_version": 6,
+    "kafka_key": "aaaaaaaaaaaaaaaaaaaaa",
+    "timestamp": "2026-09-01T18:10:12.252758Z",
+    "author": {
+        "name": "IndexCoincidence",
+        "version": "2025.03.18",
+        "category": "plugin"
+    },
+    "source": {
+        "name": "testing",
+        "references": {
+            "user": "test-user"
+        },
+        "security": "LOW",
+        "path": [
+            {
+                "author": {
+                    "name": "test-user",
+                    "category": "user",
+                    "security": "OFFICIAL"
+                },
+                "action": "sourced",
+                "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                          
+                "timestamp": "2026-09-01T18:10:00Z",
+                "file_format": "image/png",
+                "size": 11111,
+                "filename": "test.png"
+            },
+            {
+                "author": {
+                    "name": "IndexCoincidence",
+                    "version": "2025.03.18",
+                    "category": "plugin"
+                },
+                "action": "enriched",
+                "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                "timestamp": "2026-09-01T18:10:12.252758Z"
+            }
+        ],
+        "timestamp": "2026-09-01T18:10:00Z"
+    },
+    "entity": {
+        "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "sha512": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sha1": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "md5": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "ssdeep": "768:9ypr+GG9U2tu3a9B72ukSUsqu9atCSEIt32LcOgjLcYOxaID7xw37c:9c+GGigasqxMSmHEI/5",
+        "tlsh": "T1111111ea4411259ed0f0c6e9cfa3f73e25217d83e0d2ba08499f12b7875f8459e59425",
+        "size": 11111,
+        "mime": "image/png",
+        "magic": "PNG image data, 128 x 128, 8-bit/color RGB, non-interlaced",
+        "file_format": "image/png",
+        "file_extension": "png",
+        "features": [
+            {
+                "name": "index_of_coincidence",
+                "value": "0.5",
+                "type": "float"
+            }
+        ]
+    },
+    "action": "enriched",
+    "flags": {},
+    "track_source_references": "testing.referenceparammd5",
+    "track_links": [
+        "track_link"
+    ],
+    "track_authors": [
+        "user.test-user.",
+        "plugin.IndexCoincidence.2025.03.18"
+    ]
+}

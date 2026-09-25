@@ -5,7 +5,7 @@ go 1.26.0
 toolchain go1.26.1
 
 require (
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.22
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.32
 	github.com/allegro/bigcache/v3 v3.2.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
@@ -24,7 +24,7 @@ require (
 )
 
 // Uncomment and set correct version to get import of a dev version of bedrock you have
-// replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v11.0.98 => ../azul-bedrock
+// replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.30 => ../azul-bedrock
 
 require (
 	dario.cat/mergo v1.0.2
@@ -44,15 +44,16 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.14.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.8.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.8.1 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.9.0 // indirect
 	github.com/VirusTotal/yara-x/go v1.20.0 // indirect
+	github.com/apache/arrow-go/v18 v18.7.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/gopkg v0.1.4 // indirect
 	github.com/bytedance/sonic v1.15.3 // indirect
 	github.com/bytedance/sonic/loader v0.5.2 // indirect
 	github.com/cloudwego/base64x v0.1.7 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/eapache/go-resiliency v1.7.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
@@ -63,6 +64,7 @@ require (
 	github.com/go-playground/validator/v10 v10.30.4 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
+	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hamba/avro/v2 v2.31.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
@@ -116,9 +118,9 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/arch v0.30.0 // indirect
 	golang.org/x/crypto v0.56.0 // indirect
-	golang.org/x/exp v0.0.0-20260824195058-e88cd73687aa // indirect
+	golang.org/x/exp v0.0.0-20260908205506-85c1c2202aba // indirect
 	golang.org/x/net v0.58.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect

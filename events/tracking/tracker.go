@@ -68,6 +68,7 @@ func (tr *TaskTracker) startDequeuedDeleter(ctx context.Context) {
 		lastDeletionTime = time.Now()
 		runDelete := false
 		periodicDeleteCheck := time.NewTicker(secondsBetweenCheckIntervalForDelete * time.Second)
+		defer periodicDeleteCheck.Stop()
 		// infinite run loop after setup.
 		for {
 			select {

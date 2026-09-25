@@ -173,7 +173,7 @@ func (p *Producer) publish(confirm bool, evs ...*msginflight.MsgInFlight) error 
 		if status, ok := evs[i].GetStatus(); ok {
 			// Add to status if the author isn't a user type.
 			if strings.ToLower(evs[i].Base.Author.Category) != "user" {
-				prom.EventsProduceStatusPublished.WithLabelValues(evs[i].Base.Author.Name, status.Entity.Status).Inc()
+				prom.EventsProduceStatusPublished.WithLabelValues(evs[i].Base.Author.Name, string(status.Entity.Status)).Inc()
 			}
 		}
 		selectedTopics[topic]++

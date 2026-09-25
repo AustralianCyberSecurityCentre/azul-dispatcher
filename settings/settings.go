@@ -7,6 +7,7 @@ import (
 	"log" // cannot use zerolog as log options not initialised
 	"os"
 
+	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/models"
 	"github.com/go-viper/mapstructure/v2"
 
 	bedsettings "github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/settings"
@@ -171,6 +172,18 @@ type DPRedis struct {
 	ConnectionTimeoutSeconds int    `Koanf:"connection_timeout_seconds"`
 }
 
+type DPAlerter struct {
+	Enabled bool `koanf:"enabled"`
+	// Maximum security of event that alert can be generated on.
+	MaxSecurity string `koanf:"max_security"`
+	// Periodically reload the alerter config every x minutes (0 or less means disabled).
+	ConfigReloadFrequencyMin int `koanf:"config_reload_frequency_min"`
+	// Redis keys and details
+	RedisDbId int    `koanf:"redis_db_id"`
+	AlertKey  string `koanf:"alert_key"`
+	ConfigKey string `koanf:"config_key"`
+}
+
 type DPEvents struct {
 	Reprocess                  DPEventReprocess         `koanf:"reprocess"`
 	Kafka                      DPKafka                  `koanf:"kafka"`
@@ -210,6 +223,7 @@ type DPSettings struct {
 	LogPath string    `koanf:"log_path"`
 	Streams DPStreams `koanf:"streams"`
 	Events  DPEvents  `koanf:"events"`
+	Alerter DPAlerter `koanf:"alerter"`
 }
 
 var defaults DPSettings = DPSettings{
@@ -291,6 +305,14 @@ var defaults DPSettings = DPSettings{
 		LostTasksBulkCreateLimit:                     10,
 		OldConsumerGroupDroppedMinutes:               60 * 24, // One day by default,
 		OldConsumerGroupDropperCheckFrequencyMinutes: 60,
+	},
+	Alerter: DPAlerter{
+		Enabled:                  false,
+		MaxSecurity:              "",
+		ConfigReloadFrequencyMin: 60,
+		RedisDbId:                models.ALERTER_DB_ID,
+		AlertKey:                 models.ALERTER_ALERT_KEY,
+		ConfigKey:                models.ALERTER_CONFIG_KEY,
 	},
 }
 
