@@ -27,7 +27,7 @@ type Alerter struct {
 
 // Load the alerter configuration from the key value store.
 func loadAlerterConfigFromKvStore(ctx context.Context, kvStore *kvprovider.KVMulti) (*models.LoadedRules, error) {
-	configBytes, err := kvStore.Alerter.GetBytes(ctx, models.ALERTER_CONFIG_KEY)
+	configBytes, err := kvStore.Alerter.GetBytes(ctx, settings.Settings.Alerter.ConfigKey)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +204,7 @@ func (alert *Alerter) ProduceMod(inFlight *msginflight.MsgInFlight, meta *pipeli
 			bedSet.Logger.Error().Err(err).Msg("could not marshal Alert hit")
 			continue
 		}
-		err = alert.kvStore.Alerter.PushToQueue(alert.ctx, models.ALERTER_ALERT_KEY, encodedHit)
+		err = alert.kvStore.Alerter.PushToQueue(alert.ctx, settings.Settings.Alerter.AlertKey, encodedHit)
 		if err != nil {
 			bedSet.Logger.Error().Err(err).Msg("could not store alert hit in redis")
 		}
