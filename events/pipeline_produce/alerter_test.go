@@ -69,6 +69,7 @@ func TestAlerterAddsToRedis(t *testing.T) {
 	loadedRules := models.LoadedRules{
 		Rules: []models.AlertRule{
 			{
+				Id:            "ruleidA1",
 				WebhookId:     "endpointA1",
 				EventType:     events.ActionEnriched,
 				PluginName:    "CustomPlugin",
@@ -82,22 +83,26 @@ func TestAlerterAddsToRedis(t *testing.T) {
 				},
 			},
 			{
+				Id:         "ruleidB1",
 				WebhookId:  "endpointB1",
 				EventType:  events.ActionExtracted,
 				PluginName: "MimeDecoder",
 			},
 			{
+				Id:        "ruleidC1",
 				WebhookId: "endpointC1",
 				FeatureNameValues: map[string]string{
 					"index_of_coincidence": "0.5",
 				},
 			},
 			{
+				Id:         "ruleidD1",
 				WebhookId:  "endpointD1",
 				PluginName: "MimeDecoder",
 			},
 			// Case where the expected output is an error exception.
 			{
+				Id:        "ruleidE1",
 				WebhookId: "endpointE1",
 				Status:    events.StatusTypeErrorException,
 			},
@@ -118,14 +123,16 @@ func TestAlerterAddsToRedis(t *testing.T) {
 	err = json.Unmarshal(result, &alertHit)
 	require.Nil(t, err)
 	require.Equal(t, alertHit.Sha256, "ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69")
-	require.Equal(t, alertHit.Rule.WebhookId, "endpointB1")
+	require.Equal(t, alertHit.WebhookId, "endpointB1")
+	require.Equal(t, alertHit.RuleId, "ruleidB1")
 
 	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
 	require.Nil(t, err)
 	err = json.Unmarshal(result, &alertHit)
 	require.Nil(t, err)
 	require.Equal(t, alertHit.Sha256, "ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69")
-	require.Equal(t, alertHit.Rule.WebhookId, "endpointD1")
+	require.Equal(t, alertHit.WebhookId, "endpointD1")
+	require.Equal(t, alertHit.RuleId, "ruleidD1")
 
 	// Confirm no more events in queue
 	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
@@ -142,7 +149,8 @@ func TestAlerterAddsToRedis(t *testing.T) {
 	err = json.Unmarshal(result, &alertHit)
 	require.Nil(t, err)
 	require.Equal(t, alertHit.Sha256, "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
-	require.Equal(t, alertHit.Rule.WebhookId, "endpointC1")
+	require.Equal(t, alertHit.WebhookId, "endpointC1")
+	require.Equal(t, alertHit.RuleId, "ruleidC1")
 
 	// Confirm Queue is now empty
 	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
@@ -159,7 +167,8 @@ func TestAlerterAddsToRedis(t *testing.T) {
 	err = json.Unmarshal(result, &alertHit)
 	require.Nil(t, err)
 	require.Equal(t, alertHit.Sha256, "ca4233acbcf3217ad8910afdf3ecf0c23650497a24e6cb953f91557d7daaaaaa")
-	require.Equal(t, alertHit.Rule.WebhookId, "endpointA1")
+	require.Equal(t, alertHit.WebhookId, "endpointA1")
+	require.Equal(t, alertHit.RuleId, "ruleidA1")
 
 	// Error exception rule hits
 	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
@@ -167,7 +176,8 @@ func TestAlerterAddsToRedis(t *testing.T) {
 	err = json.Unmarshal(result, &alertHit)
 	require.Nil(t, err)
 	require.Equal(t, alertHit.Sha256, "ca4233acbcf3217ad8910afdf3ecf0c23650497a24e6cb953f91557d7daaaaaa")
-	require.Equal(t, alertHit.Rule.WebhookId, "endpointE1")
+	require.Equal(t, alertHit.WebhookId, "endpointE1")
+	require.Equal(t, alertHit.RuleId, "ruleidE1")
 
 	// Confirm queue is now empty
 	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
@@ -178,6 +188,7 @@ func TestAlerterNoRaises(t *testing.T) {
 	loadedRules := models.LoadedRules{
 		Rules: []models.AlertRule{
 			{
+				Id:            "ruleidA1",
 				WebhookId:     "endpointA1",
 				EventType:     events.ActionEnriched,
 				PluginName:    "Custom2",
@@ -215,6 +226,7 @@ func TestAlerterReloadingRules(t *testing.T) {
 	loadedRules := models.LoadedRules{
 		Rules: []models.AlertRule{
 			{
+				Id:            "ruleidA1",
 				WebhookId:     "endpointA1",
 				EventType:     events.ActionEnriched,
 				PluginName:    "CustomPlugin",
@@ -228,11 +240,13 @@ func TestAlerterReloadingRules(t *testing.T) {
 				},
 			},
 			{
+				Id:         "ruleidB1",
 				WebhookId:  "endpointB1",
 				EventType:  events.ActionExtracted,
 				PluginName: "MimeDecoder",
 			},
 			{
+				Id: "ruleidC1",
 				FeatureNameValues: map[string]string{
 					"index_of_coincidence": "0.5",
 				},
@@ -271,6 +285,7 @@ func TestAlerterReloadingRulesAutomatically(t *testing.T) {
 	loadedRules := models.LoadedRules{
 		Rules: []models.AlertRule{
 			{
+				Id:            "ruleidA1",
 				WebhookId:     "endpointA1",
 				EventType:     events.ActionEnriched,
 				PluginName:    "CustomPlugin",
@@ -284,6 +299,7 @@ func TestAlerterReloadingRulesAutomatically(t *testing.T) {
 				},
 			},
 			{
+				Id:         "ruleidB1",
 				WebhookId:  "endpointB1",
 				EventType:  events.ActionExtracted,
 				PluginName: "MimeDecoder",
@@ -400,6 +416,7 @@ func TestAlerterSecurity(t *testing.T) {
 	loadedRules := models.LoadedRules{
 		Rules: []models.AlertRule{
 			{
+				Id:            "ruleidA1",
 				WebhookId:     "endpointA1",
 				EventType:     events.ActionEnriched,
 				PluginName:    "CustomPlugin",
@@ -414,16 +431,19 @@ func TestAlerterSecurity(t *testing.T) {
 			},
 			{
 				WebhookId:  "endpointB1",
+				Id:         "ruleidB1",
 				EventType:  events.ActionExtracted,
 				PluginName: "MimeDecoder",
 			},
 			{
+				Id:        "ruleidC1",
 				WebhookId: "endpointC1",
 				FeatureNameValues: map[string]string{
 					"index_of_coincidence": "0.5",
 				},
 			},
 			{
+				Id:         "ruleidD1",
 				WebhookId:  "endpointD1",
 				PluginName: "MimeDecoder",
 			},
@@ -455,7 +475,8 @@ func TestAlerterSecurity(t *testing.T) {
 	err = json.Unmarshal(result, &alertHit)
 	require.Nil(t, err)
 	require.Equal(t, alertHit.Sha256, "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
-	require.Equal(t, alertHit.Rule.WebhookId, "endpointC1")
+	require.Equal(t, alertHit.WebhookId, "endpointC1")
+	require.Equal(t, alertHit.RuleId, "ruleidC1")
 
 	// Confirm Queue is now empty
 	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
@@ -472,7 +493,8 @@ func TestAlerterSecurity(t *testing.T) {
 	err = json.Unmarshal(result, &alertHit)
 	require.Nil(t, err)
 	require.Equal(t, alertHit.Sha256, "ca4233acbcf3217ad8910afdf3ecf0c23650497a24e6cb953f91557d7daaaaaa")
-	require.Equal(t, alertHit.Rule.WebhookId, "endpointA1")
+	require.Equal(t, alertHit.WebhookId, "endpointA1")
+	require.Equal(t, alertHit.RuleId, "ruleidA1")
 
 	// Confirm queue is now empty
 	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)

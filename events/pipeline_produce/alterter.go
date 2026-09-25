@@ -197,8 +197,10 @@ func (alert *Alerter) ProduceMod(inFlight *msginflight.MsgInFlight, meta *pipeli
 		}
 
 		hit := models.AlertHit{
-			Rule:   curRule,
-			Sha256: statusEvent.Entity.Input.Entity.Sha256,
+			RuleId:       curRule.Id,
+			WebhookId:    curRule.WebhookId,
+			AlertMessage: curRule.AlertMessage,
+			Sha256:       statusEvent.Entity.Input.Entity.Sha256,
 		}
 		encodedHit, err := json.Marshal(hit)
 		if err != nil {
