@@ -53,6 +53,18 @@ func setupAlerter(t *testing.T, rules models.LoadedRules) (*Alerter, context.Can
 	return alerter, cancelFunc
 }
 
+// Verify that alerter doesn't crash if there is no configured rules.
+func TestAlerterNoConfig(t *testing.T) {
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	defer cancelFunc()
+	multiProvider, err := kvprovider.NewMemoryProviders()
+	require.Nil(t, err)
+	// Ensure the alerter loads when there is no config in redis with an empty rules config.
+	alerter, err := NewAlerter(ctx, multiProvider)
+	require.Nil(t, err)
+	require.Equal(t, len(alerter.rules.Rules), 0)
+}
+
 func TestAlerterAddsToRedis(t *testing.T) {
 	loadedRules := models.LoadedRules{
 		Rules: []models.AlertRule{

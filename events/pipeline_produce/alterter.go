@@ -29,7 +29,8 @@ type Alerter struct {
 func loadAlerterConfigFromKvStore(ctx context.Context, kvStore *kvprovider.KVMulti) (*models.LoadedRules, error) {
 	configBytes, err := kvStore.Alerter.GetBytes(ctx, settings.Settings.Alerter.ConfigKey)
 	if err != nil {
-		return nil, err
+		// Nothing to load so just supply an empty rule set.
+		return &models.LoadedRules{Rules: []models.AlertRule{}}, nil
 	}
 	var loadedRules models.LoadedRules
 	err = json.Unmarshal(configBytes, &loadedRules)
