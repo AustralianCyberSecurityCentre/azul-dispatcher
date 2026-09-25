@@ -5,7 +5,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/models"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/redis/go-redis/v9"
 )
@@ -35,7 +34,7 @@ func NewRedisProviders() (*KVMulti, error) {
 		return nil, err
 	}
 	// be very careful about changing the db number
-	ret.Alerter, err = newRedisProvider(models.ALERTER_DB_ID)
+	ret.Alerter, err = newRedisProvider(st.Settings.Alerter.RedisDbId)
 	if err != nil {
 		return nil, err
 	}
