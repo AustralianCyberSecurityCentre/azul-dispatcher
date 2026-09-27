@@ -41,10 +41,7 @@ var lostTasksCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		err = ltp.Start()
-		if err != nil {
-			fmt.Println("Error performing lost task processing:", err)
-			os.Exit(1)
-		}
+		fmt.Println("Finished performing lost task processing with final error: ", err)
 	},
 }
 
