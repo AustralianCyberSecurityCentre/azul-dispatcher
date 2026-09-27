@@ -9,7 +9,7 @@ toolchain go1.27.1
 
 require (
 	dario.cat/mergo v1.0.2
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.28
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.39
 	github.com/IBM/sarama v1.60.2
 	github.com/allegro/bigcache/v3 v3.2.0
 	github.com/cespare/xxhash/v2 v2.3.0
