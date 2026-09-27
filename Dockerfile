@@ -2,12 +2,12 @@
 # and a workspace (GOPATH) configured at /go.
 ARG REGISTRY="dhi.io"
 ARG BUILD_IMAGE='golang'
-ARG BUILD_TAG='1.26-debian13-dev@sha256:16c5a564414233249e0b12bcdc1bf22a0c1affc0f85d5a804c82254b6e528583'
+ARG BUILD_TAG='1.27-trixie@sha256:433790e515d27dc6003e847e644cc0af956985cf315c1c58a3b73ee2dd305183'
 ARG BASE_IMAGE=static
 ARG BASE_TAG=20250419@sha256:98ef7a853608577e8d66dad1d25ada75d745d782f28d84e9ecfb85dfeb1f9c98
 
 ARG PYTHON_BUILD_IMAGE='python'
-ARG PYTHON_BUILD_TAG='3.12-debian-dev@sha256:bd72d0438bfe217f5eaf000bf484083ca70c4ccac187d865e79ecf6d98bc4e69'
+ARG PYTHON_BUILD_TAG='3.12-debian-dev@sha256:2815360e12d472ec8f531700819d281a796ab4c42a113de1b9d4fc144bca7c5a'
 
 # Note if this is bumped for faster builds ensure the build agent has the same version of yara.
 ARG YARA_X_VERSION_TAG="1.20.0"
@@ -126,7 +126,7 @@ COPY --from=pybuilder /tmp/src/dist/azul-security/_internal /usr/bin/_internal
 # contains a number of bugs for office and archive file types
 # Install updated libmagic
 ARG FILE_GIT=https://github.com/file/file
-ARG FILE_TAG=FILE5_47
+ARG FILE_TAG=FILE5_48
 # Install file with --prefix=/usr to ensure it overrides the built-in magic.
 RUN git clone --branch $FILE_TAG $FILE_GIT /go/file && \
     cd /go/file/ && \
