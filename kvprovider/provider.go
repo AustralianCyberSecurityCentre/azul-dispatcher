@@ -11,6 +11,8 @@ type KVInterface interface {
 	GetBytes(ctx context.Context, key string) ([]byte, error)
 	GetTime(ctx context.Context, key string) (time.Time, error)
 	Set(ctx context.Context, key string, value any, expiration time.Duration) error
+	PushToQueue(ctx context.Context, key string, value []byte) error
+	PopFromQueue(ctx context.Context, key string) ([]byte, error)
 	/*Delete any number of keys and return the number of elements that were deleted and any errors.*/
 	Del(ctx context.Context, keys ...string) (int64, error)
 	Scan(ctx context.Context, cursor uint64, match string, count int64) ([]string, uint64, error)
@@ -24,6 +26,8 @@ type KVMulti struct {
 	RegisteredPlugins KVInterface
 	// Holds relations between deployment keys/names and their plugins
 	DeployedPlugins KVInterface
-	//  Holds the value to indicate if Plugins should stop processing because a reporcess or restore is in progress.
+	//  Holds the value to indicate if Plugins should stop processing because a reprocess or restore is in progress.
 	PausePluginProcessingStartTime KVInterface
+	//  Holds alerts and alert results from the alerter pipeline.
+	Alerter KVInterface
 }

@@ -164,6 +164,7 @@ func (m *ConsumerManager) getEventReader(p *consumer.ConsumeParams, lastPauseTim
 func (m *ConsumerManager) StartPeriodicCheckAndDeleteOldConsumers(ctx context.Context) {
 	go func(ctx context.Context) {
 		ticker := time.NewTicker(time.Duration(st.Events.OldConsumerGroupDropperCheckFrequencyMinutes) * time.Minute)
+		defer ticker.Stop()
 		for {
 			select {
 			case <-ctx.Done():

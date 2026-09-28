@@ -61,6 +61,7 @@ func PauseUntilContextDone(ctx context.Context, kvmulti *kvprovider.KVMulti) *sy
 	go func(ctx context.Context, innerWg *sync.WaitGroup, kvmulti *kvprovider.KVMulti) {
 		defer innerWg.Done()
 		minutelyTicker := time.NewTicker(TIME_BETWEEN_REDIS_UPDATES)
+		defer minutelyTicker.Stop()
 		err := PausePluginProcessing(ctx, kvmulti)
 		if err != nil {
 			bedSet.Logger.Err(err).Msg("Couldn't pause plugin processing during minutely routine.")

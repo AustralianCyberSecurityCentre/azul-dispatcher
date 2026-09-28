@@ -6,7 +6,6 @@ import (
 	"time"
 
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
-
 	"github.com/redis/go-redis/v9"
 )
 
@@ -31,6 +30,11 @@ func NewRedisProviders() (*KVMulti, error) {
 	}
 	// be very careful about changing the db number
 	ret.PausePluginProcessingStartTime, err = newRedisProvider(3)
+	if err != nil {
+		return nil, err
+	}
+	// be very careful about changing the db number
+	ret.Alerter, err = newRedisProvider(st.Settings.Alerter.RedisDbId)
 	if err != nil {
 		return nil, err
 	}
@@ -80,6 +84,14 @@ func (prov *RedisProvider) GetTime(ctx context.Context, key string) (time.Time, 
 
 func (prov *RedisProvider) Set(ctx context.Context, key string, value any, expiration time.Duration) error {
 	return prov.Redis.Set(ctx, key, value, expiration).Err()
+}
+
+func (prov *RedisProvider) PushToQueue(ctx context.Context, key string, value []byte) error {
+	return prov.Redis.RPush(ctx, key, value).Err()
+}
+
+func (prov *RedisProvider) PopFromQueue(ctx context.Context, key string) ([]byte, error) {
+	return prov.Redis.LPop(ctx, key).Bytes()
 }
 
 func (prov *RedisProvider) Del(ctx context.Context, key ...string) (int64, error) {

@@ -1,43 +1,39 @@
 module github.com/AustralianCyberSecurityCentre/azul-dispatcher.git
 
-go 1.26.0
+go 1.27.0
 
-toolchain go1.26.1
-
-require (
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.28
-	github.com/allegro/bigcache/v3 v3.2.0
-	github.com/cespare/xxhash/v2 v2.3.0
-	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
-	github.com/eko/gocache/lib/v4 v4.4.0
-	github.com/eko/gocache/store/bigcache/v4 v4.2.10
-	github.com/glaslos/tlsh v0.4.0
-	github.com/golang/mock v1.6.0
-	github.com/minio/minio-go/v7 v7.3.0 // indirect
-	github.com/prometheus/client_golang v1.24.1
-	github.com/redis/go-redis/v9 v9.22.0
-	github.com/rs/zerolog v1.35.1
-	github.com/stretchr/testify v1.12.1
-	github.com/tidwall/gjson v1.19.0
-	github.com/tidwall/sjson v1.2.5
-	gopkg.in/yaml.v3 v3.0.1
-)
+toolchain go1.27.1
 
 // Uncomment and set correct version to get import of a dev version of bedrock you have
-// replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v11.0.98 => ../azul-bedrock
+// replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.30 => ../azul-bedrock
 
 require (
 	dario.cat/mergo v1.0.2
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.39
 	github.com/IBM/sarama v1.60.2
+	github.com/allegro/bigcache/v3 v3.2.0
+	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/deathowl/go-metrics-prometheus v0.0.0-20221009205350-f2a1482ba35b
+	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
+	github.com/eko/gocache/lib/v4 v4.4.0
+	github.com/eko/gocache/store/bigcache/v4 v4.2.10
 	github.com/gin-contrib/pprof v1.5.5
 	github.com/gin-gonic/gin v1.12.0
+	github.com/glaslos/tlsh v0.4.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/goccy/go-json v0.10.6
+	github.com/golang/mock v1.6.0
+	github.com/prometheus/client_golang v1.24.1
 	github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9
+	github.com/redis/go-redis/v9 v9.22.0
+	github.com/rs/zerolog v1.35.1
 	github.com/spf13/cobra v1.10.2
+	github.com/stretchr/testify v1.12.1
+	github.com/tidwall/gjson v1.19.0
+	github.com/tidwall/sjson v1.2.5
 	go.uber.org/automaxprocs v1.6.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -88,6 +84,7 @@ require (
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/minio/crc64nvme v1.1.1 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
+	github.com/minio/minio-go/v7 v7.3.0 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

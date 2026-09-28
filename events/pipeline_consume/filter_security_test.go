@@ -98,7 +98,7 @@ func TestSecurityNormal(t *testing.T) {
 	inFlight, err := pipeline.NewMsgInFlightFromJson(security_empty_path, events.ModelBinary)
 	require.Nil(t, err)
 
-	fs := FilterSecurity{CachedSecurityResults: map[string]CacheHit{}}
+	fs := FilterSecurity{CachedSecurityResults: map[string]CachedSecurityHit{}}
 	be, ok := inFlight.GetBinary()
 	require.True(t, ok)
 
@@ -130,7 +130,7 @@ func TestSecurityNormalDownload(t *testing.T) {
 	inFlight, err := pipeline.NewMsgInFlightFromJson(download_event, events.ModelDownload)
 	require.Nil(t, err)
 
-	fs := FilterSecurity{CachedSecurityResults: map[string]CacheHit{}}
+	fs := FilterSecurity{CachedSecurityResults: map[string]CachedSecurityHit{}}
 	be, ok := inFlight.GetDownload()
 	require.True(t, ok)
 
@@ -162,7 +162,7 @@ func TestSecurityBadSecurity(t *testing.T) {
 	inFlight, err := pipeline.NewMsgInFlightFromJson(security_empty_path, events.ModelBinary)
 	require.Nil(t, err)
 
-	fs := FilterSecurity{CachedSecurityResults: map[string]CacheHit{}}
+	fs := FilterSecurity{CachedSecurityResults: map[string]CachedSecurityHit{}}
 	be, ok := inFlight.GetBinary()
 	require.True(t, ok)
 
@@ -196,7 +196,7 @@ func TestSecurityEmptySecurity(t *testing.T) {
 	inFlight, err := pipeline.NewMsgInFlightFromJson(security_empty_path, events.ModelBinary)
 	require.Nil(t, err)
 
-	fs := FilterSecurity{CachedSecurityResults: map[string]CacheHit{}}
+	fs := FilterSecurity{CachedSecurityResults: map[string]CachedSecurityHit{}}
 	be, ok := inFlight.GetBinary()
 	require.True(t, ok)
 

@@ -12,12 +12,12 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/events/consumer"
 )
 
-type CacheHit struct {
-	hit map[string]bool
+type CachedSecurityHit struct {
+	Hit map[string]bool
 }
 
-func calculateSecurityResult(authorSecurity, eventSecurity string) (bool, error) {
-	cmd := exec.Command("azul-security", "can-access", authorSecurity, eventSecurity)
+func CalculateSecurityResult(accessorSecurity, documentSecurity string) (bool, error) {
+	cmd := exec.Command("azul-security", "can-access", accessorSecurity, documentSecurity)
 	cmd.Env = os.Environ()
 	out, err := cmd.Output()
 	if err != nil {
@@ -33,7 +33,7 @@ func calculateSecurityResult(authorSecurity, eventSecurity string) (bool, error)
 }
 
 type FilterSecurity struct {
-	CachedSecurityResults map[string]CacheHit
+	CachedSecurityResults map[string]CachedSecurityHit
 }
 
 func (p *FilterSecurity) GetName() string { return "FilterSecurity" }
@@ -62,21 +62,21 @@ func (p *FilterSecurity) ConsumeMod(message *msginflight.MsgInFlight, meta *cons
 	var err error
 	userSecurityHit, ok := p.CachedSecurityResults[meta.MaxSecurity]
 	if !ok {
-		result, err = calculateSecurityResult(meta.MaxSecurity, security)
+		result, err = CalculateSecurityResult(meta.MaxSecurity, security)
 		if err != nil {
 			bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering.")
 		}
-		p.CachedSecurityResults[meta.MaxSecurity] = CacheHit{
-			hit: map[string]bool{security: result},
+		p.CachedSecurityResults[meta.MaxSecurity] = CachedSecurityHit{
+			Hit: map[string]bool{security: result},
 		}
 	} else {
-		result, ok = userSecurityHit.hit[security]
+		result, ok = userSecurityHit.Hit[security]
 		if !ok {
-			result, err = calculateSecurityResult(meta.MaxSecurity, security)
+			result, err = CalculateSecurityResult(meta.MaxSecurity, security)
 			if err != nil {
 				bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering.")
 			}
-			userSecurityHit.hit[security] = result
+			userSecurityHit.Hit[security] = result
 		}
 	}
 	// check if security allows message to continue.

@@ -13,6 +13,7 @@ import (
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/kvprovider"
 	st "github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/settings"
 	"github.com/AustralianCyberSecurityCentre/azul-dispatcher.git/testdata"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -229,6 +230,6 @@ func TestLTStart(t *testing.T) {
 	})
 
 	data, err := kvprov.TrackPluginExecution.GetBytes(ctx, "azul.dev.tracking.abc.my-plugin.my.version.1")
-	require.Nil(t, err)
+	require.Equal(t, err, redis.Nil)
 	require.Nil(t, data)
 }
