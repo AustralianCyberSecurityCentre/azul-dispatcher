@@ -76,6 +76,7 @@ func (alert *Alerter) startPeriodicReload(ctx context.Context) {
 
 func NewAlerter(ctx context.Context, kvStore *kvprovider.KVMulti) (*Alerter, error) {
 	loadedRules, err := loadAlerterConfigFromKvStore(ctx, kvStore)
+	bedSet.Logger.Info().Msgf("Startup Alerter, successfully loaded %d alerter rules", len(loadedRules.Rules))
 	if err != nil {
 		return nil, err
 	}
