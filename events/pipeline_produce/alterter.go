@@ -106,6 +106,9 @@ func (alert *Alerter) ProduceMod(inFlight *msginflight.MsgInFlight, meta *pipeli
 		isSecurityAllowedToContinue, ok := alert.cachedMaxSecurityHits[statusEvent.Entity.Input.Source.Security]
 		// No cached result so calculate the new result.
 		if !ok {
+			if statusEvent.Entity.Input.Source.Security == "" {
+				bedSet.Logger.Error().Msgf("The author %s with sha256 %s has an empty security value.", statusEvent.Entity.Input.Author.Name, statusEvent.Entity.Input.Entity.Sha256)
+			}
 			isSecurityAllowedToContinue, err = pipeline_consume.CalculateSecurityResult(settings.Settings.Alerter.MaxSecurity, statusEvent.Entity.Input.Source.Security)
 			if err != nil {
 				bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering for alerter.")

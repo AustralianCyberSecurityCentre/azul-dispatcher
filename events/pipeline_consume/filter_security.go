@@ -29,7 +29,7 @@ func CalculateSecurityResult(accessorSecurity, documentSecurity string) (bool, e
 	} else if simplified_output == "false" {
 		return false, nil
 	}
-	return false, fmt.Errorf("bad security output: %s", out)
+	return false, fmt.Errorf("bad security output (inputs were accessor: '%s', document '%s'): %s", accessorSecurity, documentSecurity, out)
 }
 
 type FilterSecurity struct {
