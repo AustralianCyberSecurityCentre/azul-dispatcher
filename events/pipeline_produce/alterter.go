@@ -107,7 +107,7 @@ func (alert *Alerter) ProduceMod(inFlight *msginflight.MsgInFlight, meta *pipeli
 		// No cached result so calculate the new result.
 		if !ok {
 			if statusEvent.Entity.Input.Source.Security == "" {
-				bedSet.Logger.Error().Msgf("The author %s with sha256 %s has an empty security value.", statusEvent.Entity.Input.Author.Name, statusEvent.Entity.Input.Entity.Sha256)
+				bedSet.Logger.Error().Msgf("The author %s with sha256 %s has an empty security original author: %s.", statusEvent.Entity.Input.Author.Name, statusEvent.Entity.Input.Entity.Sha256, statusEvent.Entity.Input.Source.Path[0].Author)
 			}
 			isSecurityAllowedToContinue, err = pipeline_consume.CalculateSecurityResult(settings.Settings.Alerter.MaxSecurity, statusEvent.Entity.Input.Source.Security)
 			if err != nil {
