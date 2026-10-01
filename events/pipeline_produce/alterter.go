@@ -46,6 +46,7 @@ func (alert *Alerter) RecheckRules(ctx context.Context) error {
 		return err
 	}
 	if loadedRules.RulesCompileTime != alert.rules.RulesCompileTime {
+		bedSet.Logger.Info().Msgf("Successfully loaded %d alerter rules", len(loadedRules.Rules))
 		alert.rules = loadedRules
 	}
 	return nil
