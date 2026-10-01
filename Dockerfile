@@ -46,7 +46,7 @@ RUN if [ "$GIT_BRANCH_NAME" = "refs/heads/dev" ]; then \
     uv pip freeze | grep 'azul-.*==' | cut -d "=" -f 1 | xargs -I {} uv pip install --extra-index-url=$UV_INDEX_URL --system --upgrade --no-deps '{}>=0.0.0'; \
     fi
 # Create the azul-security executable in a dist directory.
-RUN pyinstaller --onedir $( find /usr/ -type f -path "*/azul_security/cli_commands.py") --exclude-module uvloop  --name azul-security
+RUN pyinstaller --onedir $( find /usr/ -type f -path "*/azul_security/cli_commands.py") --exclude-module uvloop --add-data "$( find /usr/ -type f -path '*/azul_bedrock/language_catalogs/english.po' | head -n 1 | tr -d '\n'):azul_bedrock/language_catalogs"  --name azul-security
 # Delete un-needed babel files
 RUN find dist/azul-security/_internal/babel/locale-data -type f ! -name 'root.dat' ! -name 'en.dat' ! -name 'en_US.dat' -delete
 
