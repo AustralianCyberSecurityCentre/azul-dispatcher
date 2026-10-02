@@ -103,21 +103,26 @@ func (alert *Alerter) ProduceMod(inFlight *msginflight.MsgInFlight, meta *pipeli
 	// Ensuring the event passes the security filtering.
 	var err error
 	if len(settings.Settings.Alerter.MaxSecurity) > 0 {
-		isSecurityAllowedToContinue, ok := alert.cachedMaxSecurityHits[statusEvent.Entity.Input.Source.Security]
-		// No cached result so calculate the new result.
-		if !ok {
-			if statusEvent.Entity.Input.Source.Security == "" {
-				bedSet.Logger.Error().Msgf("The author %s with sha256 %s has an empty security original author: %s.", statusEvent.Entity.Input.Author.Name, statusEvent.Entity.Input.Entity.Sha256, statusEvent.Entity.Input.Source.Path[0].Author)
+		if statusEvent.Entity.Input.Source.Security == "" {
+			originalAuthor := "unknown"
+			if len(statusEvent.Entity.Input.Source.Path) > 0 {
+				originalAuthor = statusEvent.Entity.Input.Source.Path[0].Author.Name
 			}
-			isSecurityAllowedToContinue, err = pipeline_consume.CalculateSecurityResult(settings.Settings.Alerter.MaxSecurity, statusEvent.Entity.Input.Source.Security)
-			if err != nil {
-				bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering for alerter.")
+			bedSet.Logger.Warn().Msgf("The author %s with sha256 %s has provided no security string, ignoring security check.", originalAuthor, statusEvent.Entity.Input.Entity.Sha256)
+		} else {
+			isSecurityAllowedToContinue, ok := alert.cachedMaxSecurityHits[statusEvent.Entity.Input.Source.Security]
+			// No cached result so calculate the new result.
+			if !ok {
+				isSecurityAllowedToContinue, err = pipeline_consume.CalculateSecurityResult(settings.Settings.Alerter.MaxSecurity, statusEvent.Entity.Input.Source.Security)
+				if err != nil {
+					bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering for alerter.")
+					return inFlight, nil
+				}
+				alert.cachedMaxSecurityHits[statusEvent.Entity.Input.Source.Security] = isSecurityAllowedToContinue
+			}
+			if !isSecurityAllowedToContinue {
 				return inFlight, nil
 			}
-			alert.cachedMaxSecurityHits[statusEvent.Entity.Input.Source.Security] = isSecurityAllowedToContinue
-		}
-		if !isSecurityAllowedToContinue {
-			return inFlight, nil
 		}
 	}
 
