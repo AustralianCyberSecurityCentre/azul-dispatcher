@@ -2,6 +2,7 @@ package pipeline_produce
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/models"
@@ -106,7 +107,7 @@ func (alert *Alerter) ProduceMod(inFlight *msginflight.MsgInFlight, meta *pipeli
 		if statusEvent.Entity.Input.Source.Security == "" {
 			originalAuthor := "unknown"
 			if len(statusEvent.Entity.Input.Source.Path) > 0 {
-				originalAuthor = statusEvent.Entity.Input.Source.Path[0].Author.Name
+				originalAuthor = fmt.Sprintf("%s - %s", statusEvent.Entity.Input.Source.Path[0].Author.Name, statusEvent.Entity.Input.Source.Path[0].Author.Version)
 			}
 			bedSet.Logger.Warn().Msgf("The author %s with sha256 %s has provided no security string, ignoring security check.", originalAuthor, statusEvent.Entity.Input.Entity.Sha256)
 		} else {
