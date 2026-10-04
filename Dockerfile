@@ -7,7 +7,7 @@ ARG BASE_IMAGE=static
 ARG BASE_TAG=20250419@sha256:98ef7a853608577e8d66dad1d25ada75d745d782f28d84e9ecfb85dfeb1f9c98
 
 ARG PYTHON_BUILD_IMAGE='python'
-ARG PYTHON_BUILD_TAG='3.12-debian-dev@sha256:2815360e12d472ec8f531700819d281a796ab4c42a113de1b9d4fc144bca7c5a'
+ARG PYTHON_BUILD_TAG='3.12-debian-dev@sha256:c3cf26c657b0bfaff31663523c3679c7bd791c6e894203b5c26c1e2a3cac7046'
 
 # Note if this is bumped for faster builds ensure the build agent has the same version of yara.
 ARG YARA_X_VERSION_TAG="1.20.0"
