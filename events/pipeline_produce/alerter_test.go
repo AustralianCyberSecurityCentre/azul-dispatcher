@@ -460,8 +460,24 @@ func TestAlerterSecurity(t *testing.T) {
 	require.Equal(t, msg, original)
 	require.Equal(t, len(additional), 0)
 
-	// No hits due to security restrictions
 	result, err := alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
+	require.Nil(t, err)
+	err = json.Unmarshal(result, &alertHit)
+	require.Nil(t, err)
+	require.Equal(t, alertHit.Sha256, "ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69")
+	require.Equal(t, alertHit.WebhookId, "endpointB1")
+	require.Equal(t, alertHit.RuleId, "ruleidB1")
+
+	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
+	require.Nil(t, err)
+	err = json.Unmarshal(result, &alertHit)
+	require.Nil(t, err)
+	require.Equal(t, alertHit.Sha256, "ee303d3c6d7cfa24d42e6348bdd1103a26de77a887e9dbee3dd1fe6304414f69")
+	require.Equal(t, alertHit.WebhookId, "endpointD1")
+	require.Equal(t, alertHit.RuleId, "ruleidD1")
+
+	// Double hit on an events empty security string
+	result, err = alerter.kvStore.Alerter.PopFromQueue(context.Background(), models.ALERTER_ALERT_KEY)
 	require.Equal(t, err, redis.Nil)
 
 	//// ------------------------------------------------------------ Second message (confirm a single hit)

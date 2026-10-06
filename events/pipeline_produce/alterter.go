@@ -2,6 +2,7 @@ package pipeline_produce
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/models"
@@ -46,6 +47,7 @@ func (alert *Alerter) RecheckRules(ctx context.Context) error {
 		return err
 	}
 	if loadedRules.RulesCompileTime != alert.rules.RulesCompileTime {
+		bedSet.Logger.Info().Msgf("Successfully loaded %d alerter rules", len(loadedRules.Rules))
 		alert.rules = loadedRules
 	}
 	return nil
@@ -75,6 +77,7 @@ func (alert *Alerter) startPeriodicReload(ctx context.Context) {
 
 func NewAlerter(ctx context.Context, kvStore *kvprovider.KVMulti) (*Alerter, error) {
 	loadedRules, err := loadAlerterConfigFromKvStore(ctx, kvStore)
+	bedSet.Logger.Info().Msgf("Startup Alerter, successfully loaded %d alerter rules", len(loadedRules.Rules))
 	if err != nil {
 		return nil, err
 	}
@@ -101,18 +104,26 @@ func (alert *Alerter) ProduceMod(inFlight *msginflight.MsgInFlight, meta *pipeli
 	// Ensuring the event passes the security filtering.
 	var err error
 	if len(settings.Settings.Alerter.MaxSecurity) > 0 {
-		isSecurityAllowedToContinue, ok := alert.cachedMaxSecurityHits[statusEvent.Entity.Input.Source.Security]
-		// No cached result so calculate the new result.
-		if !ok {
-			isSecurityAllowedToContinue, err = pipeline_consume.CalculateSecurityResult(settings.Settings.Alerter.MaxSecurity, statusEvent.Entity.Input.Source.Security)
-			if err != nil {
-				bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering for alerter.")
+		if statusEvent.Entity.Input.Source.Security == "" {
+			originalAuthor := "unknown"
+			if len(statusEvent.Entity.Input.Source.Path) > 0 {
+				originalAuthor = fmt.Sprintf("%s - %s", statusEvent.Entity.Input.Source.Path[0].Author.Name, statusEvent.Entity.Input.Source.Path[0].Author.Version)
+			}
+			bedSet.Logger.Warn().Msgf("The author %s with sha256 %s has provided no security string, ignoring security check.", originalAuthor, statusEvent.Entity.Input.Entity.Sha256)
+		} else {
+			isSecurityAllowedToContinue, ok := alert.cachedMaxSecurityHits[statusEvent.Entity.Input.Source.Security]
+			// No cached result so calculate the new result.
+			if !ok {
+				isSecurityAllowedToContinue, err = pipeline_consume.CalculateSecurityResult(settings.Settings.Alerter.MaxSecurity, statusEvent.Entity.Input.Source.Security)
+				if err != nil {
+					bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering for alerter.")
+					return inFlight, nil
+				}
+				alert.cachedMaxSecurityHits[statusEvent.Entity.Input.Source.Security] = isSecurityAllowedToContinue
+			}
+			if !isSecurityAllowedToContinue {
 				return inFlight, nil
 			}
-			alert.cachedMaxSecurityHits[statusEvent.Entity.Input.Source.Security] = isSecurityAllowedToContinue
-		}
-		if !isSecurityAllowedToContinue {
-			return inFlight, nil
 		}
 	}
 
