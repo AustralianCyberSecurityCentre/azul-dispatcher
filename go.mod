@@ -9,7 +9,7 @@ toolchain go1.27.1
 
 require (
 	dario.cat/mergo v1.0.2
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.39
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.48
 	github.com/IBM/sarama v1.61.1
 	github.com/allegro/bigcache/v3 v3.2.0
 	github.com/cespare/xxhash/v2 v2.3.0
@@ -21,7 +21,7 @@ require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/glaslos/tlsh v0.4.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
-	github.com/goccy/go-json v0.11.1
+	github.com/goccy/go-json v0.11.2
 	github.com/golang/mock v1.6.0
 	github.com/prometheus/client_golang v1.24.1
 	github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9
@@ -77,7 +77,7 @@ require (
 	github.com/knadh/koanf/maps v0.1.3 // indirect
 	github.com/knadh/koanf/providers/env/v2 v2.0.1 // indirect
 	github.com/knadh/koanf/providers/structs v1.0.1 // indirect
-	github.com/knadh/koanf/v2 v2.3.6 // indirect
+	github.com/knadh/koanf/v2 v2.3.7 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
