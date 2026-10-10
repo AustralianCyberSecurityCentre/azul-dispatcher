@@ -9,7 +9,7 @@ toolchain go1.27.1
 
 require (
 	dario.cat/mergo v1.0.2
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.48
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.50
 	github.com/IBM/sarama v1.61.1
 	github.com/allegro/bigcache/v3 v3.2.0
 	github.com/cespare/xxhash/v2 v2.3.0
@@ -29,7 +29,7 @@ require (
 	github.com/rs/zerolog v1.35.1
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
-	github.com/tidwall/gjson v1.19.0
+	github.com/tidwall/gjson v1.19.1
 	github.com/tidwall/sjson v1.2.5
 	go.uber.org/automaxprocs v1.6.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
