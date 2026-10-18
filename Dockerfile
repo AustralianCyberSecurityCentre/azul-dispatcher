@@ -4,10 +4,10 @@ ARG REGISTRY="dhi.io"
 ARG BUILD_IMAGE='golang'
 ARG BUILD_TAG='1.27-trixie@sha256:433790e515d27dc6003e847e644cc0af956985cf315c1c58a3b73ee2dd305183'
 ARG BASE_IMAGE=static
-ARG BASE_TAG=20250419@sha256:98ef7a853608577e8d66dad1d25ada75d745d782f28d84e9ecfb85dfeb1f9c98
+ARG BASE_TAG=20250419@sha256:6b8a3e2b794ae1d8ea16ba8f1df2fb270a81d1bcf10c912a83fea7b19c582721
 
 ARG PYTHON_BUILD_IMAGE='python'
-ARG PYTHON_BUILD_TAG='3.12-debian-dev@sha256:c690df7b786e2ce24ab2a07b63356fbf28dbbb29f488435c1b6e3ffeed8827a8'
+ARG PYTHON_BUILD_TAG='3.12-debian-dev@sha256:882085059e651dd4953cf52eaad67dd3b1240ba798be32081b92fdde9968fc3a'
 
 # Note if this is bumped for faster builds ensure the build agent has the same version of yara.
 ARG YARA_X_VERSION_TAG="1.20.0"
