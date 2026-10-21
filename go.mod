@@ -1,8 +1,8 @@
 module github.com/AustralianCyberSecurityCentre/azul-dispatcher.git
 
-go 1.27.0
+go 1.27.3
 
-toolchain go1.27.1
+// toolchain go1.27.3
 
 // Uncomment and set correct version to get import of a dev version of bedrock you have
 // replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.30 => ../azul-bedrock
