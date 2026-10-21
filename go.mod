@@ -1,15 +1,15 @@
 module github.com/AustralianCyberSecurityCentre/azul-dispatcher.git
 
-go 1.27.0
+go 1.27.3
 
-toolchain go1.27.1
+// toolchain go1.27.3
 
 // Uncomment and set correct version to get import of a dev version of bedrock you have
 // replace github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.30 => ../azul-bedrock
 
 require (
 	dario.cat/mergo v1.0.2
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.66
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.72
 	github.com/IBM/sarama v1.61.1
 	github.com/allegro/bigcache/v3 v3.2.0
 	github.com/cespare/xxhash/v2 v2.3.0
@@ -48,13 +48,13 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/gopkg v0.1.4 // indirect
 	github.com/bytedance/sonic v1.15.4 // indirect
-	github.com/bytedance/sonic/loader v0.5.2 // indirect
+	github.com/bytedance/sonic/loader v0.5.3 // indirect
 	github.com/cloudwego/base64x v0.1.7 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dustin/go-humanize v1.1.0 // indirect
 	github.com/eapache/go-resiliency v1.7.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/gin-contrib/sse v1.1.2 // indirect
 	github.com/go-playground/locales v0.14.2 // indirect
 	github.com/go-playground/universal-translator v0.18.2 // indirect
@@ -73,12 +73,12 @@ require (
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.20.3 // indirect
-	github.com/klauspost/cpuid/v2 v2.4.0 // indirect
+	github.com/klauspost/cpuid/v2 v2.4.1 // indirect
 	github.com/klauspost/crc32 v1.3.0 // indirect
 	github.com/knadh/koanf/maps v0.1.3 // indirect
 	github.com/knadh/koanf/providers/env/v2 v2.0.2 // indirect
 	github.com/knadh/koanf/providers/structs v1.0.1 // indirect
-	github.com/knadh/koanf/v2 v2.3.8 // indirect
+	github.com/knadh/koanf/v2 v2.4.1 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/mattn/go-colorable v0.1.16 // indirect
@@ -92,7 +92,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
-	github.com/philhofer/fwd v1.2.0 // indirect
+	github.com/philhofer/fwd v1.2.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.33 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -100,7 +100,7 @@ require (
 	github.com/prometheus/common v0.72.1 // indirect
 	github.com/prometheus/procfs v0.22.0 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
-	github.com/quic-go/quic-go v0.63.0 // indirect
+	github.com/quic-go/quic-go v0.64.1 // indirect
 	github.com/rakyll/magicmime v0.1.0 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
