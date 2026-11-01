@@ -9,7 +9,7 @@ go 1.27.3
 
 require (
 	dario.cat/mergo v1.0.2
-	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.72
+	github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.77
 	github.com/IBM/sarama v1.61.1
 	github.com/allegro/bigcache/v3 v3.2.0
 	github.com/cespare/xxhash/v2 v2.3.0
