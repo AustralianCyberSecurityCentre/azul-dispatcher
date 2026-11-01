@@ -1,7 +1,7 @@
 dario.cat/mergo v1.0.2 h1:85+piFYR1tMbRrLcDwR18y4UKJ3aH1Tbzi24VRW1TK8=
 dario.cat/mergo v1.0.2/go.mod h1:E/hbnu0NxMFBjpMIE34DRGLWqDy0g5FuKDhCb31ngxA=
-github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.72 h1:L8d3xGpYPnDLfHJ4rprNWyHev622WsAssclNVWtFgJQ=
-github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.72/go.mod h1:meovAijl0QBDT9qVaQol9eilj53gsh4KdJqMEoGm+D4=
+github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.77 h1:nzYxkQr5tJlacLJN87qixUM+OhzT1Bbxc7r6gjXaP3M=
+github.com/AustralianCyberSecurityCentre/azul-bedrock/v13 v13.0.77/go.mod h1:E8qBoSbM/+5koi/OUmekVTXkeRBOfUaAIMQIIGO1RH8=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.3 h1:qgnWTiWs1G7AqcKZegFvkJD1bmXJcaDU3uC0ELSgZ5U=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.3/go.mod h1:XtxD48QPInqoj+GMlcRlXHEYsoOxFnP6w2JgIZ9rDS4=
 github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.15.0 h1:w3gDUJlJ0BfBsHH02DCBDwbkmMSXJqBj6nBOCo9iocY=
