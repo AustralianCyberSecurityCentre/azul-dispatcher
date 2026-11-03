@@ -10,7 +10,7 @@ ARG PYTHON_BUILD_IMAGE='python'
 ARG PYTHON_BUILD_TAG='3.12-debian-dev@sha256:6f9085a6340761b0ab011234ec138bcc07ffc8de6c6cbca697658fff855d374b'
 
 # Note if this is bumped for faster builds ensure the build agent has the same version of yara.
-ARG YARA_X_VERSION_TAG="1.20.0"
+ARG YARA_X_VERSION_TAG="1.22.0"
 
 FROM $REGISTRY/$PYTHON_BUILD_IMAGE:$PYTHON_BUILD_TAG AS pybuilder
 ENV DEBIAN_FRONTEND=noninteractive
@@ -71,7 +71,7 @@ RUN git config --global url."git@github.com:AustralianCyberSecurityCentre/".inst
 
 # Install yara-x for identify - needed for golang bedrock
 # Install Rust and yara-x
-ENV RUST_VERSION=1.98.0
+ENV RUST_VERSION=1.99.1
 # Attempts to limit cargo RAM usage during builds.
 ENV RUSTFLAGS="-C link-arg=-fuse-ld=lld"
 ARG YARA_X_VERSION_TAG
