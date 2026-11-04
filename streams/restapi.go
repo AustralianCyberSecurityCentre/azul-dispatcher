@@ -209,17 +209,14 @@ func (s *Streams) PostStream(c *gin.Context) {
 	defer c.Request.Body.Close()
 	bufferedReader := bufio.NewReaderSize(c.Request.Body, maxBytesBufferBytes)
 	buf := make([]byte, maxBytesBufferBytes)
-	start := time.Now()
 	fileSize, err = io.CopyBuffer(file, bufferedReader, buf)
 	if err != nil {
 		restapi_handlers.JSONError(c, 500, "filebuffering error, failed to copy file from stream to cache", err)
 		return
 	}
-	elapsed := time.Since(start)
-	bedSet.Logger.Error().Msgf("Copying from stream to temp file took %s\n", elapsed)
 
-	start = time.Now()
 	hasher := identify.NewHasher(paramSkipIdentify)
+	defer hasher.Close()
 	_, err = file.Seek(0, 0)
 	if err != nil {
 		restapi_handlers.JSONError(c, 500, "filebuffering error, failed to seek back to zero for writing to hasher", err)
@@ -229,10 +226,7 @@ func (s *Streams) PostStream(c *gin.Context) {
 		restapi_handlers.JSONError(c, 500, "file hasing error, failed to write cached file into hasher", err)
 		return
 	}
-	elapsed = time.Since(start)
-	bedSet.Logger.Error().Msgf("Creating and populating the hasher took %s\n", elapsed)
 
-	start = time.Now()
 	// generate hashes for the stream
 	metadata, err := hasher.CookAndClose()
 	if err != nil {
@@ -241,8 +235,6 @@ func (s *Streams) PostStream(c *gin.Context) {
 	}
 	// Used for warning logging if the file fails to delete.
 	fileSha256 = metadata.Sha256
-	elapsed = time.Since(start)
-	bedSet.Logger.Error().Msgf("Hasher cooking took %s\n", elapsed)
 
 	if fileSize == 0 {
 		restapi_handlers.JSONError(c, 400, "no content in request body", nil)
@@ -253,7 +245,6 @@ func (s *Streams) PostStream(c *gin.Context) {
 		restapi_handlers.JSONError(c, 400, "sha256 mismatch", err)
 		return
 	}
-	start = time.Now()
 	if !paramSkipIdentify {
 		// identify the file types
 		err = s.identifier.Identify(file.Name(), metadata)
@@ -262,8 +253,6 @@ func (s *Streams) PostStream(c *gin.Context) {
 			return
 		}
 	}
-	elapsed = time.Since(start)
-	bedSet.Logger.Error().Msgf("Identifier took %s\n", elapsed)
 
 	// put binary into s3
 	attempt := 0
