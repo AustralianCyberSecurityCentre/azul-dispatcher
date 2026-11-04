@@ -202,34 +202,18 @@ func (s *Streams) PostStream(c *gin.Context) {
 			bedSet.Logger.Warn().Msgf("Failed to cleanup the temporary file associated with a Stream upload. Sha256 '%s' with file name '%s'", sha256Val, file.Name())
 		}
 	}(file, &fileSha256)
-	var fileSize uint64
+	var fileSize int64
 	// 100kB buffering
 	maxBytesBufferBytes := 102400
 	// Ensure request body closes.
 	defer c.Request.Body.Close()
 	bufferedReader := bufio.NewReaderSize(c.Request.Body, maxBytesBufferBytes)
 	buf := make([]byte, maxBytesBufferBytes)
-	var readBytes int
-	var writtenBytes int
 	start := time.Now()
-	for {
-		readBytes, err = bufferedReader.Read(buf)
-		if err != nil && err != io.EOF {
-			restapi_handlers.JSONError(c, 500, "filebuffering error 1, failed to read file in PutData", err)
-			return
-		}
-		if readBytes == 0 {
-			break
-		}
-		writtenBytes, err = file.Write(buf[:readBytes])
-		if err != nil {
-			restapi_handlers.JSONError(c, 500, "filebuffering error 2, failed to write file in PutData", err)
-			return
-		}
-		fileSize += uint64(writtenBytes)
-		if err == io.EOF {
-			break
-		}
+	fileSize, err = io.CopyBuffer(file, bufferedReader, buf)
+	if err != nil {
+		restapi_handlers.JSONError(c, 500, "filebuffering error, failed to copy file from stream to cache", err)
+		return
 	}
 	elapsed := time.Since(start)
 	bedSet.Logger.Error().Msgf("Copying from stream to temp file took %s\n", elapsed)
@@ -240,7 +224,7 @@ func (s *Streams) PostStream(c *gin.Context) {
 	if err != nil {
 		restapi_handlers.JSONError(c, 500, "filebuffering error, failed to seek back to zero for writing to hasher", err)
 	}
-	_, err = io.Copy(hasher, file)
+	_, err = io.CopyBuffer(hasher, file, buf)
 	if err != nil {
 		restapi_handlers.JSONError(c, 500, "file hasing error, failed to write cached file into hasher", err)
 		return
