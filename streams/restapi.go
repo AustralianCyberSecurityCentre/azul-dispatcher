@@ -234,7 +234,7 @@ func (s *Streams) PostStream(c *gin.Context) {
 
 	start = time.Now()
 	// generate hashes for the stream
-	metadata, err := hasher.Cook()
+	metadata, err := hasher.CookAndClose()
 	if err != nil {
 		restapi_handlers.JSONError(c, 500, "hasher error", err)
 		return
