@@ -38,7 +38,7 @@ func hashFilePath(filepath string) (*events.BinaryEntityDatastream, error) {
 		if readBytes == 0 {
 			break
 		}
-		err = h.Write(buf[:readBytes])
+		_, err = h.Write(buf[:readBytes])
 		if err == io.EOF {
 			break
 		}
@@ -76,40 +76,40 @@ func NewHasher(minimal bool) *Hasher {
 	}
 }
 
-func (h *Hasher) Write(buf []byte) error {
+func (h *Hasher) Write(buf []byte) (int, error) {
 	var err error
 	var written int
 	genericError := "failed to calculate the %s hash with error %s"
 	written, err = h.sha256.Write(buf)
 	h.size += written
 	if err != nil {
-		return fmt.Errorf(genericError, "sha256", err.Error())
+		return len(buf), fmt.Errorf(genericError, "sha256", err.Error())
 	}
 	if !h.minimal {
 		_, err = h.sha512.Write(buf)
 		if err != nil {
-			return fmt.Errorf(genericError, "sha512", err.Error())
+			return len(buf), fmt.Errorf(genericError, "sha512", err.Error())
 		}
 		_, err = h.sha1.Write(buf)
 		if err != nil {
-			return fmt.Errorf(genericError, "sha1", err.Error())
+			return len(buf), fmt.Errorf(genericError, "sha1", err.Error())
 		}
 		_, err = h.md5.Write(buf)
 		if err != nil {
-			return fmt.Errorf(genericError, "md5", err.Error())
+			return len(buf), fmt.Errorf(genericError, "md5", err.Error())
 		}
 		// Complex hash types
 		_, err = h.tlsh.Write(buf)
 		if err != nil {
-			return fmt.Errorf(genericError, "tlsh", err.Error())
+			return len(buf), fmt.Errorf(genericError, "tlsh", err.Error())
 		}
 		err = h.ssdeep.Update(string(buf))
 		if err != nil {
-			return fmt.Errorf(genericError, "ssdeep", err.Error())
+			return len(buf), fmt.Errorf(genericError, "ssdeep", err.Error())
 		}
 
 	}
-	return nil
+	return len(buf), nil
 }
 
 func (h *Hasher) Cook() (*events.BinaryEntityDatastream, error) {

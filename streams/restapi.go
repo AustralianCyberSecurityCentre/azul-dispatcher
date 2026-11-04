@@ -203,31 +203,27 @@ func (s *Streams) PostStream(c *gin.Context) {
 		}
 	}(file, &fileSha256)
 	var fileSize uint64
-	// 10kB buffering
-	maxBytesBufferBytes := 10240
+	// 100kB buffering
+	maxBytesBufferBytes := 102400
 	// Ensure request body closes.
 	defer c.Request.Body.Close()
 	bufferedReader := bufio.NewReaderSize(c.Request.Body, maxBytesBufferBytes)
 	buf := make([]byte, maxBytesBufferBytes)
 	var readBytes int
 	var writtenBytes int
-	hasher := identify.NewHasher(paramSkipIdentify)
+	start := time.Now()
 	for {
 		readBytes, err = bufferedReader.Read(buf)
 		if err != nil && err != io.EOF {
-			restapi_handlers.JSONError(c, 500, "filebuffering error, failed to read file in PutData", err)
+			restapi_handlers.JSONError(c, 500, "filebuffering error 1, failed to read file in PutData", err)
 			return
 		}
 		if readBytes == 0 {
 			break
 		}
-		err = hasher.Write(buf[:readBytes])
-		if err != nil {
-			return
-		}
 		writtenBytes, err = file.Write(buf[:readBytes])
 		if err != nil {
-			restapi_handlers.JSONError(c, 500, "filebuffering error, failed to write file in PutData", err)
+			restapi_handlers.JSONError(c, 500, "filebuffering error 2, failed to write file in PutData", err)
 			return
 		}
 		fileSize += uint64(writtenBytes)
@@ -235,7 +231,24 @@ func (s *Streams) PostStream(c *gin.Context) {
 			break
 		}
 	}
+	elapsed := time.Since(start)
+	bedSet.Logger.Error().Msgf("Copying from stream to temp file took %s\n", elapsed)
 
+	start = time.Now()
+	hasher := identify.NewHasher(paramSkipIdentify)
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		restapi_handlers.JSONError(c, 500, "filebuffering error, failed to seek back to zero for writing to hasher", err)
+	}
+	_, err = io.Copy(hasher, file)
+	if err != nil {
+		restapi_handlers.JSONError(c, 500, "file hasing error, failed to write cached file into hasher", err)
+		return
+	}
+	elapsed = time.Since(start)
+	bedSet.Logger.Error().Msgf("Creating and populating the hasher took %s\n", elapsed)
+
+	start = time.Now()
 	// generate hashes for the stream
 	metadata, err := hasher.Cook()
 	if err != nil {
@@ -244,6 +257,8 @@ func (s *Streams) PostStream(c *gin.Context) {
 	}
 	// Used for warning logging if the file fails to delete.
 	fileSha256 = metadata.Sha256
+	elapsed = time.Since(start)
+	bedSet.Logger.Error().Msgf("Hasher cooking took %s\n", elapsed)
 
 	if fileSize == 0 {
 		restapi_handlers.JSONError(c, 400, "no content in request body", nil)
@@ -254,6 +269,7 @@ func (s *Streams) PostStream(c *gin.Context) {
 		restapi_handlers.JSONError(c, 400, "sha256 mismatch", err)
 		return
 	}
+	start = time.Now()
 	if !paramSkipIdentify {
 		// identify the file types
 		err = s.identifier.Identify(file.Name(), metadata)
@@ -262,6 +278,8 @@ func (s *Streams) PostStream(c *gin.Context) {
 			return
 		}
 	}
+	elapsed = time.Since(start)
+	bedSet.Logger.Error().Msgf("Identifier took %s\n", elapsed)
 
 	// put binary into s3
 	attempt := 0
