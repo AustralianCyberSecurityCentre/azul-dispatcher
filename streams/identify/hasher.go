@@ -60,13 +60,11 @@ type Hasher struct {
 	ssdeep  *ssdeep.FuzzyState
 	tlsh    *tlsh.TLSH
 	wg      sync.WaitGroup
-	// Channels to forward bufferent data to tlsh and ssdeep
-	// These need to be closed before tlsh and ssdeep are Sum'd and also closed when the hasher is done being used (via built in Close method)
-	tlshCh   chan []byte
-	ssdeepCh chan []byte
+	// Channels to forward buffered data to tlsh
+	// These need to be closed before tlsh are Sum'd and also closed when the hasher is done being used (via built in Close method)
+	tlshCh chan []byte
 	// Note close should be called before these are checked
-	tlshErr   error
-	ssdeepErr error
+	tlshErr error
 	// Ensure close is only called once.
 	closeOnce sync.Once
 	closed    bool
@@ -79,20 +77,19 @@ func NewHasher(minimal bool) *Hasher {
 		panic(err)
 	}
 	h := &Hasher{
-		minimal:  minimal,
-		size:     0,
-		sha512:   sha512.New(),
-		sha256:   sha256.New(),
-		sha1:     sha1.New(),
-		md5:      md5.New(),
-		ssdeep:   ssdeepBuf,
-		tlsh:     tlsh.New(),
-		tlshCh:   make(chan []byte, 1),
-		ssdeepCh: make(chan []byte, 1),
+		minimal: minimal,
+		size:    0,
+		sha512:  sha512.New(),
+		sha256:  sha256.New(),
+		sha1:    sha1.New(),
+		md5:     md5.New(),
+		ssdeep:  ssdeepBuf,
+		tlsh:    tlsh.New(),
+		tlshCh:  make(chan []byte, 1),
 	}
 
 	if !minimal {
-		h.wg.Add(2)
+		h.wg.Add(1)
 		go func() {
 			defer h.wg.Done()
 
@@ -104,20 +101,6 @@ func NewHasher(minimal bool) *Hasher {
 				_, err := h.tlsh.Write(buf)
 				if err != nil && h.tlshErr == nil {
 					h.tlshErr = err
-				}
-			}
-		}()
-
-		go func() {
-			defer h.wg.Done()
-
-			for buf := range h.ssdeepCh {
-				// If a ssdeep error has occurred discard all future content
-				if h.ssdeepErr != nil {
-					continue
-				}
-				if err := h.ssdeep.Update(string(buf)); err != nil && h.ssdeepErr == nil {
-					h.ssdeepErr = err
 				}
 			}
 		}()
@@ -158,7 +141,11 @@ func (h *Hasher) Write(buf []byte) (int, error) {
 		hasherBuffer := append([]byte(nil), buf...)
 
 		h.tlshCh <- hasherBuffer
-		h.ssdeepCh <- hasherBuffer
+
+		err = h.ssdeep.Update(string(buf))
+		if err != nil {
+			return len(buf), fmt.Errorf(genericError, "ssdeep", err.Error())
+		}
 
 	}
 	return len(buf), nil
@@ -182,10 +169,6 @@ func (h *Hasher) CookAndClose() (*events.BinaryEntityDatastream, error) {
 
 		// if we have enough bytes, calculate ssdeep
 		// files smaller than 4kb may produce an ssdeep hash, but it can't be used for anything useful
-		if h.ssdeepErr != nil {
-			return nil, h.ssdeepErr
-		}
-
 		hash_ssdeep := ""
 		if h.size >= 4096 {
 			hash_ssdeep, err = h.ssdeep.Digest()
@@ -230,7 +213,6 @@ func (h *Hasher) Close() {
 	h.closeOnce.Do(func() {
 		h.closed = true
 		close(h.tlshCh)
-		close(h.ssdeepCh)
 		h.wg.Wait()
 	})
 }
