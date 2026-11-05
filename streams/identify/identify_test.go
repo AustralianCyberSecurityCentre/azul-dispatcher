@@ -34,9 +34,10 @@ func testDoIdentify(t *testing.T, sha256 string, description string, minimal boo
 
 	// hash calculation
 	h := NewHasher(minimal)
-	err = h.Write(data)
+	defer h.Close()
+	_, err = h.Write(data)
 	require.Nil(t, err)
-	stream, err := h.Cook()
+	stream, err := h.CookAndClose()
 	require.Nil(t, err)
 
 	if !minimal {

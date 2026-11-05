@@ -6,11 +6,13 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"hash"
 	"io"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/events"
 	bedSet "github.com/AustralianCyberSecurityCentre/azul-bedrock/v13/gosrc/settings"
@@ -18,10 +20,11 @@ import (
 	"github.com/glaslos/tlsh"
 )
 
-const BYTE_BUFFER_SIZE = 1024 * 10
+const BYTE_BUFFER_SIZE = 1024 * 100
 
 func hashFilePath(filepath string) (*events.BinaryEntityDatastream, error) {
 	h := NewHasher(false)
+	defer h.Close()
 	fileHandler, err := os.Open(filepath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open a file in doWork with path %s with error %s", filepath, err.Error())
@@ -38,12 +41,12 @@ func hashFilePath(filepath string) (*events.BinaryEntityDatastream, error) {
 		if readBytes == 0 {
 			break
 		}
-		err = h.Write(buf[:readBytes])
+		_, err = h.Write(buf[:readBytes])
 		if err == io.EOF {
 			break
 		}
 	}
-	return h.Cook()
+	return h.CookAndClose()
 }
 
 // Hasher allows for processing a stream of data rather than a file from disk
@@ -56,6 +59,15 @@ type Hasher struct {
 	md5     hash.Hash
 	ssdeep  *ssdeep.FuzzyState
 	tlsh    *tlsh.TLSH
+	wg      sync.WaitGroup
+	// Channels to forward buffered data to tlsh
+	// These need to be closed before tlsh are Sum'd and also closed when the hasher is done being used (via built in Close method)
+	tlshCh chan []byte
+	// Note close should be called before these are checked
+	tlshErr error
+	// Ensure close is only called once.
+	closeOnce sync.Once
+	closed    bool
 }
 
 func NewHasher(minimal bool) *Hasher {
@@ -64,7 +76,7 @@ func NewHasher(minimal bool) *Hasher {
 		// initialising this should never fail
 		panic(err)
 	}
-	return &Hasher{
+	h := &Hasher{
 		minimal: minimal,
 		size:    0,
 		sha512:  sha512.New(),
@@ -73,54 +85,88 @@ func NewHasher(minimal bool) *Hasher {
 		md5:     md5.New(),
 		ssdeep:  ssdeepBuf,
 		tlsh:    tlsh.New(),
+		tlshCh:  make(chan []byte, 1),
 	}
+
+	if !minimal {
+		h.wg.Add(1)
+		go func() {
+			defer h.wg.Done()
+
+			for buf := range h.tlshCh {
+				// If a tlsh error has occurred discard all future content
+				if h.tlshErr != nil {
+					continue
+				}
+				_, err := h.tlsh.Write(buf)
+				if err != nil && h.tlshErr == nil {
+					h.tlshErr = err
+				}
+			}
+		}()
+	}
+
+	return h
 }
 
-func (h *Hasher) Write(buf []byte) error {
+func (h *Hasher) Write(buf []byte) (int, error) {
+	if h.closed {
+		return 0, errors.New("hasher is already closed, create a new hasher to continue")
+	}
 	var err error
 	var written int
 	genericError := "failed to calculate the %s hash with error %s"
 	written, err = h.sha256.Write(buf)
 	h.size += written
 	if err != nil {
-		return fmt.Errorf(genericError, "sha256", err.Error())
+		return len(buf), fmt.Errorf(genericError, "sha256", err.Error())
 	}
 	if !h.minimal {
 		_, err = h.sha512.Write(buf)
 		if err != nil {
-			return fmt.Errorf(genericError, "sha512", err.Error())
+			return len(buf), fmt.Errorf(genericError, "sha512", err.Error())
 		}
 		_, err = h.sha1.Write(buf)
 		if err != nil {
-			return fmt.Errorf(genericError, "sha1", err.Error())
+			return len(buf), fmt.Errorf(genericError, "sha1", err.Error())
 		}
 		_, err = h.md5.Write(buf)
 		if err != nil {
-			return fmt.Errorf(genericError, "md5", err.Error())
+			return len(buf), fmt.Errorf(genericError, "md5", err.Error())
 		}
+
 		// Complex hash types
-		_, err = h.tlsh.Write(buf)
-		if err != nil {
-			return fmt.Errorf(genericError, "tlsh", err.Error())
-		}
+
+		// must copy to ensure the provided buffer doesn't change while the channel processes handle it.
+		hasherBuffer := append([]byte(nil), buf...)
+
+		h.tlshCh <- hasherBuffer
+
 		err = h.ssdeep.Update(string(buf))
 		if err != nil {
-			return fmt.Errorf(genericError, "ssdeep", err.Error())
+			return len(buf), fmt.Errorf(genericError, "ssdeep", err.Error())
 		}
 
 	}
-	return nil
+	return len(buf), nil
 }
 
-func (h *Hasher) Cook() (*events.BinaryEntityDatastream, error) {
+// Calculates all the hashes.
+// Note because the cook needs to close the ssdeep and tlsh hashes this can only be called once.
+func (h *Hasher) CookAndClose() (*events.BinaryEntityDatastream, error) {
 	var err error
 	md := &events.BinaryEntityDatastream{}
 	md.Size = uint64(h.size)
 	md.Sha256 = fmt.Sprintf("%x", h.sha256.Sum(nil))
 	if !h.minimal {
+		if h.closed {
+			return nil, errors.New("CookAndClose or Close have already been called accurate SSDEEP and TLSH hashes cannot be calculated")
+		}
+		h.Close()
 		md.Sha512 = fmt.Sprintf("%x", h.sha512.Sum(nil))
 		md.Sha1 = fmt.Sprintf("%x", h.sha1.Sum(nil))
 		md.Md5 = fmt.Sprintf("%x", h.md5.Sum(nil))
+
 		// if we have enough bytes, calculate ssdeep
 		// files smaller than 4kb may produce an ssdeep hash, but it can't be used for anything useful
 		hash_ssdeep := ""
@@ -132,6 +178,10 @@ func (h *Hasher) Cook() (*events.BinaryEntityDatastream, error) {
 			}
 		}
 		md.Ssdeep = hash_ssdeep
+
+		if h.tlshErr != nil {
+			return nil, h.tlshErr
+		}
 
 		hash_tlsh := ""
 		// If we don't have at least 50 bytes can't calculate tlsh
@@ -156,4 +206,13 @@ func (h *Hasher) Cook() (*events.BinaryEntityDatastream, error) {
 		md.FileExtension = ""
 	}
 	return md, nil
+}
+
+// Idempotent close to close all the open hasher channels to garuntee goroutines are closed even if CookAndClose is never called.
+func (h *Hasher) Close() {
+	h.closeOnce.Do(func() {
+		h.closed = true
+		close(h.tlshCh)
+		h.wg.Wait()
+	})
 }
