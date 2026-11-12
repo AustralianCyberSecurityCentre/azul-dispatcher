@@ -41,6 +41,12 @@ func (p *FilterSecurity) GetName() string { return "FilterSecurity" }
 // Filter if this message has a security classification that exceeds what is allowed
 func (p *FilterSecurity) ConsumeMod(message *msginflight.MsgInFlight, meta *consumer.ConsumeParams) (string, *msginflight.MsgInFlight) {
 	if len(meta.MaxSecurity) == 0 {
+		// max_security is caller supplied and not tied to any authenticated
+		// clearance, so an empty value here means this consumer receives
+		// every message completely unfiltered. Log it so that is visible
+		// rather than a silent path, in case this consumer should not have
+		// been able to reach dispatcher without one set.
+		bedSet.Logger.Warn().Msg("FilterSecurity: consumer provided no max_security, all messages passing through unfiltered.")
 		return "", message
 	}
 	binary, ok := message.GetBinary()
@@ -66,9 +72,15 @@ func (p *FilterSecurity) ConsumeMod(message *msginflight.MsgInFlight, meta *cons
 		if err != nil {
 			bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering.")
 		}
-		p.CachedSecurityResults[meta.MaxSecurity] = CachedSecurityHit{
-			Hit: map[string]bool{security: result},
+		userSecurityHit = CachedSecurityHit{Hit: map[string]bool{}}
+		if err == nil {
+			// Only cache a real determination. Caching a transient command
+			// failure as a permanent "false" would keep denying this
+			// accessor/security pair forever, even once azul-security is
+			// working again.
+			userSecurityHit.Hit[security] = result
 		}
+		p.CachedSecurityResults[meta.MaxSecurity] = userSecurityHit
 	} else {
 		result, ok = userSecurityHit.Hit[security]
 		if !ok {
@@ -76,7 +88,9 @@ func (p *FilterSecurity) ConsumeMod(message *msginflight.MsgInFlight, meta *cons
 			if err != nil {
 				bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering.")
 			}
-			userSecurityHit.Hit[security] = result
+			if err == nil {
+				userSecurityHit.Hit[security] = result
+			}
 		}
 	}
 	// check if security allows message to continue.

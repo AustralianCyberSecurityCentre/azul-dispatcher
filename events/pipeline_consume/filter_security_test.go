@@ -191,6 +191,34 @@ func TestSecurityBadSecurity(t *testing.T) {
 	}
 }
 
+func TestSecurityDoesNotCacheCommandFailure(t *testing.T) {
+	setupSecurityEnv(t)
+	inFlight, err := pipeline.NewMsgInFlightFromJson(security_empty_path, events.ModelBinary)
+	require.Nil(t, err)
+
+	fs := FilterSecurity{CachedSecurityResults: map[string]CachedSecurityHit{}}
+	be, ok := inFlight.GetBinary()
+	require.True(t, ok)
+	be.Source.Security = "MEDIUM"
+
+	// Force azul-security to be unresolvable, regardless of whether it is
+	// normally on PATH in this environment, so CalculateSecurityResult is
+	// guaranteed to error here. That failure used to get cached as a
+	// permanent "false" for this accessor/security pair, denying it
+	// forever even after azul-security starts working again. It must not
+	// be present in the cache after a failed lookup.
+	oldPath := os.Getenv("PATH")
+	require.NoError(t, os.Setenv("PATH", t.TempDir()))
+	defer func() { _ = os.Setenv("PATH", oldPath) }()
+
+	_, _ = fs.ConsumeMod(inFlight, &consumer.ConsumeParams{Name: "", Version: "", IsTask: true, MaxSecurity: "MEDIUM"})
+
+	hit, ok := fs.CachedSecurityResults["MEDIUM"]
+	require.True(t, ok, "expected a cache entry for the max_security value to exist")
+	_, cached := hit.Hit["MEDIUM"]
+	require.False(t, cached, "a failed azul-security lookup must not be cached as a permanent result")
+}
+
 func TestSecurityEmptySecurity(t *testing.T) {
 	setupSecurityEnv(t)
 	inFlight, err := pipeline.NewMsgInFlightFromJson(security_empty_path, events.ModelBinary)
