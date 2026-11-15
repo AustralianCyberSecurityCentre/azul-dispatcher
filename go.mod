@@ -17,7 +17,7 @@ require (
 	github.com/dutchcoders/gossdeep v0.0.0-20201120073358-963140ea83a4
 	github.com/eko/gocache/lib/v4 v4.4.0
 	github.com/eko/gocache/store/bigcache/v4 v4.2.10
-	github.com/gin-contrib/pprof v1.5.7
+	github.com/gin-contrib/pprof v1.5.8
 	github.com/gin-gonic/gin v1.12.0
 	github.com/glaslos/tlsh v0.4.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
