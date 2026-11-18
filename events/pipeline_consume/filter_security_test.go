@@ -201,12 +201,7 @@ func TestSecurityDoesNotCacheCommandFailure(t *testing.T) {
 	require.True(t, ok)
 	be.Source.Security = "MEDIUM"
 
-	// Force azul-security to be unresolvable, regardless of whether it is
-	// normally on PATH in this environment, so CalculateSecurityResult is
-	// guaranteed to error here. That failure used to get cached as a
-	// permanent "false" for this accessor/security pair, denying it
-	// forever even after azul-security starts working again. It must not
-	// be present in the cache after a failed lookup.
+	// Clear PATH so azul-security cannot be found and the lookup fails.
 	oldPath := os.Getenv("PATH")
 	require.NoError(t, os.Setenv("PATH", t.TempDir()))
 	defer func() { _ = os.Setenv("PATH", oldPath) }()
