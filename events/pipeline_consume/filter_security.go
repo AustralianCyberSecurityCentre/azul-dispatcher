@@ -63,20 +63,23 @@ func (p *FilterSecurity) ConsumeMod(message *msginflight.MsgInFlight, meta *cons
 	userSecurityHit, ok := p.CachedSecurityResults[meta.MaxSecurity]
 	if !ok {
 		result, err = CalculateSecurityResult(meta.MaxSecurity, security)
+		userSecurityHit = CachedSecurityHit{Hit: map[string]bool{}}
+		// Only cache a real result so a failed lookup is retried next time.
 		if err != nil {
 			bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering.")
+		} else {
+			userSecurityHit.Hit[security] = result
 		}
-		p.CachedSecurityResults[meta.MaxSecurity] = CachedSecurityHit{
-			Hit: map[string]bool{security: result},
-		}
+		p.CachedSecurityResults[meta.MaxSecurity] = userSecurityHit
 	} else {
 		result, ok = userSecurityHit.Hit[security]
 		if !ok {
 			result, err = CalculateSecurityResult(meta.MaxSecurity, security)
 			if err != nil {
 				bedSet.Logger.Error().Err(err).Msg("Unable to provide security filtering.")
+			} else {
+				userSecurityHit.Hit[security] = result
 			}
-			userSecurityHit.Hit[security] = result
 		}
 	}
 	// check if security allows message to continue.
