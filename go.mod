@@ -29,7 +29,7 @@ require (
 	github.com/rs/zerolog v1.35.1
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
-	github.com/tidwall/gjson v1.20.2
+	github.com/tidwall/gjson v1.20.3
 	github.com/tidwall/sjson v1.2.9
 	go.uber.org/automaxprocs v1.6.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
